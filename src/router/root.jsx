@@ -1,10 +1,10 @@
-import React from 'react'
-import { createBrowserRouter } from 'react-router-dom'
+import React from 'react';
+import { createBrowserRouter } from 'react-router-dom';
 
 const roots = createBrowserRouter([
   // 메인페이지
   {
-    path: "/",
+    path: "/articket",
     HydrateFallback: () => <div>Loading...</div>,
     lazy: async () => {
       const { default: Component } = await import("../pages/MainPage");
@@ -13,4 +13,4 @@ const roots = createBrowserRouter([
   },
 ]);
 
-export default roots
+export default roots;

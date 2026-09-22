@@ -1,9 +1,6 @@
-import { useState } from 'react'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import './App.css'
-import { RouterProvider } from 'react-router-dom'
+import './App.css';
+import { RouterProvider } from 'react-router-dom';
+import root from './router/root';
 
 function App() {
 
@@ -11,3 +8,4 @@ function App() {
 }
 
 export default App
+ 
