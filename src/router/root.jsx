@@ -1,15 +1,34 @@
-import React from 'react';
-import { createBrowserRouter } from 'react-router-dom';
+import React from "react";
+import { createBrowserRouter } from "react-router-dom";
+import adminRouter from "./AdminRouter";
+import staffRouter from "./staffRouter";
+import IntroPage from "../pages/intro/IntroPage";
 
 const roots = createBrowserRouter([
-  // 메인페이지
   {
     path: "/articket",
     HydrateFallback: () => <div>Loading...</div>,
-    lazy: async () => {
-      const { default: Component } = await import("../pages/MainPage");
-      return { Component };
-    },
+    children: [
+      {
+        index: true,
+        lazy: async () => {
+          const { default: Component } = await import("../pages/MainPage");
+          return { Component };
+        },
+      },
+      {
+        path: "intro",
+        element: <IntroPage />,
+      },
+      {
+        path: "adminpage",
+        children: adminRouter(),
+      },
+      {
+        path: "staffpage",
+        children: staffRouter(),
+      },
+    ],
   },
 ]);
 
