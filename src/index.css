@@ -1,1 +1,54 @@
-/* 데이터 삭제 */
+@import "tailwindcss";
+
+@font-face {
+  font-family: "KosinGothic";
+  src: url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607101549@font-108/font-108/font-108-400.woff2")
+    format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KosinGothic";
+  src: url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607101549@font-108/font-108/font-108-600.woff2")
+    format("woff2");
+  font-weight: 600;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KosinGothic";
+  src: url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607101549@font-108/font-108/font-108-700.woff2")
+    format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KosinGothic";
+  src: url("https://cdn.jsdelivr.net/gh/Project-Noonnu/2607101549@font-108/font-108/font-108-800.woff2")
+    format("woff2");
+  font-weight: 800;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "NanumBareunGothicOldHangeul";
+  src: url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumBarunGothicYetHangul/NanumBarunGothic-YetHangul.eot);
+  src:
+    url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumBarunGothicYetHangul/NanumBarunGothic-YetHangul.eot?#iefix)
+      format("embedded-opentype"),
+    url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumBarunGothicYetHangul/NanumBarunGothic-YetHangul.woff2)
+      format("woff2"),
+    url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumBarunGothicYetHangul/NanumBarunGothic-YetHangul.woff)
+      format("woff"),
+    url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumBarunGothicYetHangul/NanumBarunGothic-YetHangul.ttf)
+      format("truetype");
+}
+
+.head-text {
+  font-family: "KosinGothic";
+}
+.body-text {
+  font-family: "NanumBareunGothicOldHangeul";
+}

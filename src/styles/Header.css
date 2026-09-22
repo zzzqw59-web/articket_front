@@ -1,0 +1,22 @@
+@font-face {
+  font-family: "MapoAemin";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoAgapeA.woff")
+    format("woff");
+  font-weight: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "HsJandari";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/2510-2@1.0/HSJandari.woff2")
+    format("woff2");
+  font-weight: normal;
+  font-display: swap;
+}
+.logo {
+  font-family: "MapoAemin";
+}
+
+.navi-text {
+  font-family: "HsJandari";
+}
