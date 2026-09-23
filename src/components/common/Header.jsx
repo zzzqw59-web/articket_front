@@ -21,8 +21,15 @@ const Header = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  const handleScrollClick = (e) => {
+    if (e.target.closest("a")) {
+      window.scrollTo(0, 0);
+    }
+  };
+
   return (
     <div
+      onClick={handleScrollClick}
       className={`fixed top-0 left-0 right-0 z-50 transition-transform duration-600
         ${isVisible ? "translate-y-0" : "-translate-y-full"}`}
     >
