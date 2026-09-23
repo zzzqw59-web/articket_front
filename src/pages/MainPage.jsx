@@ -5,7 +5,7 @@ const MainPage = () => {
   return (
     <>
       <MainLayout>
-        <div className="">main page</div>
+        <div className="h-[1000px]">main page</div>
       </MainLayout>
     </>
   );
