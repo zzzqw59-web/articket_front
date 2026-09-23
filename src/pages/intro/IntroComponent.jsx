@@ -8,7 +8,9 @@ import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
-
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
 const IntroComponent = () => {
   const textRef = useRef(null);
   const containerRef = useRef(null);
@@ -48,6 +50,36 @@ const IntroComponent = () => {
         ".first-intro-text",
         { opacity: 0, y: 20 },
         { opacity: 1, y: 0, duration: 0.8, delay: 0.8, ease: "power2.out" },
+      );
+      //[contact us background]
+      gsap.fromTo(
+        ".first-tape",
+        { scaleX: 0, transformOrigin: "left center" },
+        {
+          scaleX: 1,
+          duration: 0.3,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".first-tape",
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        },
+      );
+      //[ask anything background]
+      gsap.fromTo(
+        ".second-tape",
+        { scaleX: 0, transformOrigin: "left center" },
+        {
+          scaleX: 1,
+          duration: 0.3,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".second-tape",
+            start: "top 80%",
+            toggleActions: "play none none none",
+          },
+        },
       );
 
       const textElement = textRef.current;
@@ -89,12 +121,13 @@ const IntroComponent = () => {
       const firstScreenHeight = 1200;
 
       frameTl
+        //[1단계] 자동 스크롤
         .to(".first-screen", {
           y: -firstScreenHeight,
           duration: 2,
         })
 
-        // [2단계] 정확히 화면에 들어온 파란 박스를 정중앙(center center) 기준로 0.2배 축소
+        // [2단계] 파란 박스 축소
         .to(
           ".frame-container",
           {
@@ -125,7 +158,7 @@ const IntroComponent = () => {
         trigger: ".uppermost-container",
         pin: true,
         start: "top top",
-        end: "+=1500",
+        end: "+=100",
       });
 
       Observer.create({
@@ -192,7 +225,7 @@ const IntroComponent = () => {
       className="flex flex-col w-full min-h-screen bg-white uppermost-container"
       ref={containerRef}
     >
-      <div className="first-screen ">
+      <div className="first-screen select-none">
         <div className="group flex flex-row items-center w-full justify-between h-[850px] w-full overflow-hidden bg-white">
           <div className="flex flex-col">
             <div className="first-intro-text head-text ml-30 mb-0  font-bold text-3xl">
@@ -216,8 +249,7 @@ const IntroComponent = () => {
               <div
                 key={item.id}
                 className="relative h-160 w-50 rounded-none overflow-hidden transition-all 
-                duration-500 ease-out hover:w-[450px]
-              "
+                duration-500 ease-out hover:w-112.5"
               >
                 <img
                   src={item.img}
@@ -225,7 +257,7 @@ const IntroComponent = () => {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div
-                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent 
+                  className="absolute inset-0 bg-gradient-to-top from-black/80 via-transparent to-transparent 
               opacity-0 hover:opacity-100 transition-opacity duration-500 flex items-end p-6"
                 >
                   <span className="text-white text-xl font-bold whitespace-nowrap">
@@ -237,7 +269,7 @@ const IntroComponent = () => {
           </div>
         </div>
         <div className="flex flex-col justify-center h-30 bg-[#ede6d6]">
-          <div className="logo text-5xl font-bold m-6 mb-10">
+          <div className="logo text-5xl font-bold m-6 mb-15">
             <Link to="/articket">
               <span>Articket</span>{" "}
             </Link>
@@ -245,25 +277,53 @@ const IntroComponent = () => {
         </div>
 
         <div className="frame-container w-full h-[2500px] bg-[#214d72] flex items-center justify-center relative overflow-hidden">
-          <div className="head-text text-white text-[250px] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[180%]">
+          <div className="frame-text text-white text-[250px] absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-[-180%]">
             Articket
           </div>
           <div className="flex flex-col items-center text-white text-center">
-            <div className=" text-fadein-first head-text text-[200px] mt-30 -translate-x-[-500px] opacity-0">
+            <div className="frame-text text-fadein-first text-[200px] ml-120 translate-x-[420px] translate-y-[-120px] opacity-0">
               에서
             </div>
-            <div className="text-fadein-second head-text text-[300px] font-bold -translate-y-[-200px] text-gray-50 opacity-0">
+            <div className="frame-text text-fadein-second text-[350px] font-bold translate-y-[500px] text-gray-50 opacity-0">
               한눈에
             </div>
           </div>
         </div>
       </div>
-      <div className=" text-center exhibition-fadein-text head-text text-6xl font-bold text-black -translate-y-[2250px]">
+
+      <div className=" text-center exhibition-fadein-text head-text text-6xl font-bold relative z-10 -mt-20 translate-y-[-2200px]">
         대한민국에서 열리는
         <br /> 모든 전시를 만나보세요
       </div>
-      <div className=" bg-white -translate-y-[2000px] flex flex-col items-center justify-center p-6">
-        <div className="text-2xl font-bold mb-8 text-slate-900">전시</div>
+
+      <div className=" bg-white flex flex-col items-center justify-center p-6">
+        <div className="text-8xl font-bold mb-8 text-slate-900 self-start ml-30 relative z-20">
+          Contact Us
+        </div>
+
+        <div className=" p-10 self-start ml-60 z-10 relative">
+          <div
+            onClick={() => (window.location.href = "mailto:Articket@gmail.com")}
+            className="body-text text-5xl cursor-pointer hover:text-gray-50 hover:font-bold"
+          >
+            email &emsp;&emsp;&emsp; Articket@gmail.com
+          </div>
+          <div
+            onClick={() => (window.location.href = "tel:01012341234")}
+            className="body-text text-5xl cursor-pointer hover:text-gray-50 hover:font-bold"
+          >
+            telephone &emsp;010-1234-1234
+          </div>
+        </div>
+        <div className="first-tape bg-[#bfd6df] select-none w-205 h-40 self-start ml-60 text-[#bfd6df] relative z-0 translate-y-[-150px] -rotate-3">
+          .
+        </div>
+        <div className="text-8xl font-bold mb-8 text-slate-900 self-end mr-30 relative z-20">
+          Ask Anything!
+        </div>
+        <div className="second-tape bg-[#ede6d6] w-180 h-35 select-none self-end mr-20 text-[#ede6d6] relative z-0 translate-y-[-160px] rotate-3">
+          .
+        </div>
       </div>
     </div>
   );

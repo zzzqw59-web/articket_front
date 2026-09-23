@@ -6,10 +6,18 @@
   font-display: swap;
 }
 @font-face {
-  font-family: "116ParrotBeak";
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.0/116angmuburi.woff")
-    format("woff");
-  font-weight: normal;
+  font-family: "KofihJongwook";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-2@1.0/KOFIHDrLEEJWTTF-L.woff2")
+    format("woff2");
+  font-weight: 300;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "KofihJongwook";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-2@1.0/KOFIHDrLEEJWTTF-B.woff2")
+    format("woff2");
+  font-weight: 700;
   font-display: swap;
 }
 
@@ -17,12 +25,16 @@
   font-family: "DosHandwriting";
 }
 
+.frame-text {
+  font-family: "KofihJongwook";
+}
+
 .svg-container {
   width: 85%;
 }
 
 .animated-text {
-  font-size: 160px;
+  font-size: 180px;
 
   visibility: hidden;
   fill: none;
