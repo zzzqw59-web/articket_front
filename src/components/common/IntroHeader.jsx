@@ -1,15 +1,18 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
-const Header = () => {
-  const [isVisible, setIsVisible] = useState(true);
+const IntroHeader = () => {
+  const [isVisible, setIsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      if (
+        (currentScrollY > lastScrollY && currentScrollY > 0) ||
+        currentScrollY < 900
+      ) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
@@ -100,4 +103,4 @@ const Header = () => {
     </div>
   );
 };
-export default Header;
+export default IntroHeader;

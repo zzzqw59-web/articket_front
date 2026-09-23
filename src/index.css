@@ -45,6 +45,17 @@
     url(https://hangeul.pstatic.net/hangeul_static/webfont/NanumBarunGothicYetHangul/NanumBarunGothic-YetHangul.ttf)
       format("truetype");
 }
+@font-face {
+  font-family: "MapoAemin";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/MapoAgapeA.woff")
+    format("woff");
+  font-weight: normal;
+  font-display: swap;
+}
+
+.logo {
+  font-family: "MapoAemin";
+}
 
 .head-text {
   font-family: "KosinGothic";
