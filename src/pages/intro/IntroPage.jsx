@@ -3,7 +3,7 @@ import MainLayout from "../../layouts/MainLayout";
 const IntroPage = () => {
   return (
     <MainLayout>
-      <div>tstestsetaset</div>
+      <div className="h-[2000px]">tstestsetaset</div>
     </MainLayout>
   );
 };
