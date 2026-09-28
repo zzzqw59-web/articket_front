@@ -85,7 +85,7 @@ const CommentSection = ({
                 return (
                   <tr
                     key={commentId}
-                    className="border-b border-gray-100 last:border-none hover:bg-gray-50/50 relative"
+                    className="border-b border-gray-100 last:border-none hover:bg-gray-50/50 relative group"
                   >
                     {/* 번호 */}
                     <td className="py-3 px-4 text-center text-gray-500">
@@ -120,15 +120,12 @@ const CommentSection = ({
                       <button
                         type="button"
                         onClick={() => toggleMenu(commentId)}
-                        className="p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors"
+                        className={`p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-opacity duration-150 ${
+                          isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                        }`}
                         title="더보기"
                       >
-                        {/* 케밥 아이콘 (⋮) */}
-                        <svg
-                          className="w-4 h-4"
-                          fill="currentColor"
-                          viewBox="0 0 24 24"
-                        >
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                         </svg>
                       </button>

@@ -4,6 +4,8 @@ import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
 import MypageLayout from "../pages/mypage/components/MypageLayout";
 import mypageRouter from "./mypageRouter";
+import MainLayout from "../layouts/MainLayout";
+import askpageRouter from "./askpageRouter";
 
 const roots = createBrowserRouter([
   {
@@ -37,11 +39,10 @@ const roots = createBrowserRouter([
         children: mypageRouter(),
       },
 
-      // 마이페이지
+      // 문의페이지
       {
-        path: "mypage",
-        element: <MypageLayout />,
-        children: mypageRouter(),
+        path: "ask",
+        children: askpageRouter(),
       },
     ],
   },
