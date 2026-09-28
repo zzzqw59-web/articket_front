@@ -1,8 +1,9 @@
-import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import adminRouter from "./AdminRouter";
 import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
+import MypageLayout from "../pages/mypage/components/MypageLayout";
+import mypageRouter from "./mypageRouter";
 
 const roots = createBrowserRouter([
   {
@@ -27,6 +28,20 @@ const roots = createBrowserRouter([
       {
         path: "staffpage",
         children: staffRouter(),
+      },
+      
+      // 마이페이지
+      {
+        path: "mypage",
+        element: <MypageLayout />,
+        children: mypageRouter(),
+      },
+
+      // 마이페이지
+      {
+        path: "mypage",
+        element: <MypageLayout />,
+        children: mypageRouter(),
       },
     ],
   },
