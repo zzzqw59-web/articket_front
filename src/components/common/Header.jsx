@@ -89,7 +89,7 @@ const Header = () => {
             </Link>
 
             <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/wishlist">
+            <Link to="/articket/mypage">
               <div>마이 페이지</div>
             </Link>
 
