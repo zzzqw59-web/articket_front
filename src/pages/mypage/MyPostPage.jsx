@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
+import PageHeader from "../../components/common/PageHeader";
 
 const MyPostPage = () => {
   const navigate = useNavigate();
@@ -98,7 +99,13 @@ const MyPostPage = () => {
   };
 
   return (
-    <div className="w-full flex flex-col gap-6">
+    <div className="w-full flex flex-col gap-6 py-6">
+      {/* 1. 페이지 헤더 */}
+      <PageHeader
+        title="내 게시물"
+        description="회원님이 등록하신 게시물 내역을 조회할 수 있습니다."
+      />
+
       {/* 메인 표 컴포넌트 */}
       <DataTableContainer
         tabs={tabs}
