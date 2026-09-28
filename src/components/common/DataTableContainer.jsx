@@ -93,12 +93,8 @@ const DataTableContainer = ({
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className={`px-6 py-4 border-b border-gray-100 ${
-                          col.align === "center"
-                            ? "text-center"
-                            : col.align === "right"
-                            ? "text-right"
-                            : "text-left"
+                        className={`py-3 px-4 text-sm text-gray-800 whitespace-nowrap truncate ${
+                          col.align === "center" ? "text-center" : "text-left"
                         }`}
                       >
                         {row[col.key]}
