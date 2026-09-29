@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import NotificationBell from "./NotificationBell";
 
 const Header = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -61,7 +62,10 @@ const Header = () => {
                 회원가입
               </div>
             </Link>
+
+            <NotificationBell />
           </div>
+
           <div className="head-text flex flex-row mr-5 mb-5 mt-3 text-2xl cursor-pointer">
             <Link to="/articket/exhibition">
               <div>전시</div>
@@ -88,7 +92,7 @@ const Header = () => {
             </Link>
 
             <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/wishlist">
+            <Link to="/articket/mypage">
               <div>마이 페이지</div>
             </Link>
 
