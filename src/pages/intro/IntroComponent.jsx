@@ -1,11 +1,12 @@
 import gsap from "gsap";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { Link } from "react-router-dom";
 import "./Intro.css";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Observer } from "gsap/Observer";
 import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import Marquee from "./Marquee";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
 if ("scrollRestoration" in history) {
@@ -57,7 +58,7 @@ const IntroComponent = () => {
         { scaleX: 0, transformOrigin: "left center" },
         {
           scaleX: 1,
-          duration: 0.3,
+          duration: 0.5,
           ease: "none",
           scrollTrigger: {
             trigger: ".first-tape",
@@ -72,7 +73,7 @@ const IntroComponent = () => {
         { scaleX: 0, transformOrigin: "left center" },
         {
           scaleX: 1,
-          duration: 0.3,
+          duration: 0.5,
           ease: "none",
           scrollTrigger: {
             trigger: ".second-tape",
@@ -93,18 +94,19 @@ const IntroComponent = () => {
         visibility: "visible",
       });
       //[Articket 모션] 반복 타임라인 생성
-      const tl = gsap.timeline({
+      const articketTl = gsap.timeline({
         delay: 1.5,
         repeat: -1,
         repeatDelay: 0.5,
       });
 
       //[Articket 모션] [1단계] 선이 그려짐
-      tl.to(textElement, {
-        strokeDashoffset: 0,
-        duration: 2.5,
-        ease: "power2.inOut",
-      })
+      articketTl
+        .to(textElement, {
+          strokeDashoffset: 0,
+          duration: 2.5,
+          ease: "power2.inOut",
+        })
         //[Articket 모션] [2단계] 그려진 상태로 잠시 멈춤
         .to(textElement, {
           strokeDashoffset: 0, // 제자리 유지
@@ -117,40 +119,56 @@ const IntroComponent = () => {
           ease: "power2.inOut",
         });
 
-      const frameTl = gsap.timeline({ paused: true });
+      const mainTl = gsap.timeline({ paused: true });
       const firstScreenHeight = 1200;
 
-      frameTl
-        //[1단계] 자동 스크롤
+      mainTl
+        //자동 스크롤
         .to(".first-screen", {
           y: -firstScreenHeight,
           duration: 2,
         })
 
-        // [2단계] 파란 박스 축소
+        // 파란 박스 축소
         .to(
           ".frame-container",
           {
             scale: 0.2,
-            y: -100,
+            y: -500,
             transformOrigin: "center center",
-            duration: 5,
+            duration: 2,
           },
           2,
         )
+        //자동 스크롤2
+        .to(
+          ".second-screen",
+          {
+            y: -5500,
+            duration: 3,
+          },
+          4,
+        );
 
-        // [3단계] 작아진 박스 안에 글자 페이드 인
+      const textTl = gsap.timeline({ paused: true });
+
+      textTl
+        // 작아진 박스 안에 글자 페이드 인
         .to(".text-fadein-first", {
           opacity: 1,
-          duration: 1.5,
+          duration: 0.5,
         })
         .to(".text-fadein-second", {
           opacity: 1,
-          duration: 1.5,
+          duration: 0.5,
+        })
+        .to(".exhibition-fadein-text", {
+          opacity: 1,
+          duration: 1,
         });
 
-      const steps = [0, 0.2, 1];
-      const scrollTargets = [0, 60, 500];
+      const steps = [0, 2, 4, 7];
+      const scrollTargets = [0, 60, 80, 5500];
       let currentIndex = 0;
       let isAnimating = false;
 
@@ -167,8 +185,9 @@ const IntroComponent = () => {
         onChange: (self) => {
           if (isAnimating) return;
 
-          const maxPinScroll = 500;
+          const maxPinScroll = 5500;
 
+          //애니메이션 파트 끝난 이후
           if (window.scrollY > maxPinScroll && self.deltaY < 0) {
             if (
               currentIndex === scrollTargets.length - 1 &&
@@ -177,32 +196,51 @@ const IntroComponent = () => {
               return;
             }
           }
+
+          //스크롤 내리는 중
           if (self.deltaY > 0) {
             if (currentIndex < steps.length - 1) {
               currentIndex++;
               isAnimating = true;
 
-              gsap.to(frameTl, {
-                progress: steps[currentIndex],
+              const isFinalStep = currentIndex == 3;
+              const stepDuration = currentIndex == 3;
+
+              gsap.to(mainTl, {
+                time: steps[currentIndex],
                 duration: 1,
+                ease: isFinalStep ? (x) => Math.pow(x, 20) : "power1",
               });
+
+              if (currentIndex == 2) {
+                textTl.play(0).then(() => {});
+              }
 
               gsap.to(window, {
                 scrollTo: { y: scrollTargets[currentIndex], autoKill: false },
-                duration: 1,
+                duration: stepDuration ? 2 : 1,
                 onComplete: () => {
                   isAnimating = false;
                 },
               });
             }
+            //스크롤 올리는 중
           } else if (self.deltaY < 0) {
             if (currentIndex > 0) {
               currentIndex--;
               isAnimating = true;
 
-              gsap.to(frameTl, {
-                progress: steps[currentIndex],
+              if (currentIndex < 2) {
+                textTl
+                  .timeScale(3)
+                  .reverse()
+                  .then(() => {});
+              }
+
+              gsap.to(mainTl, {
+                time: steps[currentIndex],
                 duration: 1,
+                ease: "power1.out",
               });
 
               gsap.to(window, {
@@ -217,6 +255,7 @@ const IntroComponent = () => {
         },
       });
     },
+    //선택자 범위 제한
     { scope: containerRef },
   );
 
@@ -225,7 +264,7 @@ const IntroComponent = () => {
       className="flex flex-col w-full min-h-screen bg-white uppermost-container"
       ref={containerRef}
     >
-      <div className="first-screen select-none">
+      <div className="first-screen second-screen select-none">
         <div className="group flex flex-row items-center w-full justify-between h-[850px] w-full overflow-hidden bg-white">
           <div className="flex flex-col">
             <div className="first-intro-text head-text ml-30 mb-0  font-bold text-3xl">
@@ -249,7 +288,7 @@ const IntroComponent = () => {
               <div
                 key={item.id}
                 className="relative h-160 w-50 rounded-none overflow-hidden transition-all 
-                duration-500 ease-out hover:w-112.5"
+                duration-500 ease-out hover:w-112.5 cursor-pointer"
               >
                 <img
                   src={item.img}
@@ -269,9 +308,15 @@ const IntroComponent = () => {
           </div>
         </div>
         <div className="flex flex-col justify-center h-30 bg-[#ede6d6]">
-          <div className="logo text-5xl font-bold m-6 mb-15">
+          <div className="logo text-6xl font-bold m-6 mb-12 ml-8">
             <Link to="/articket">
-              <span>Articket</span>{" "}
+              <span
+                className="transition-colors duration-100 
+              hover:text-[#ede6d6] hover:[--text-stroke-width:0.5px] hover:[--text-stroke-color:#000000] 
+                hover:[-webkit-text-stroke-width:0.1px] hover:[-webkit-text-stroke-color:#000000]"
+              >
+                Articket
+              </span>
             </Link>
           </div>
         </div>
@@ -281,23 +326,61 @@ const IntroComponent = () => {
             Articket
           </div>
           <div className="flex flex-col items-center text-white text-center">
-            <div className="frame-text text-fadein-first text-[200px] ml-120 translate-x-[420px] translate-y-[-120px] opacity-0">
+            <div className="frame-text text-fadein-first text-[180px] ml-120 translate-x-[480px] translate-y-[-30px] opacity-0">
               에서
             </div>
-            <div className="frame-text text-fadein-second text-[350px] font-bold translate-y-[500px] text-gray-50 opacity-0">
+            <div className="frame-text text-fadein-second text-[350px] font-bold translate-y-[300px] text-gray-50 opacity-0">
               한눈에
             </div>
           </div>
         </div>
+        <div className=" text-center exhibition-fadein-text head-text text-6xl font-bold relative z-10 -mt-20 translate-y-[-1400px] opacity-0">
+          대한민국에서 열리는
+          <br /> 모든 전시를 만나보세요
+        </div>
       </div>
 
-      <div className=" text-center exhibition-fadein-text head-text text-6xl font-bold relative z-10 -mt-20 translate-y-[-2200px]">
-        대한민국에서 열리는
-        <br /> 모든 전시를 만나보세요
+      <div className="bg-[#5c88a8] h-[900px] w-full text-[#5c88a8] select-none translate-y-[-1900px] second-screen">
+        background
+      </div>
+      <div className="bg-[#bfd6df] h-[1200px] w-full text-[#bfd6df] select-none translate-y-[-1900px] second-screen">
+        background
       </div>
 
-      <div className=" bg-white flex flex-col items-center justify-center p-6">
-        <div className="text-8xl font-bold mb-8 text-slate-900 self-start ml-30 relative z-20">
+      <div>
+        <div className="text-7xl head-text font-bold ml-10">
+          오늘 보러 갈 수 있는 전시
+        </div>
+        <div className="flex ">
+          <Marquee />
+          <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15">
+            <br /> 다채로운
+            <br /> 전시 정보를
+            <br />
+            <Link to="/articket/exhibition">
+              <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                한곳에&nbsp;
+              </span>
+            </Link>
+            모아
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div className="text-7xl head-text font-bold ml-10 mt-50">
+          전시장 날씨
+        </div>
+      </div>
+
+      <div>
+        <div className="text-7xl head-text font-bold ml-10 mt-50">
+          관람객 이야기
+        </div>
+      </div>
+
+      <div className=" bg-white flex flex-col items-center justify-center p-6 mt-50">
+        <div className="text-8xl font-bold mb-6 text-slate-900 self-start ml-30 relative z-20">
           Contact Us
         </div>
 

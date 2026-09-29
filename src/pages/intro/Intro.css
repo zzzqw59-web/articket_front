@@ -6,17 +6,25 @@
   font-display: swap;
 }
 @font-face {
-  font-family: "KofihJongwook";
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-2@1.0/KOFIHDrLEEJWTTF-L.woff2")
-    format("woff2");
+  font-family: "Aggravo";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroL.woff")
+    format("woff");
   font-weight: 300;
   font-display: swap;
 }
 
 @font-face {
-  font-family: "KofihJongwook";
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2210-2@1.0/KOFIHDrLEEJWTTF-B.woff2")
-    format("woff2");
+  font-family: "Aggravo";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroM.woff")
+    format("woff");
+  font-weight: 500;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Aggravo";
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2108@1.1/SBAggroB.woff")
+    format("woff");
   font-weight: 700;
   font-display: swap;
 }
@@ -26,7 +34,7 @@
 }
 
 .frame-text {
-  font-family: "KofihJongwook";
+  font-family: "Aggravo";
 }
 
 .svg-container {

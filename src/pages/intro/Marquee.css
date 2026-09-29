@@ -1,0 +1,18 @@
+@keyframes moveLeft {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-100% - 1rem));
+  }
+}
+.animate-marquee {
+  animation: moveLeft 40s linear infinite;
+}
+.animate-marquee-reverse {
+  animation: moveLeft 40s linear infinite reverse;
+}
+.flex.overflow-hidden:hover .animate-marquee,
+.flex.overflow-hidden:hover .animate-marquee-reverse {
+  animation-play-state: paused !important;
+}
