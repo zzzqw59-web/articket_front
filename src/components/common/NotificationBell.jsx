@@ -1,10 +1,20 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react";
 import NotificationDropdown from "./NotificationDropdown";
+import { useNotifications } from "../../hooks/useNotifications"; // 커스텀 훅 경로에 맞게 수정
 
 const NotificationBell = () => {
   const [isNotiOpen, setIsNotiOpen] = useState(false);
-  const [unreadCount, setUnreadCount] = useState(3); // 안 읽은 알림 개수 (API 연동용)
   const bellRef = useRef(null);
+
+  // 커스텀 훅을 통해 알림 데이터 및 액션 함수들 가져오기
+  const {
+    notifications,
+    unreadCount,
+    handleRead,
+    handleReadAll,
+    handleDelete,
+    handleDeleteAll,
+  } = useNotifications(15); // TEMP_MEMBER_ID = 15
 
   // 외부 영역 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -23,18 +33,17 @@ const NotificationBell = () => {
 
   return (
     <div ref={bellRef} className="relative flex items-center">
-      {/* 종 아이콘 버튼 (Header 원형 버튼 스타일과 통일) */}
+      {/* 종 아이콘 버튼 */}
       <button
         type="button"
         onClick={(e) => {
-          e.stopPropagation(); // Header 상단 스크롤 이벤트 클릭 간섭 방지
+          e.stopPropagation();
           setIsNotiOpen((prev) => !prev);
         }}
         className="relative w-15 h-15 border-2 border-[#0b2342] rounded-full select-none cursor-pointer 
         flex items-center justify-center hover:bg-[#0b2342] hover:text-white transition-colors duration-300 text-[#0b2342]"
         title="알림"
       >
-        {/* 종 SVG 아이콘 */}
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path
             strokeLinecap="round"
@@ -52,10 +61,16 @@ const NotificationBell = () => {
         )}
       </button>
 
-      {/* 알림 드롭다운 팝업 목록 */}
+      {/* 알림 드롭다운 팝업 목록 (훅에서 가져온 데이터 및 핸들러 전달) */}
       <NotificationDropdown
         isOpen={isNotiOpen}
         onClose={() => setIsNotiOpen(false)}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onRead={handleRead}
+        onReadAll={handleReadAll}
+        onDelete={handleDelete}
+        onDeleteAll={handleDeleteAll}
       />
     </div>
   );
