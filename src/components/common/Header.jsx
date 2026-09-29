@@ -1,4 +1,3 @@
-import "../../styles/Header.css";
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 
@@ -10,7 +9,7 @@ const Header = () => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 50) {
+      if (currentScrollY > lastScrollY && currentScrollY > 100) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
@@ -38,7 +37,7 @@ const Header = () => {
         <Link to="/articket">
           <div
             className="logo text-7xl select-none cursor-pointer mt-13 m-4 ml-6 flex items-end transition-colors duration-100
-          hover:text-white hover:[--text-stroke-width:1px] hover:[--text-stroke-color:#000000] 
+          hover:text-[#ede6d6] hover:[--text-stroke-width:1px] hover:[--text-stroke-color:#000000] 
           hover:[-webkit-text-stroke-width:1px] hover:[-webkit-text-stroke-color:#000000]"
           >
             Articket
@@ -62,9 +61,8 @@ const Header = () => {
                 회원가입
               </div>
             </Link>
-
           </div>
-          <div className="head-text flex flex-row mr-5 mb-5 mt-5 text-2xl cursor-pointer">
+          <div className="head-text flex flex-row mr-5 mb-5 mt-3 text-2xl cursor-pointer">
             <Link to="/articket/exhibition">
               <div>전시</div>
             </Link>
@@ -90,7 +88,7 @@ const Header = () => {
             </Link>
 
             <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/mypage">
+            <Link to="/articket/wishlist">
               <div>마이 페이지</div>
             </Link>
 
