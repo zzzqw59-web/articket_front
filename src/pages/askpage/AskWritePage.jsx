@@ -1,28 +1,19 @@
-import { useNavigate } from "react-router-dom";
+import React from "react";
 import MainLayout from "../../layouts/MainLayout";
 import PageHeader from "../../components/common/PageHeader";
 import AskForm from "./components/AskForm";
-import { createAsk } from "../../api/askApi";
+import ConfirmModal from "../../components/common/ConfirmModal";
+import { useAskWrite } from "./hooks/useAskWrite";
 
 const AskWritePage = () => {
-  const navigate = useNavigate();
-
-  const handleSubmit = async ({ requestDto, files }) => {
-    try {
-      const askId = await createAsk(requestDto, files);
-      alert("문의가 성공적으로 등록되었습니다.");
-      navigate(`/articket/ask/${askId}`);
-    } catch (error) {
-      console.error("문의 등록 실패:", error);
-      alert("문의 등록에 실패했습니다.");
-    }
-  };
-
-  const handleCancel = () => {
-    if (window.confirm("작성을 취소하시겠습니까? 입력한 내용은 저장되지 않습니다.")) {
-      navigate("/articket/ask");
-    }
-  };
+  // 🚀 커스텀 훅을 통해 등록/취소 비즈니스 로직 및 모달 상태 바인딩
+  const {
+    handleSubmit,
+    handleCancelWrite,
+    modalState,
+    handleConfirm,
+    handleCancel,
+  } = useAskWrite();
 
   return (
     <MainLayout>
@@ -34,9 +25,16 @@ const AskWritePage = () => {
         <AskForm
           isEditMode={false}
           onSubmit={handleSubmit}
-          onCancel={handleCancel}
+          onCancel={handleCancelWrite}
         />
       </div>
+
+      {/* 🚀 커스텀 모달 컴포넌트 바인딩 */}
+      <ConfirmModal
+        modalState={modalState}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </MainLayout>
   );
 };
