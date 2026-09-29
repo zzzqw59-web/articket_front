@@ -1,25 +1,33 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-const SearchBar = ({ options = [], onSearch }) => {
-  const [selectedKey, setSelectedKey] = useState(options[0]?.value || "");
-  const [searchValue, setSearchValue] = useState("");
+const SearchBar = ({ options = [], onSearch, placeholder = "검색어를 입력하세요" }) => {
+  // options의 첫 번째 항목 값으로 초기화 (options가 뒤늦게 전달되더라도 대응되도록 useEffect 포함)
+  const [selectedType, setSelectedType] = useState(options[0]?.value || "");
+  const [keyword, setKeyword] = useState("");
+
+  useEffect(() => {
+    if (options.length > 0 && !selectedType) {
+      setSelectedType(options[0].value);
+    }
+  }, [options, selectedType]);
 
   const handleSearch = (e) => {
     e.preventDefault();
     if (onSearch) {
-      onSearch({ key: selectedKey, value: searchValue });
+      // 🚀 { key, value } 대신 useAskList / AskListPage가 받는 { type, keyword }로 전달
+      onSearch({ type: selectedType, keyword: keyword.trim() });
     }
   };
 
   return (
     <form
       onSubmit={handleSearch}
-      className="w-full flex items-center gap-2 border border-gray-300 rounded-md px-3 py-1.5 bg-white text-sm"
+      className="w-full flex items-center gap-2 border border-gray-300 rounded-md px-3 py-1.5 bg-white text-sm focus-within:border-amber-600 transition-colors"
     >
       {/* 검색 카테고리 셀렉트 */}
       <select
-        value={selectedKey}
-        onChange={(e) => setSelectedKey(e.target.value)}
+        value={selectedType}
+        onChange={(e) => setSelectedType(e.target.value)}
         className="bg-transparent border-none outline-none text-gray-700 cursor-pointer pr-2"
       >
         {options.map((opt) => (
@@ -34,14 +42,14 @@ const SearchBar = ({ options = [], onSearch }) => {
       {/* 검색어 입력창 */}
       <input
         type="text"
-        placeholder="Value"
-        value={searchValue}
-        onChange={(e) => setSearchValue(e.target.value)}
+        placeholder={placeholder}
+        value={keyword}
+        onChange={(e) => setKeyword(e.target.value)}
         className="bg-transparent border-none outline-none flex-1 text-gray-800 placeholder-gray-400"
       />
 
       {/* 검색 아이콘 버튼 */}
-      <button type="submit" className="text-gray-500 hover:text-gray-800 p-1">
+      <button type="submit" className="text-gray-500 hover:text-amber-800 p-1 transition-colors">
         <svg
           className="w-4 h-4"
           fill="none"
