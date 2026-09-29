@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import WishlistCard from "./components/WishlistCard";
 
-// 초기 무한스크롤 샘플 데이터
+// 초기 무한스크롤 샘플 데이터 (10개)
 const initialMockData = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
   title: `사라지는 것들에 대하여`,
@@ -11,7 +11,7 @@ const initialMockData = Array.from({ length: 10 }, (_, i) => ({
   place: "문화아트홀",
   startDate: "2026.09.18",
   endDate: "2026.09.27",
-  imageUrl: "", // 이미지가 없으면 기본 아이콘 표출
+  imageUrl: "",
 }));
 
 const MyWishlistPage = () => {
@@ -29,20 +29,40 @@ const MyWishlistPage = () => {
     setWishlist((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // 카드 클릭 시 전시 상세 페이지로 이동
+  // 카드 클릭 시 상세 이동
   const handleCardClick = (id) => {
     navigate(`/articket/exhibition/${id}`);
   };
 
-  // 무한 스크롤 더보기 로드 함수
+  // 📐 현재 화면 너비(Breakpoint)에 맞는 그리드 열(Column) 수 반환
+  const getColumnCount = () => {
+    const width = window.innerWidth;
+    if (width >= 1024) return 5; // lg (lg:grid-cols-5)
+    if (width >= 768) return 4;  // md (md:grid-cols-4)
+    if (width >= 640) return 3;  // sm (sm:grid-cols-3)
+    return 2;                    // default (grid-cols-2)
+  };
+
+  // 🔄 무한 스크롤 더보기 로드 함수 (동적 개수 계산)
   const loadMoreItems = () => {
     if (isLoading) return;
     setIsLoading(true);
 
+    const cols = getColumnCount(); // 현재 화면의 열 수 (예: 5)
+    const currentCount = wishlist.length; // 현재 남은 아이템 수
+
+    // 1) 현재 마지막 행을 채우기 위해 필요한 개수
+    const remainder = currentCount % cols;
+    const fillRowNeeded = remainder === 0 ? 0 : cols - remainder;
+
+    // 2) 마지막 행 채움 + 추가로 더 불러올 행(Row) 수 (기본 1~2줄 추가)
+    const targetRowsToFetch = 1; 
+    const fetchCount = fillRowNeeded + (cols * targetRowsToFetch);
+
     setTimeout(() => {
-      const newItems = Array.from({ length: 5 }, (_, i) => ({
+      const newItems = Array.from({ length: fetchCount }, (_, i) => ({
         id: Date.now() + i,
-        title: `사라지는 것들에 대하여 ${wishlist.length + i + 1}`,
+        title: `사라지는 것들에 대하여 ${currentCount + i + 1}`,
         status: "개최중",
         place: "문화아트홀 2관",
         startDate: "2026.10.01",
@@ -52,7 +72,7 @@ const MyWishlistPage = () => {
 
       setWishlist((prev) => [...prev, ...newItems]);
       setIsLoading(false);
-    }, 800);
+    }, 600);
   };
 
   // IntersectionObserver 설정
@@ -63,7 +83,7 @@ const MyWishlistPage = () => {
           loadMoreItems();
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
 
     if (observerRef.current) {
@@ -81,7 +101,7 @@ const MyWishlistPage = () => {
         description="회원님이 등록하신 위시리스트를 조회할 수 있습니다."
       />
 
-      {/* 2. 상단 컨트롤 바 (정렬 드롭다운 & 검색창) */}
+      {/* 2. 상단 컨트롤 바 */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 w-full">
         {/* 정렬 드롭다운 */}
         <select
@@ -114,7 +134,7 @@ const MyWishlistPage = () => {
         </div>
       </div>
 
-      {/* 3. 위시리스트 카드 그리드 (스토리보드 기준 5열) */}
+      {/* 3. 위시리스트 카드 그리드 */}
       {wishlist.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 w-full">
           {wishlist.map((item) => (
@@ -132,7 +152,7 @@ const MyWishlistPage = () => {
         </div>
       )}
 
-      {/* 4. 무한 스크롤 트리거 영역 및 스피너 */}
+      {/* 4. 무한 스크롤 트리거 영역 */}
       <div ref={observerRef} className="py-6 flex justify-center items-center w-full">
         {isLoading && (
           <div className="flex items-center gap-2 text-xs text-gray-400">
