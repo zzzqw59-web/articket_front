@@ -1,20 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import ActionButton from "../../../components/common/ActionButton";
+import { useImageUploader } from "../hooks/useImageUploader";
+import {
+  ASK_IMAGE_LIMIT,
+  CATEGORY_MAP,
+  REVERSE_CATEGORY_MAP,
+  ASK_CATEGORY_OPTIONS,
+} from "../../../constants/askConstants";
 
-// 카테고리 텍스트 <-> askType(Integer) 매핑
-const CATEGORY_MAP = {
-  "전시 관련 문의": 1,
-  "사이트 관련 문의": 2,
-  "기타": 0,
-};
-
-const REVERSE_CATEGORY_MAP = {
-  1: "전시 관련 문의",
-  2: "사이트 관련 문의",
-  0: "기타",
-};
-
-// TODO 샘플 전시회 목록 (추후 전시 검색 API 연동 가능)
+// 샘플 전시회 목록 (추후 전시 검색 API 연동 가능)
 const mockExhibitions = [
   { id: 148, title: "사라지는 것들에 대하여" },
   { id: 149, title: "사계절을 전시에 담다" },
@@ -37,11 +31,15 @@ const AskForm = ({
     agreePolicy: false,
   });
 
-  // 기존 서버 이미지 (수정 모드용) [{ askImageOrigin, imageUrl, askImageFilename }, ...]
-  const [existingImages, setExistingImages] = useState([]);
-
-  // 새로 첨부할 파일 객체 배열 (최대 3개 제한)
-  const [files, setFiles] = useState([null, null, null]);
+  // 📸 이미지 제어 커스텀 훅 적용 (상수 ASK_IMAGE_LIMIT 사용)
+  const {
+    existingImages,
+    files,
+    validFiles,
+    handleFileChange,
+    handleRemoveFile,
+    handleRemoveExistingImage,
+  } = useImageUploader(ASK_IMAGE_LIMIT, initialData?.images || []);
 
   // 검색 드롭다운 state
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,10 +61,6 @@ const AskForm = ({
         content: initialData.askBody || "",
         agreePolicy: true,
       });
-
-      if (initialData.images) {
-        setExistingImages(initialData.images);
-      }
     }
   }, [isEditMode, initialData]);
 
@@ -113,45 +107,6 @@ const AskForm = ({
     setSearchQuery("");
   };
 
-  // 현재 총 이미지 개수 계산 함수 (기존 유지 이미지 + 새로 선택한 파일)
-  const getRemainingSlotCount = () => {
-    const currentExistingCount = isEditMode ? existingImages.length : 0;
-    const currentNewFilesCount = files.filter(Boolean).length;
-    return 3 - (currentExistingCount + currentNewFilesCount);
-  };
-
-  // 신규 파일 첨부 핸들러
-  const handleFileChange = (index, e) => {
-    const selectedFile = e.target.files[0];
-    if (!selectedFile) return;
-
-    // 기존 이미지 + 새 이미지 총합 체크
-    const currentExistingCount = isEditMode ? existingImages.length : 0;
-    const currentNewFilesCount = files.filter((f, i) => i !== index && f !== null).length;
-    
-    if (currentExistingCount + currentNewFilesCount >= 3) {
-      alert("이미지는 최대 3장까지만 등록 가능합니다.");
-      e.target.value = ""; // input 초기화
-      return;
-    }
-
-    const updatedFiles = [...files];
-    updatedFiles[index] = selectedFile;
-    setFiles(updatedFiles);
-  };
-
-  // 신규 파일 제거
-  const handleRemoveFile = (index) => {
-    const updatedFiles = [...files];
-    updatedFiles[index] = null;
-    setFiles(updatedFiles);
-  };
-
-  // 기존 서버 이미지 제거
-  const handleRemoveExistingImage = (index) => {
-    setExistingImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
   const filteredExhibitions = mockExhibitions.filter((ex) =>
     ex.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -164,15 +119,7 @@ const AskForm = ({
     if (!formData.content.trim()) return alert("문의 내용을 입력해 주세요.");
     if (!formData.agreePolicy) return alert("운영원칙 동의에 체크해 주세요.");
 
-    const validFiles = files.filter(Boolean);
-    const currentExistingCount = isEditMode ? existingImages.length : 0;
-
-    // 최종 이미지 개수 검증
-    if (currentExistingCount + validFiles.length > 3) {
-      return alert("이미지는 기존 이미지를 포함하여 최대 3장까지만 등록할 수 있습니다.");
-    }
-
-    // DTO 생성 및 제출 로직 (기존과 동일)
+    // 백엔드 전달용 DTO 객체 조립 (중앙 상수 CATEGORY_MAP 사용)
     const requestDto = {
       exhibitionId: formData.selectedExhibition ? formData.selectedExhibition.id : null,
       askTitle: formData.title,
@@ -182,6 +129,7 @@ const AskForm = ({
     };
 
     if (isEditMode) {
+      // 수정 모드일 때는 유지할 기존 이미지 파일명 배열 추가
       const keepImageFilenames = existingImages
         .map((img) => img.askImageFilename || img.filename)
         .filter(Boolean);
@@ -191,6 +139,7 @@ const AskForm = ({
         newFiles: validFiles,
       });
     } else {
+      // 작성 모드
       onSubmit({
         requestDto,
         files: validFiles,
@@ -209,9 +158,11 @@ const AskForm = ({
           className="px-3 py-2 text-sm border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:border-amber-600"
         >
           <option value="">문의 종류 선택</option>
-          <option value="전시 관련 문의">전시 관련 문의</option>
-          <option value="사이트 관련 문의">사이트 관련 문의</option>
-          <option value="기타">기타</option>
+          {ASK_CATEGORY_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
 
         <div className="md:col-span-2 relative" ref={dropdownRef}>
@@ -330,10 +281,10 @@ const AskForm = ({
         </div>
       )}
 
-      {/* 4행: 사진 첨부 영역 (3개 슬롯) */}
+      {/* 4행: 사진 첨부 영역 (상수 ASK_IMAGE_LIMIT 사용) */}
       <div className="flex flex-col gap-2">
         <span className="text-xs text-gray-500 font-semibold">
-          사진 첨부 (최대 3개 / 현재 { (isEditMode ? existingImages.length : 0) + files.filter(Boolean).length }개 등록됨)
+          사진 첨부 (최대 {ASK_IMAGE_LIMIT}개)
         </span>
         {files.map((file, idx) => (
           <div key={idx} className="flex items-center gap-2">
