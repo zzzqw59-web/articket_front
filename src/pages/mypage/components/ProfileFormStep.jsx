@@ -76,7 +76,6 @@ const ProfileFormStep = ({
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
               <span>가입일 : 2026년 9월 17일</span>
-              <span>최근 수정일 : 2026년 9월 17일</span>
             </div>
           </div>
         </div>

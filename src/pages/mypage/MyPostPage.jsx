@@ -1,96 +1,75 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import PageHeader from "../../components/common/PageHeader";
+import { getMyAskList } from "../../api/mypageApi"; // 방금 만든 API 임포트
 
 const MyPostPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("review");
+  const [activeTab, setActiveTab] = useState("ask"); // 내 문의를 먼저 테스트하기 위해 기본값 설정
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 1. 탭 설정
+  // API 데이터 상태
+  const [askList, setAskList] = useState([]);
+  const [totalPages, setTotalPages] = useState(1);
+
+  // 검색 상태 관리
+  const [searchQuery, setSearchQuery] = useState({ searchType: "title", keyword: "" });
+
+  // 탭 설정 및 컬럼 설정 (기존 코드 유지)
   const tabs = [
     { id: "review", label: "내 리뷰" },
     { id: "ask", label: "내 문의" },
     { id: "reply", label: "내 댓글" },
   ];
 
-  // 2. 탭별 컬럼 구성
   const postColumns = [
     { key: "id", label: "번호", width: "w-24", align: "center" },
     { key: "title", label: "게시물 제목", align: "left" },
     { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
   ];
 
-  const replyColumns = [
-    { key: "id", label: "번호", width: "w-24", align: "center" },
-    { key: "content", label: "댓글 내용", align: "left" },
-    { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
-  ];
-
-  // 3. 탭별 검색 옵션
   const postSearchOptions = [
     { label: "제목", value: "title" },
     { label: "내용", value: "content" },
   ];
 
-  const replySearchOptions = [{ label: "댓글 내용", value: "content" }];
+  // 내 문의 데이터 호출 (useEffect)
+  useEffect(() => {
+    if (activeTab === "ask") {
+      fetchMyAsks();
+    }
+  }, [activeTab, currentPage, searchQuery]);
 
-  // 4. 샘플 데이터
-  const mockReviewData = [
-    {
-      id: 1,
-      title: "사계절 전시에 대한 솔직 리뷰 [2]",
-      createdAt: "2026.09.28",
-      targetUrl: "/articket/review/1",
-    },
-    {
-      id: 2,
-      title: "인상주의 특별전 방문 후기 [1]",
-      createdAt: "2026.09.27",
-      targetUrl: "/articket/review/2",
-    },
-  ];
+  const fetchMyAsks = async () => {
+    try {
+      const response = await getMyAskList(currentPage, 10, searchQuery.searchType, searchQuery.keyword);
+      
+      // 백엔드 PageResponseDTO -> 프론트 테이블 포맷으로 매핑
+      const formattedData = response.dtoList.map((item) => ({
+        id: item.askId,
+        title: item.askTitle,
+        createdAt: item.askCreatedAt ? item.askCreatedAt.substring(0, 10) : "",
+        targetUrl: `/articket/ask/${item.askId}`,
+      }));
 
-  const mockAskData = [
-    {
-      id: 1,
-      title: "가족과 함께 방문해도 괜찮을까요?",
-      createdAt: "2026.09.21",
-      targetUrl: "/articket/ask/1",
-    },
-  ];
+      setAskList(formattedData);
+      setTotalPages(response.totalPage || 1);
+    } catch (error) {
+      console.error("내 문의 목록을 불러오는 중 오류가 발생했습니다.", error);
+    }
+  };
 
-  const mockReplyData = [
-    {
-      id: 1,
-      content: "좋은 정보 감사합니다! 이번 주말에 꼭 가봐야겠네요.",
-      createdAt: "2026.09.28",
-      targetUrl: "/articket/ask/1",
-    },
-    {
-      id: 2,
-      content: "주차장이 다소 협소하니 대중교통 이용을 추천합니다.",
-      createdAt: "2026.09.25",
-      targetUrl: "/articket/review/5",
-    },
-  ];
-
-  // 탭 상태에 따른 헬퍼
-  const getColumns = () => (activeTab === "reply" ? replyColumns : postColumns);
-  const getSearchOptions = () =>
-    activeTab === "reply" ? replySearchOptions : postSearchOptions;
-
+  // 탭에 따른 데이터 반환
   const getData = () => {
     switch (activeTab) {
       case "ask":
-        return mockAskData;
-      case "reply":
-        return mockReplyData;
+        return askList; // 실제 API 데이터 바인딩
       case "review":
+      case "reply":
       default:
-        return mockReviewData;
+        return []; // 추후 연동 전까지 임시 빈 배열 또는 목업 유지
     }
   };
 
@@ -100,13 +79,11 @@ const MyPostPage = () => {
 
   return (
     <div className="w-full flex flex-col gap-6 py-6">
-      {/* 1. 페이지 헤더 */}
       <PageHeader
         title="내 게시물"
         description="회원님이 등록하신 게시물 내역을 조회할 수 있습니다."
       />
 
-      {/* 메인 표 컴포넌트 */}
       <DataTableContainer
         tabs={tabs}
         activeTab={activeTab}
@@ -114,22 +91,26 @@ const MyPostPage = () => {
           setActiveTab(tabId);
           setCurrentPage(1);
         }}
-        columns={getColumns()}
+        columns={postColumns}
         data={getData()}
         currentPage={currentPage}
-        totalPages={10}
+        totalPages={activeTab === "ask" ? totalPages : 1}
         onPageChange={(page) => setCurrentPage(page)}
         sortOptions={[{ label: "최신순", value: "latest" }]}
         onRowClick={handleRowClick}
       />
 
-      {/* 하단 검색 바 (중앙 정렬) */}
-      <div className="w-full max-w-xl mx-auto mt-2">
-        <SearchBar
-          options={getSearchOptions()}
-          onSearch={(query) => console.log(`${activeTab} 검색:`, query)}
-        />
-      </div>
+      {activeTab === "ask" && (
+        <div className="w-full max-w-xl mx-auto mt-2">
+          <SearchBar
+            options={postSearchOptions}
+            onSearch={(searchType, keyword) => {
+              setSearchQuery({ searchType, keyword });
+              setCurrentPage(1); // 검색 시 1페이지로 초기화
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
