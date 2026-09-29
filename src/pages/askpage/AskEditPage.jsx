@@ -1,32 +1,56 @@
-import React from "react";
+import { useState, useEffect } from "react"; // 👈 useState, useEffect import 추가
 import { useNavigate, useParams } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import PageHeader from "../../components/common/PageHeader";
 import AskForm from "./components/AskForm";
+import { getAskDetail, updateAsk } from "../../api/askApi";
 
 const AskEditPage = () => {
   const navigate = useNavigate();
   const { askId } = useParams();
+  const [initialData, setInitialData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // 기존 상세 데이터 샘플 (스토리보드 화면 기준)[cite: 5]
-  const mockInitialData = {
-    category: "전시 관련 문의",
-    exhibition: "0000148 - 사라지는 것들에 대하여",
-    title: "가족과 함께 방문해도 괜찮을까요?",
-    isSecret: true,
-    content: "노인과 아이들이 관람해도 괜찮은 전시인지 문의드립니다.",
-    files: ["입구 사진.jpg"],
-  };
+  useEffect(() => {
+    const fetchOriginalAsk = async () => {
+      try {
+        const data = await getAskDetail(askId);
+        setInitialData(data);
+      } catch (error) {
+        console.error("원글 데이터 조회 실패:", error);
+        alert("존재하지 않는 문의글입니다.");
+        navigate("/articket/ask");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOriginalAsk();
+  }, [askId, navigate]);
 
-  const handleSubmit = (data) => {
-    console.log(`문의[${askId}] 수정 제출:`, data);
-    alert("문의글이 수정되었습니다.");
-    navigate(`/articket/ask/${askId}`);
+  const handleSubmit = async ({ requestDto, newFiles }) => {
+    try {
+      await updateAsk(askId, requestDto, newFiles);
+      alert("문의글이 수정되었습니다.");
+      navigate(`/articket/ask/${askId}`);
+    } catch (error) {
+      console.error("문의글 수정 실패:", error);
+      alert("문의글 수정 처리에 실패했습니다.");
+    }
   };
 
   const handleCancel = () => {
     navigate(`/articket/ask/${askId}`);
   };
+
+  if (isLoading) {
+    return (
+      <MainLayout>
+        <div className="text-center py-12 text-gray-500">
+          데이터를 불러오는 중입니다...
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -36,7 +60,7 @@ const AskEditPage = () => {
           description="전시 관련 문의 및 사이트 관련 문의 사항을 남겨주세요."
         />
         <AskForm
-          initialData={mockInitialData}
+          initialData={initialData}
           isEditMode={true}
           onSubmit={handleSubmit}
           onCancel={handleCancel}

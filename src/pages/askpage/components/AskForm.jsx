@@ -1,68 +1,76 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import ActionButton from "../../../components/common/ActionButton";
 
-// 샘플 전시회 검색 데이터 목록 (추후 API 연동)
+// 카테고리 텍스트 <-> askType(Integer) 매핑
+const CATEGORY_MAP = {
+  "전시 관련 문의": 1,
+  "사이트 관련 문의": 2,
+  "기타": 0,
+};
+
+const REVERSE_CATEGORY_MAP = {
+  1: "전시 관련 문의",
+  2: "사이트 관련 문의",
+  0: "기타",
+};
+
+// TODO 샘플 전시회 목록 (추후 전시 검색 API 연동 가능)
 const mockExhibitions = [
-  { id: "0000148", title: "사라지는 것들에 대하여" },
-  { id: "0000149", title: "사계절을 전시에 담다" },
-  { id: "0000150", title: "인상주의 특별전" },
-  { id: "0000151", title: "현대 미술의 거장들" },
+  { id: 148, title: "사라지는 것들에 대하여" },
+  { id: 149, title: "사계절을 전시에 담다" },
+  { id: 150, title: "인상주의 특별전" },
+  { id: 151, title: "현대 미술의 거장들" },
 ];
 
 const AskForm = ({
-  initialData = {},
+  initialData = null,
   isEditMode = false,
   onSubmit,
   onCancel,
 }) => {
   const [formData, setFormData] = useState({
-    category: initialData.category || "",
-    selectedExhibition: initialData.exhibition || null, // 선택된 전시회 객체 { id, title } 또는 null
-    title: initialData.title || "",
-    isSecret: initialData.isSecret || false,
-    content: initialData.content || "",
-    agreePolicy: initialData.agreePolicy || false,
+    category: "",
+    selectedExhibition: null,
+    title: "",
+    isSecret: false,
+    content: "",
+    agreePolicy: false,
   });
 
-  // 전시 검색 관련 state
+  // 기존 서버 이미지 (수정 모드용) [{ askImageOrigin, imageUrl, askImageFilename }, ...]
+  const [existingImages, setExistingImages] = useState([]);
+
+  // 새로 첨부할 파일 객체 배열 (최대 3개 제한)
+  const [files, setFiles] = useState([null, null, null]);
+
+  // 검색 드롭다운 state
   const [searchQuery, setSearchQuery] = useState("");
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // 문의 종류가 '전시 관련 문의'인지 여부
   const isExhibitionCategory = formData.category === "전시 관련 문의";
 
-  // 첨부 파일 상태
-  const [files, setFiles] = useState([
-    initialData.files?.[0] || null,
-    initialData.files?.[1] || null,
-    initialData.files?.[2] || null,
-  ]);
-
-  // 수정 모드 데이터 로드
+  // 기존 초기 데이터 채우기 (수정 모드)
   useEffect(() => {
     if (isEditMode && initialData) {
       setFormData({
-        category: initialData.category || "전시 관련 문의",
-        selectedExhibition: initialData.exhibition
-          ? { id: "0000148", title: initialData.exhibition }
+        category: REVERSE_CATEGORY_MAP[initialData.askType] || "기타",
+        selectedExhibition: initialData.exhibitionTitle
+          ? { id: initialData.exhibitionId, title: initialData.exhibitionTitle }
           : null,
-        title: initialData.title || "",
-        isSecret: initialData.isSecret ?? false,
-        content: initialData.content || "",
+        title: initialData.askTitle || "",
+        isSecret: initialData.askSecret === 1,
+        content: initialData.askBody || "",
         agreePolicy: true,
       });
-      if (initialData.files) {
-        setFiles([
-          initialData.files[0] || null,
-          initialData.files[1] || null,
-          initialData.files[2] || null,
-        ]);
+
+      if (initialData.images) {
+        setExistingImages(initialData.images);
       }
     }
   }, [isEditMode, initialData]);
 
-  // 드롭다운 외부 클릭 감지 및 닫기
+  // 드롭다운 외부 클릭 감지
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -73,13 +81,12 @@ const AskForm = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 문의 종류 변경 시 이벤트
+  // 카테고리 변경 핸들러
   const handleCategoryChange = (e) => {
     const category = e.target.value;
     setFormData((prev) => ({
       ...prev,
       category,
-      // '전시 관련 문의'가 아니면 선택된 연관 전시회도 초기화
       selectedExhibition: category === "전시 관련 문의" ? prev.selectedExhibition : null,
     }));
     setSearchQuery("");
@@ -94,38 +101,100 @@ const AskForm = ({
     }));
   };
 
-  // 전시회 선택 처리
+  // 전시회 선택/취소
   const handleSelectExhibition = (exhibition) => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedExhibition: exhibition,
-    }));
+    setFormData((prev) => ({ ...prev, selectedExhibition: exhibition }));
     setSearchQuery("");
     setIsDropdownOpen(false);
   };
 
-  // 선택된 전시회 초기화 (X 버튼)
   const handleClearExhibition = () => {
-    setFormData((prev) => ({
-      ...prev,
-      selectedExhibition: null,
-    }));
+    setFormData((prev) => ({ ...prev, selectedExhibition: null }));
     setSearchQuery("");
   };
 
-  // 검색어 필터링된 전시회 목록
+  // 현재 총 이미지 개수 계산 함수 (기존 유지 이미지 + 새로 선택한 파일)
+  const getRemainingSlotCount = () => {
+    const currentExistingCount = isEditMode ? existingImages.length : 0;
+    const currentNewFilesCount = files.filter(Boolean).length;
+    return 3 - (currentExistingCount + currentNewFilesCount);
+  };
+
+  // 신규 파일 첨부 핸들러
+  const handleFileChange = (index, e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    // 기존 이미지 + 새 이미지 총합 체크
+    const currentExistingCount = isEditMode ? existingImages.length : 0;
+    const currentNewFilesCount = files.filter((f, i) => i !== index && f !== null).length;
+    
+    if (currentExistingCount + currentNewFilesCount >= 3) {
+      alert("이미지는 최대 3장까지만 등록 가능합니다.");
+      e.target.value = ""; // input 초기화
+      return;
+    }
+
+    const updatedFiles = [...files];
+    updatedFiles[index] = selectedFile;
+    setFiles(updatedFiles);
+  };
+
+  // 신규 파일 제거
+  const handleRemoveFile = (index) => {
+    const updatedFiles = [...files];
+    updatedFiles[index] = null;
+    setFiles(updatedFiles);
+  };
+
+  // 기존 서버 이미지 제거
+  const handleRemoveExistingImage = (index) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
+
   const filteredExhibitions = mockExhibitions.filter((ex) =>
     ex.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  // 폼 제출 핸들러
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.title.trim()) return alert("제목을 입력해주세요.");
-    if (!formData.content.trim()) return alert("문의 내용을 입력해주세요.");
-    if (!formData.agreePolicy) return alert("운영원칙에 동의해주세요.");
+    if (!formData.category) return alert("문의 종류를 선택해 주세요.");
+    if (!formData.title.trim()) return alert("제목을 입력해 주세요.");
+    if (!formData.content.trim()) return alert("문의 내용을 입력해 주세요.");
+    if (!formData.agreePolicy) return alert("운영원칙 동의에 체크해 주세요.");
 
-    if (onSubmit) {
-      onSubmit({ ...formData, files });
+    const validFiles = files.filter(Boolean);
+    const currentExistingCount = isEditMode ? existingImages.length : 0;
+
+    // 최종 이미지 개수 검증
+    if (currentExistingCount + validFiles.length > 3) {
+      return alert("이미지는 기존 이미지를 포함하여 최대 3장까지만 등록할 수 있습니다.");
+    }
+
+    // DTO 생성 및 제출 로직 (기존과 동일)
+    const requestDto = {
+      exhibitionId: formData.selectedExhibition ? formData.selectedExhibition.id : null,
+      askTitle: formData.title,
+      askBody: formData.content,
+      askType: CATEGORY_MAP[formData.category] ?? 0,
+      askSecret: formData.isSecret ? 1 : 0,
+    };
+
+    if (isEditMode) {
+      const keepImageFilenames = existingImages
+        .map((img) => img.askImageFilename || img.filename)
+        .filter(Boolean);
+
+      onSubmit({
+        requestDto: { ...requestDto, keepImageFilenames },
+        newFiles: validFiles,
+      });
+    } else {
+      onSubmit({
+        requestDto,
+        files: validFiles,
+      });
     }
   };
 
@@ -133,22 +202,19 @@ const AskForm = ({
     <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
       {/* 1행: 문의 종류 + 연관 전시회 검색 */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* 문의 종류 선택 */}
         <select
           name="category"
           value={formData.category}
           onChange={handleCategoryChange}
           className="px-3 py-2 text-sm border border-gray-300 rounded bg-white text-gray-700 focus:outline-none focus:border-amber-600"
         >
-          <option value="">문의 종류</option>
+          <option value="">문의 종류 선택</option>
           <option value="전시 관련 문의">전시 관련 문의</option>
           <option value="사이트 관련 문의">사이트 관련 문의</option>
           <option value="기타">기타</option>
         </select>
 
-        {/* 연관 전시회 검색 / 선택 영역 */}
         <div className="md:col-span-2 relative" ref={dropdownRef}>
-          {/* A. 전시회가 이미 선택되어 있는 경우 */}
           {formData.selectedExhibition ? (
             <div className="flex items-center justify-between w-full px-3 py-2 text-sm border border-amber-300 bg-amber-50/50 rounded text-amber-900 font-medium">
               <span className="truncate">
@@ -158,19 +224,17 @@ const AskForm = ({
                 type="button"
                 onClick={handleClearExhibition}
                 className="text-gray-400 hover:text-red-500 font-bold ml-2 transition-colors"
-                title="선택 취소"
               >
                 ✕
               </button>
             </div>
           ) : (
-            /* B. 검색 입력창 영역 (문의 종류가 '전시 관련 문의'일 때만 활성화) */
             <>
               <input
                 type="text"
                 placeholder={
                   isExhibitionCategory
-                    ? "연관 전시회 검색"
+                    ? "연관 전시회 검색 (예: 사라지는 것들에 대하여)"
                     : "문의 종류를 '전시 관련 문의'로 선택 시 검색 가능합니다"
                 }
                 value={searchQuery}
@@ -180,19 +244,13 @@ const AskForm = ({
                   setIsDropdownOpen(true);
                 }}
                 onFocus={() => isExhibitionCategory && setIsDropdownOpen(true)}
-                className={`w-full px-3 py-2 pr-10 text-sm border rounded transition-colors focus:outline-none ${
+                className={`w-full px-3 py-2 text-sm border rounded transition-colors focus:outline-none ${
                   isExhibitionCategory
                     ? "border-gray-300 bg-white focus:border-amber-600"
                     : "border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed"
                 }`}
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </span>
 
-              {/* 검색 드롭다운 결과창 */}
               {isExhibitionCategory && isDropdownOpen && searchQuery.trim() !== "" && (
                 <div className="absolute left-0 right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-20 max-h-48 overflow-y-auto text-sm">
                   {filteredExhibitions.length > 0 ? (
@@ -201,7 +259,7 @@ const AskForm = ({
                         key={ex.id}
                         type="button"
                         onClick={() => handleSelectExhibition(ex)}
-                        className="w-full text-left px-4 py-2 hover:bg-amber-50 hover:text-amber-900 transition-colors border-b last:border-none border-gray-100"
+                        className="w-full text-left px-4 py-2 hover:bg-amber-50 hover:text-amber-900 border-b last:border-none border-gray-100"
                       >
                         <span className="text-xs text-gray-400 mr-2">[{ex.id}]</span>
                         {ex.title}
@@ -219,7 +277,7 @@ const AskForm = ({
         </div>
       </div>
 
-      {/* 2행: 제목 + 비밀글 체크박스 */}
+      {/* 2행: 제목 + 비밀글 체크 */}
       <div className="flex items-center gap-3">
         <input
           type="text"
@@ -245,19 +303,43 @@ const AskForm = ({
       <textarea
         name="content"
         rows={10}
-        placeholder="문의 내용을 입력해주세요"
+        placeholder="문의 내용을 입력해 주세요"
         value={formData.content}
         onChange={handleChange}
         className="w-full p-3 text-sm border border-gray-300 rounded bg-white focus:outline-none focus:border-amber-600 resize-none"
       />
 
-      {/* 4행: 사진 첨부 영역 (3개) */}
+      {/* 수정 모드 전용: 기존 첨부 이미지 유지 목록 */}
+      {isEditMode && existingImages.length > 0 && (
+        <div className="flex flex-col gap-2 border-t border-gray-200 pt-3">
+          <span className="text-xs text-gray-500 font-semibold">기존 첨부 이미지</span>
+          <div className="flex gap-2">
+            {existingImages.map((img, idx) => (
+              <div key={idx} className="flex items-center gap-1.5 px-3 py-1 border border-gray-300 rounded bg-amber-50 text-xs text-gray-700">
+                <span className="truncate max-w-[150px]">{img.askImageOrigin || `이미지 ${idx + 1}`}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveExistingImage(idx)}
+                  className="text-gray-400 hover:text-red-500 font-bold ml-1"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* 4행: 사진 첨부 영역 (3개 슬롯) */}
       <div className="flex flex-col gap-2">
+        <span className="text-xs text-gray-500 font-semibold">
+          사진 첨부 (최대 3개 / 현재 { (isEditMode ? existingImages.length : 0) + files.filter(Boolean).length }개 등록됨)
+        </span>
         {files.map((file, idx) => (
           <div key={idx} className="flex items-center gap-2">
             {file ? (
               <div className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded bg-gray-50 text-xs text-gray-700">
-                <span>{file}</span>
+                <span>{file.name}</span>
                 <button
                   type="button"
                   onClick={() => handleRemoveFile(idx)}
@@ -269,7 +351,7 @@ const AskForm = ({
             ) : (
               <label className="cursor-pointer">
                 <span className="px-3 py-1.5 border border-gray-300 rounded bg-gray-100 text-xs text-gray-700 hover:bg-gray-200 inline-block">
-                  사진 첨부하기
+                  사진 첨부하기 #{idx + 1}
                 </span>
                 <input
                   type="file"
@@ -283,7 +365,7 @@ const AskForm = ({
         ))}
       </div>
 
-      {/* 5행: 운영원칙 동의 체크박스 */}
+      {/* 5행: 운영원칙 동의 */}
       <div className="mt-2">
         <label className="flex items-center gap-1.5 text-xs text-gray-600 cursor-pointer">
           <input
@@ -297,12 +379,13 @@ const AskForm = ({
         </label>
       </div>
 
-      {/* 하단 취소 / 등록(수정) 버튼 */}
+      {/* 버튼 */}
       <div className="flex justify-end gap-2 mt-4">
         <ActionButton
           label={isEditMode ? "수정취소" : "작성취소"}
           variant="secondary"
           onClick={onCancel}
+          type="button"
         />
         <ActionButton
           label={isEditMode ? "수정하기" : "등록하기"}

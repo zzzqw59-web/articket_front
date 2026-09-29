@@ -1,16 +1,21 @@
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import MainLayout from "../../layouts/MainLayout";
 import PageHeader from "../../components/common/PageHeader";
 import AskForm from "./components/AskForm";
+import { createAsk } from "../../api/askApi";
 
 const AskWritePage = () => {
   const navigate = useNavigate();
 
-  const handleSubmit = (data) => {
-    console.log("문의 등록 제출:", data);
-    alert("문의가 성공적으로 등록되었습니다.");
-    navigate("/articket/ask");
+  const handleSubmit = async ({ requestDto, files }) => {
+    try {
+      const askId = await createAsk(requestDto, files);
+      alert("문의가 성공적으로 등록되었습니다.");
+      navigate(`/articket/ask/${askId}`);
+    } catch (error) {
+      console.error("문의 등록 실패:", error);
+      alert("문의 등록에 실패했습니다.");
+    }
   };
 
   const handleCancel = () => {
