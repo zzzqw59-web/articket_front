@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import WishlistCard from "./components/WishlistCard";
+import { useResponsiveCols } from "../../hooks/useResponsiveCols";
 
 // 초기 무한스크롤 샘플 데이터 (10개)
 const initialMockData = Array.from({ length: 10 }, (_, i) => ({
@@ -21,6 +22,9 @@ const MyWishlistPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  // 🚀 Debounce가 적용된 동적 반응형 Column 수 감지 훅 사용
+  const cols = useResponsiveCols(150);
+
   // 무한 스크롤 타겟 Ref
   const observerRef = useRef(null);
 
@@ -34,21 +38,11 @@ const MyWishlistPage = () => {
     navigate(`/articket/exhibition/${id}`);
   };
 
-  // 📐 현재 화면 너비(Breakpoint)에 맞는 그리드 열(Column) 수 반환
-  const getColumnCount = () => {
-    const width = window.innerWidth;
-    if (width >= 1024) return 5; // lg (lg:grid-cols-5)
-    if (width >= 768) return 4;  // md (md:grid-cols-4)
-    if (width >= 640) return 3;  // sm (sm:grid-cols-3)
-    return 2;                    // default (grid-cols-2)
-  };
-
   // 🔄 무한 스크롤 더보기 로드 함수 (동적 개수 계산)
   const loadMoreItems = () => {
     if (isLoading) return;
     setIsLoading(true);
 
-    const cols = getColumnCount(); // 현재 화면의 열 수 (예: 5)
     const currentCount = wishlist.length; // 현재 남은 아이템 수
 
     // 1) 현재 마지막 행을 채우기 위해 필요한 개수
@@ -91,7 +85,7 @@ const MyWishlistPage = () => {
     }
 
     return () => observer.disconnect();
-  }, [wishlist, isLoading]);
+  }, [wishlist, isLoading, cols]); // cols 의존성 추가로 창 크기 변경 시에도 안전함
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
