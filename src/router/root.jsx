@@ -21,10 +21,6 @@ const roots = createBrowserRouter([
         },
       },
       {
-        path: "intro",
-        element: <IntroPage />,
-      },
-      {
         path: "adminpage",
         children: adminRouter(),
       },
@@ -35,6 +31,11 @@ const roots = createBrowserRouter([
       ...exhibitionRouter(),
       ...venueRouter(),
     ],
+  },
+  {
+    path: "/articket/intro",
+    element: <IntroPage />,
+    HydrateFallback: () => <div>Loading...</div>,
   },
 ]);
 

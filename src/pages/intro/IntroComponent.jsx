@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import "./Intro.css";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -8,6 +8,7 @@ import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import Marquee from "./Marquee";
 import AnimationText from "./AnimationText";
+import { getExhibitionList } from "../../api/exhibitionApi";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
 if ("scrollRestoration" in history) {
@@ -16,28 +17,22 @@ if ("scrollRestoration" in history) {
 const IntroComponent = () => {
   const textRef = useRef(null);
   const containerRef = useRef(null);
-  const posters = [
-    {
-      id: 1,
-      title: "전시회 A",
-      img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500",
-    },
-    {
-      id: 2,
-      title: "전시회 B",
-      img: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500",
-    },
-    {
-      id: 3,
-      title: "전시회 C",
-      img: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500",
-    },
-    {
-      id: 4,
-      title: "전시회 D",
-      img: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=500",
-    },
-  ];
+  const [posters, setPosters] = useState([]);
+
+  const fetchPosters = async () => {
+    try {
+      const posters = await Promise.all(
+        Array.from({ length: 3 }, (_, i) => getExhibitionList({ page: i })),
+      );
+      setPosters(posters);
+    } catch (e) {
+      console.error("fail to get exhibition list");
+    }
+  };
+
+  useEffect(() => {
+    fetchPosters();
+  });
 
   useGSAP(
     () => {
@@ -285,7 +280,7 @@ const IntroComponent = () => {
             </svg>
           </div>
           <div className="poster-box flex flex-row justify-end items-center h-full px-10 gap-2 shrink-0">
-            {posters.map((item) => (
+            {posters[0]?.slice(0, 4).map((item) => (
               <div
                 key={item.id}
                 className="relative h-160 w-50 rounded-none overflow-hidden transition-all 
@@ -350,7 +345,7 @@ const IntroComponent = () => {
 
       <div className="head-text font-bold text-6xl mb-50 ml-20">
         <div className="my-5 text-7xl relative z-10">Articket은,</div>
-        <div className="translate-y-[-20px] translate-x-[-20px]">
+        <div className="translate-y-[-10px] translate-x-15">
           <div className="bg-[#ede6d6] h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-60 h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-120 h-80 w-80 rounded-full absolute z-0"></div>
