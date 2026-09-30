@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import NotificationDropdown from "./NotificationDropdown";
 import { useNotifications } from "../../hooks/useNotifications"; // 커스텀 훅 경로에 맞게 수정
+import { CURRENT_USER } from "../../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
 
 const NotificationBell = () => {
   const [isNotiOpen, setIsNotiOpen] = useState(false);
@@ -14,7 +15,7 @@ const NotificationBell = () => {
     handleReadAll,
     handleDelete,
     handleDeleteAll,
-  } = useNotifications(15); // TEMP_MEMBER_ID = 15
+  } = useNotifications(CURRENT_USER.memberId); 
 
   // 외부 영역 클릭 시 드롭다운 닫기
   useEffect(() => {

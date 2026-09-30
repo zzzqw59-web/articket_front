@@ -8,7 +8,7 @@ import {
   getUnreadCount,
 } from "../api/notificationApi";
 
-export const useNotifications = (memberId = 15) => {
+export const useNotifications = (memberId) => {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
