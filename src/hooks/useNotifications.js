@@ -51,7 +51,7 @@ export const useNotifications = (memberId = 15) => {
       // 상태 즉시 반영 (낙관적 업데이트)
       setNotifications((prev) =>
         prev.map((item) =>
-          item.notificationId === notificationId ? { ...item, isRead: true } : item
+          item.notificationId === notificationId ? { ...item, notificationIsRead: 1 } : item
         )
       );
       fetchUnreadCount(); // 개수 동기화
