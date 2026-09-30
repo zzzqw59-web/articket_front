@@ -5,6 +5,7 @@ import ActionButton from "../../components/common/ActionButton";
 import CommentSection from "../../components/common/CommentSection";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { useAskDetail } from "./hooks/useAskDetail";
+import { CURRENT_USER, MEMBER_ROLE } from "../../constants/config"; // 임시 회원 ID, 권한명 constants/config.js에서 가져오기
 
 const AskDetailPage = () => {
   const navigate = useNavigate();
@@ -127,18 +128,21 @@ const AskDetailPage = () => {
               onClick={() => navigate("/articket/ask")}
             />
 
-            <div className="flex gap-2">
-              <ActionButton
-                label="삭제하기"
-                variant="secondary"
-                onClick={handleDeleteAsk}
-              />
-              <ActionButton
-                label="수정하기"
-                variant="primary"
-                onClick={() => navigate(`/articket/ask/${askId}/edit`)}
-              />
-            </div>
+            {/* 작성자 본인일 때만 수정/삭제 버튼 노출 (TEMP_MEMBER_ID와 비교) */}
+            {(askData.memberId === CURRENT_USER.memberId || CURRENT_USER.memberType === MEMBER_ROLE.ADMIN) && (
+              <div className="flex gap-2">
+                <ActionButton
+                  label="삭제하기"
+                  variant="secondary"
+                  onClick={handleDeleteAsk}
+                />
+                <ActionButton
+                  label="수정하기"
+                  variant="primary"
+                  onClick={() => navigate(`/articket/ask/${askId}/edit`)}
+                />
+              </div>
+            )}
           </div>
 
           {/* 댓글 영역 */}

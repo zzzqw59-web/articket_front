@@ -1,10 +1,10 @@
-import React from "react";
 import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import ActionButton from "../../components/common/ActionButton";
 import MainLayout from "../../layouts/MainLayout";
 import { useAskList } from "./hooks/useAskList";
+
 import {
   ASK_TABS,
   ASK_SEARCH_OPTIONS,
@@ -61,7 +61,7 @@ const AskListPage = () => {
           <div className="w-full max-w-xl mx-auto">
             <SearchBar options={ASK_SEARCH_OPTIONS} onSearch={handleSearch} />
           </div>
-
+    
           <div className="flex justify-center md:justify-end">
             <ActionButton
               label="글쓰기"

@@ -80,6 +80,18 @@ export const useAskList = () => {
   };
 
   const handleWriteClick = () => {
+    // 1. 비로그인 상태 체크 (현재는 CURRENT_USER가 null이거나 memberId가 없는 경우)
+    if (!CURRENT_USER || !CURRENT_USER.memberId) {
+      showAlert({
+        title: "로그인 필요",
+        message: "문의글을 작성하려면 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?",
+        // 확인을 누르면 로그인(또는 회원가입) 페이지로 이동
+        onConfirm: () => navigate("/articket/login"), 
+      });
+      return;
+    }
+
+    // 2. 로그인된 회원인 경우 정상적으로 글쓰기 페이지로 이동
     navigate("/articket/ask/write");
   };
 
