@@ -32,18 +32,37 @@ export const useAskDetail = (askId) => {
     setIsLoading(true);
     try {
       const response = await getAskDetail(askId);
-      if (response) {
-        setAskData(response);
-        if (response.images && response.images.length > 0) {
-          setSelectedImage(response.images[0].imageUrl);
-        }
+
+      // 방어 코드: 데이터가 비어있거나 null인 경우
+      if (!response) {
+        showAlert({
+          message: "이미 삭제되었거나 존재하지 않는 문의글입니다.",
+          onConfirm: () => navigate("/articket/ask"),
+        });
+        return;
+      }
+
+      setAskData(response);
+      if (response.images && response.images.length > 0) {
+        setSelectedImage(response.images[0].imageUrl);
       }
     } catch (error) {
       console.error("문의 상세 조회 실패:", error);
-      showAlert({
-        message: "존재하지 않거나 접근 권한이 없는 문의글입니다.",
-        onConfirm: () => navigate("/articket/ask"),
-      });
+
+      // 서버에서 404 Not Found를 내려주거나 삭제된 게시물인 경우
+      const status = error.response?.status;
+      if (status === 404) {
+        showAlert({
+          message: "이미 삭제되었거나 존재하지 않는 문의글입니다.",
+          onConfirm: () => navigate("/articket/ask"),
+        });
+      } else {
+        // 그 외의 서버 에러
+        showAlert({
+          message: "문의 정보를 불러오는 중 오류가 발생했습니다.",
+          onConfirm: () => navigate("/articket/ask"),
+        });
+      }
     } finally {
       setIsLoading(false);
     }
