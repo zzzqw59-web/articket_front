@@ -348,6 +348,24 @@ const IntroComponent = () => {
         background
       </div>
 
+      <div className="head-text font-bold text-6xl mb-50 ml-20">
+        <div className="my-5 text-7xl relative z-10">Articket은,</div>
+        <div className="translate-y-[-20px] translate-x-[-20px]">
+          <div className="bg-[#ede6d6] h-80 w-80 rounded-full absolute z-0"></div>
+          <div className="bg-[#ede6d6] ml-60 h-80 w-80 rounded-full absolute z-0"></div>
+          <div className="bg-[#ede6d6] ml-120 h-80 w-80 rounded-full absolute z-0"></div>
+        </div>
+        <div className="z-10 relative mt-15 ml-10">
+          <div className="my-2">대한민국에서 열리는 전시에 대한 정보</div>
+          <div className="my-2">
+            대한민국에 위치한 전시장에 대한 정보를 제공하고
+          </div>
+          <div className="my-2">
+            유료 전시의 예매와 후기를 지원하는 사이트입니다.
+          </div>
+        </div>
+      </div>
+
       <div>
         <div className="text-7xl head-text font-bold ml-10">보고싶은 전시</div>
         <div className="flex ">
