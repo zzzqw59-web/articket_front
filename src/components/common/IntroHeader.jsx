@@ -1,16 +1,18 @@
-import { NavLink, Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
-import NotificationBell from "./NotificationBell";
 
-const Header = () => {
-  const [isVisible, setIsVisible] = useState(true);
+const IntroHeader = () => {
+  const [isVisible, setIsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      if (currentScrollY > lastScrollY && currentScrollY > 100) {
+      if (
+        (currentScrollY > lastScrollY && currentScrollY > 0) ||
+        currentScrollY < 900
+      ) {
         setIsVisible(false);
       } else {
         setIsVisible(true);
@@ -62,10 +64,7 @@ const Header = () => {
                 회원가입
               </div>
             </Link>
-
-            <NotificationBell />
           </div>
-
           <div className="head-text flex flex-row mr-5 mb-5 mt-3 text-2xl cursor-pointer">
             <NavLink
               to="/articket/exhibition"
@@ -151,4 +150,4 @@ const Header = () => {
     </div>
   );
 };
-export default Header;
+export default IntroHeader;

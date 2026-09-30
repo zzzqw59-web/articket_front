@@ -1,5 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
-import adminRouter from "./AdminRouter";
+import adminRouter from "./adminRouter";
 import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
 import MypageLayout from "../pages/mypage/components/MypageLayout";
@@ -18,7 +18,7 @@ const roots = createBrowserRouter([
       {
         index: true,
         lazy: async () => {
-          const { default: Component } = await import("../pages/MainPage");
+          const { default: Component } = await import("../pages/main/MainPage");
           return { Component };
         },
       },
