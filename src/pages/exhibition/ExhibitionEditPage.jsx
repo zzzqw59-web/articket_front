@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {useNavigate,useParams} from "react-router-dom";
 import {getExhibitionDetail,updateExhibition} from "../../api/exhibitionApi";
 import "../../styles/ExhibitionAndVenue.css";
+import MainLayout from "../../layouts/MainLayout";
 
 const ExhibitionEditPage = ({ user }) => {
   const { exhibitionId } = useParams();
@@ -328,11 +329,8 @@ const ExhibitionEditPage = ({ user }) => {
           >
             취소
           </button>
-
         </div>
-
       </form>
-
     </div>
   );
 };
