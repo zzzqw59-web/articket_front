@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 
 const IntroHeader = () => {
@@ -66,44 +66,84 @@ const IntroHeader = () => {
             </Link>
           </div>
           <div className="head-text flex flex-row mr-5 mb-5 mt-3 text-2xl cursor-pointer">
-            <Link to="/articket/exhibition">
+            <NavLink
+              to="/articket/exhibition"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>전시</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/venue">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/venue"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>전시장</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/intro">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/intro"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>아티켓 소개</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/review">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/review"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>리뷰</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/ask">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/ask"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>문의</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/wishlist">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/wishlist"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>마이 페이지</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/staffpage">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/staffpage"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>스태프 페이지</div>
-            </Link>
+            </NavLink>
 
-            <div>&nbsp;·&nbsp;</div>
-            <Link to="/articket/adminpage">
+            <div className="text-gray-600">&nbsp;·&nbsp;</div>
+            <NavLink
+              to="/articket/adminpage"
+              className={({ isActive }) =>
+                isActive ? "font-bold " : "text-gray-600"
+              }
+            >
               <div>어드민 페이지</div>
-            </Link>
+            </NavLink>
           </div>
         </div>
       </div>

@@ -7,6 +7,7 @@ import { Observer } from "gsap/Observer";
 import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import Marquee from "./Marquee";
+import AnimationText from "./AnimationText";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
 if ("scrollRestoration" in history) {
@@ -296,7 +297,7 @@ const IntroComponent = () => {
                   className="absolute inset-0 h-full w-full object-cover"
                 />
                 <div
-                  className="absolute inset-0 bg-gradient-to-top from-black/80 via-transparent to-transparent 
+                  className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent 
               opacity-0 hover:opacity-100 transition-opacity duration-500 flex items-end p-6"
                 >
                   <span className="text-white text-xl font-bold whitespace-nowrap">
@@ -348,9 +349,7 @@ const IntroComponent = () => {
       </div>
 
       <div>
-        <div className="text-7xl head-text font-bold ml-10">
-          오늘 보러 갈 수 있는 전시
-        </div>
+        <div className="text-7xl head-text font-bold ml-10">보고싶은 전시</div>
         <div className="flex ">
           <Marquee />
           <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15">
@@ -369,16 +368,17 @@ const IntroComponent = () => {
 
       <div>
         <div className="text-7xl head-text font-bold ml-10 mt-50">
-          전시장 날씨
+          가고싶은 전시장
         </div>
       </div>
 
       <div>
         <div className="text-7xl head-text font-bold ml-10 mt-50">
-          관람객 이야기
+          관람객의 이야기
         </div>
       </div>
 
+      <AnimationText />
       <div className=" bg-white flex flex-col items-center justify-center p-6 mt-50">
         <div className="text-8xl font-bold mb-6 text-slate-900 self-start ml-30 relative z-20">
           Contact Us
