@@ -4,6 +4,7 @@ import VenueSearch from "../../components/venue/VenueSearch";
 import VenueList from "../../components/venue/VenueList";
 import VenuePagination from "../../components/venue/VenuePagination";
 import "../../styles/ExhibitionAndVenue.css";
+import MainLayout from "../../layouts/MainLayout";
 
 const VenueListPage = () => {
   const [venues, setVenues] = useState([]);

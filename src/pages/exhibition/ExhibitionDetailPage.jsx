@@ -6,6 +6,7 @@ import {
   getExhibitionDetail,
   deleteExhibition,
 } from "../../api/exhibitionApi";
+import MainLayout from "../../layouts/MainLayout";
 
 const ExhibitionDetailPage = ({ user }) => {
   const { exhibitionId } = useParams();
@@ -203,7 +204,6 @@ const ExhibitionDetailPage = ({ user }) => {
         </button>
 
       </div>
-
     </div>
   );
 };

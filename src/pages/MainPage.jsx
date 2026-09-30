@@ -6,7 +6,7 @@ const MainPage = () => {
   return (
     <>
       <MainLayout>
-        <Outlet />
+        <p>메인 페이지</p>
       </MainLayout>
     </>
   );
