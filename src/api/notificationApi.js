@@ -1,7 +1,5 @@
 import axios from "axios";
-
-// 임시 회원 ID (추후 인증 정보 연동 시 변경 가능)
-const TEMP_MEMBER_ID = 15;
+import { TEMP_MEMBER_ID } from "../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
 
 // NOTI-001: 내 알림 목록 조회 (페이징)
 export const getMyNotifications = async (page = 1, size = 10, memberId = TEMP_MEMBER_ID) => {

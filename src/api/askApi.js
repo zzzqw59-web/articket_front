@@ -1,7 +1,7 @@
 import axios from "axios";
+import { TEMP_MEMBER_ID } from "../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
 
 const BASE_URL = "/api/asks";
-const TEMP_MEMBER_ID = 15; // 관리자/회원 임시 ID
 
 // 1. 문의글 목록 조회 (GET /api/asks) - [추가]
 export const getAskList = async (params = {}) => {

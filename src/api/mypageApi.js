@@ -1,7 +1,7 @@
 import axios from "axios";
+import { TEMP_MEMBER_ID } from "../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
 
 const BASE_URL = "/api/asks"; // "/api/mypage" 에서 수정
-const TEMP_MEMBER_ID = 15; // 인증 구현 전 임시 회원 ID
 
 // 1. 내 문의글 목록 조회
 export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword = "") => {
