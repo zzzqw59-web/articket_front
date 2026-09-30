@@ -23,7 +23,6 @@ export const getAskList = async (params = {}) => {
       askType,
       sort,
       loginMemberId: TEMP_MEMBER_ID,
-      loginMemberType: "ADMIN",
     },
   });
   return response.data; // PageResponseDTO<AskListResponseDTO> 반환
@@ -34,7 +33,6 @@ export const getAskDetail = async (askId) => {
   const response = await axios.get(`${BASE_URL}/${askId}`, {
     params: {
       loginMemberId: TEMP_MEMBER_ID,
-      loginMemberType: "ADMIN",
     },
   });
   return response.data;
