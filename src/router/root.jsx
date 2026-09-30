@@ -5,10 +5,14 @@ import IntroPage from "../pages/intro/IntroPage";
 import MypageLayout from "../pages/mypage/components/MypageLayout";
 import mypageRouter from "./mypageRouter";
 import askpageRouter from "./askpageRouter";
+import exhibitionRouter from "./exhibitionRouter";
+import venueRouter from "./venueRouter";
+import MainLayout from "../layouts/MainLayout";
 
 const roots = createBrowserRouter([
   {
     path: "/articket",
+    element: <MainLayout />,
     HydrateFallback: () => <div>Loading...</div>,
     children: [
       {
@@ -43,6 +47,8 @@ const roots = createBrowserRouter([
         path: "ask",
         children: askpageRouter(),
       },
+      ...exhibitionRouter(),
+      ...venueRouter(),
     ],
   },
 ]);
