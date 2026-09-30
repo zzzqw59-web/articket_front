@@ -3,10 +3,14 @@ import { createBrowserRouter } from "react-router-dom";
 import adminRouter from "./AdminRouter";
 import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
+import exhibitionRouter from "./exhibitionRouter";
+import venueRouter from "./venueRouter";
+import MainLayout from "../layouts/MainLayout";
 
 const roots = createBrowserRouter([
   {
     path: "/articket",
+    element: <MainLayout />,
     HydrateFallback: () => <div>Loading...</div>,
     children: [
       {
@@ -28,6 +32,8 @@ const roots = createBrowserRouter([
         path: "staffpage",
         children: staffRouter(),
       },
+      ...exhibitionRouter(),
+      ...venueRouter(),
     ],
   },
 ]);
