@@ -12,7 +12,7 @@ const roots = createBrowserRouter([
       {
         index: true,
         lazy: async () => {
-          const { default: Component } = await import("../pages/MainPage");
+          const { default: Component } = await import("../pages/main/MainPage");
           return { Component };
         },
       },
