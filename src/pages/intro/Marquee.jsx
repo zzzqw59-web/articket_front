@@ -41,7 +41,7 @@ const Marquee = () => {
     },
   ];
 
-  const getFixedItems = (sourceArray, count = 10) => {
+  const getFixedItems = (sourceArray, count = 9) => {
     let items = [];
     while (items.length < count) {
       items = [...items, ...sourceArray];
@@ -51,17 +51,17 @@ const Marquee = () => {
 
   const rows = [
     {
-      items: getFixedItems(row1ImagesData, 10),
+      items: getFixedItems(row1ImagesData, 9),
       animationClass: "animate-marquee",
       overlayClass: "bg-black/0",
     },
     {
-      items: getFixedItems(row2ImagesData, 10),
+      items: getFixedItems(row2ImagesData, 9),
       animationClass: "animate-marquee-reverse",
       overlayClass: "bg-black/20",
     },
     {
-      items: getFixedItems(row3ImagesData, 10),
+      items: getFixedItems(row3ImagesData, 9),
       animationClass: "animate-marquee",
       overlayClass: "bg-black/50",
     },
