@@ -15,14 +15,6 @@ const adminRouter = () => {
         return { Component };
       },
     },
-    {
-      path: "ask",
-      lazy: async () => {
-        const { default: Component } =
-          await import("../pages/admin/AdminAskPage");
-        return { Component };
-      },
-    },
   ];
 };
 
