@@ -1,5 +1,4 @@
 import { Outlet } from "react-router-dom";
-import MainLayout from "../../../layouts/MainLayout.jsx";
 import MypageSidebar from "./MypageSidebar.jsx";
 
 const MypageLayout = () => {

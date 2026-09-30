@@ -1,5 +1,4 @@
 import { useNavigate, useParams } from "react-router-dom";
-import MainLayout from "../../layouts/MainLayout";
 import PageHeader from "../../components/common/PageHeader";
 import ActionButton from "../../components/common/ActionButton";
 import CommentSection from "../../components/common/CommentSection";
@@ -33,11 +32,9 @@ const AskDetailPage = () => {
 
   if (isLoading) {
     return (
-      <MainLayout>
-        <div className="w-full max-w-5xl mx-auto px-4 py-12 text-center text-gray-500">
-          문의 정보를 불러오는 중입니다...
-        </div>
-      </MainLayout>
+      <div className="w-full max-w-5xl mx-auto px-4 py-12 text-center text-gray-500">
+        문의 정보를 불러오는 중입니다...
+      </div>
     );
   }
 

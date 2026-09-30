@@ -1,4 +1,3 @@
-import React from "react";
 import { useMemberEdit } from "./hooks/useMemberEdit";
 import PasswordVerifyStep from "./components/PasswordVerifyStep";
 import ProfileFormStep from "./components/ProfileFormStep";

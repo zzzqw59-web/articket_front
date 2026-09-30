@@ -1,4 +1,3 @@
-import MainLayout from "../../layouts/MainLayout";
 import PageHeader from "../../components/common/PageHeader";
 import AskForm from "./components/AskForm";
 import ConfirmModal from "../../components/common/ConfirmModal";

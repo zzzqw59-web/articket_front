@@ -2,7 +2,6 @@ import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import ActionButton from "../../components/common/ActionButton";
-import MainLayout from "../../layouts/MainLayout";
 import { useAskList } from "./hooks/useAskList";
 
 import {

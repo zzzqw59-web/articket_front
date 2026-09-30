@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import Badge from "../../../components/common/Badge";
 
 const WishlistCard = ({ item, onRemove, onClick }) => {

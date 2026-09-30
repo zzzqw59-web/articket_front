@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
