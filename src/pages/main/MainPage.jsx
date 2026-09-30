@@ -5,9 +5,7 @@ import MainComponent from "./MainComponent";
 const MainPage = () => {
   return (
     <>
-      <MainLayout>
-        <MainComponent />
-      </MainLayout>
+      <MainComponent />
     </>
   );
 };
