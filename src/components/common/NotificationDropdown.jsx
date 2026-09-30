@@ -44,7 +44,7 @@ const getNotificationInfo = (item) => {
     case 1:
       return {
         text: "내 작성글(리뷰)에 새 댓글이 등록되었습니다.",
-        targetUrl: `/articket/review`,
+        targetUrl: `/articket/review/${targetId}`,
       };
     case 2:
       return {
