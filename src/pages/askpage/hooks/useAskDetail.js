@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react"; // useRef 추가
 import { useNavigate } from "react-router-dom";
 import { getAskDetail, deleteAsk } from "../../../api/askApi";
 import {
@@ -26,19 +26,25 @@ export const useAskDetail = (askId) => {
   const [totalReplyPages, setTotalReplyPages] = useState(1);
   const [isReplyLoading, setIsReplyLoading] = useState(false);
 
+  // 중복 에러 알럿 및 호출 방지용 Ref
+  const hasErrorHandled = useRef(false);
+
   // 1. 상세 본문 데이터 조회
   const fetchAskDetail = useCallback(async () => {
-    if (!askId) return;
+    // 이미 에러 처리가 진행되었거나 진입했으면 절대 실행 안 함
+    if (!askId || hasErrorHandled.current) return;
+    
+    // 진입하자마자 곧바로 true로 잠궈서 두 번째 요청의 동시 진입을 원천 차단
+    hasErrorHandled.current = true;
+    
     setIsLoading(true);
     try {
       const response = await getAskDetail(askId);
 
       // 방어 코드: 데이터가 비어있거나 null인 경우
       if (!response) {
-        showAlert({
-          message: "이미 삭제되었거나 존재하지 않는 문의글입니다.",
-          onConfirm: () => navigate("/articket/ask"),
-        });
+        alert("이미 삭제되었거나 존재하지 않는 문의글입니다.");
+        navigate("/articket/ask", { replace: true });
         return;
       }
 
@@ -51,22 +57,18 @@ export const useAskDetail = (askId) => {
 
       // 서버에서 404 Not Found를 내려주거나 삭제된 게시물인 경우
       const status = error.response?.status;
+
       if (status === 404) {
-        showAlert({
-          message: "이미 삭제되었거나 존재하지 않는 문의글입니다.",
-          onConfirm: () => navigate("/articket/ask"),
-        });
+        alert("이미 삭제되었거나 존재하지 않는 문의글입니다.");
+        navigate("/articket/ask", { replace: true });
       } else {
-        // 그 외의 서버 에러
-        showAlert({
-          message: "문의 정보를 불러오는 중 오류가 발생했습니다.",
-          onConfirm: () => navigate("/articket/ask"),
-        });
+        alert("문의 정보를 불러오는 중 오류가 발생했습니다.");
+        navigate("/articket/ask", { replace: true });
       }
     } finally {
       setIsLoading(false);
     }
-  }, [askId, navigate, showAlert]);
+  }, [askId, navigate]);
 
   // 2. 댓글 목록 조회
   const fetchReplyList = useCallback(async () => {
