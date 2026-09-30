@@ -44,7 +44,7 @@ const AskDetailPage = () => {
   if (!askData) return null;
 
   return (
-    <MainLayout>
+    <div>
       <div className="w-full max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
         <PageHeader
           title="문의 게시판"
@@ -166,7 +166,7 @@ const AskDetailPage = () => {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />
-    </MainLayout>
+    </div>
   );
 };
 

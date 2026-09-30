@@ -22,16 +22,16 @@ const AskEditPage = () => {
 
   if (isLoading) {
     return (
-      <MainLayout>
+      <div>
         <div className="w-full max-w-4xl mx-auto px-4 py-12 text-center text-gray-500">
           데이터를 불러오는 중입니다...
         </div>
-      </MainLayout>
+      </div>
     );
   }
 
   return (
-    <MainLayout>
+    <div>
       <div className="w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
         <PageHeader
           title="문의 게시판"
@@ -51,7 +51,7 @@ const AskEditPage = () => {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />
-    </MainLayout>
+    </div>
   );
 };
 

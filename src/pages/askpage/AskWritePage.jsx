@@ -1,4 +1,3 @@
-import React from "react";
 import MainLayout from "../../layouts/MainLayout";
 import PageHeader from "../../components/common/PageHeader";
 import AskForm from "./components/AskForm";
@@ -16,7 +15,7 @@ const AskWritePage = () => {
   } = useAskWrite();
 
   return (
-    <MainLayout>
+    <div>
       <div className="w-full max-w-4xl mx-auto px-4 py-6 flex flex-col gap-6">
         <PageHeader
           title="문의 게시판"
@@ -35,7 +34,7 @@ const AskWritePage = () => {
         onConfirm={handleConfirm}
         onCancel={handleCancel}
       />
-    </MainLayout>
+    </div>
   );
 };
 

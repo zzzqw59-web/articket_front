@@ -118,7 +118,7 @@ const Header = () => {
 
             <div className="text-gray-600">&nbsp;·&nbsp;</div>
             <NavLink
-              to="/articket/wishlist"
+              to="/articket/mypage"
               className={({ isActive }) =>
                 isActive ? "font-bold " : "text-gray-600"
               }
