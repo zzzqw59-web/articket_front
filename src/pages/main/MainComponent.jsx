@@ -32,8 +32,16 @@ const MainComponent = () => {
         ))}
       </div>
       <div>
+        <div className="head-text text-8xl ml-30 font-bold mt-10">Articket</div>
+        <Link to="/articket/intro">
+          <div className="head-text text-3xl ml-70 font-bold cursor-pointer hover:text-[#5c88a8]">
+            대한민국 모든 전시의 시작과 끝
+          </div>
+        </Link>
+      </div>
+      <div>
         <div className="head-text text-5xl h-30 mt-30 ml-30 font-bold">
-          전시
+          지금 열리는 전시
         </div>
         <div className="h-[800px]">.</div>
       </div>
