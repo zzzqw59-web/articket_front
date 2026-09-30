@@ -1,47 +1,18 @@
 import "./Marquee.css";
 import React from "react";
+import { useNavigate } from "react-router-dom";
 
-const Marquee = () => {
-  const row1ImagesData = [
-    {
-      id: 1,
-      img: "https://images.unsplash.com/photo-1579783902614-a3fb3927b675?w=500",
-      title: "1번 줄 전시 A",
-    },
-    {
-      id: 2,
-      img: "https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=500",
-      title: "1번 줄 전시 B",
-    },
-  ];
+const Marquee = ({ posters }) => {
+  const row1 = posters[0]?.content || [];
+  const row2 = posters[1]?.content || [];
+  const row3 = posters[2]?.content || [];
 
-  const row2ImagesData = [
-    {
-      id: 1,
-      img: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?w=500",
-      title: "2번 줄 전시 A",
-    },
-    {
-      id: 2,
-      img: "https://images.unsplash.com/photo-1577083552431-6e5fd01aa342?w=500",
-      title: "2번 줄 전시 B",
-    },
-  ];
-
-  const row3ImagesData = [
-    {
-      id: 1,
-      img: "https://images.unsplash.com/photo-1561214115-f2f134cc4912?w=500",
-      title: "3번 줄 전시 A",
-    },
-    {
-      id: 2,
-      img: "https://images.unsplash.com/photo-1536924940846-227afb31e2a5?w=500",
-      title: "3번 줄 전시 B",
-    },
-  ];
+  const navigate = useNavigate();
 
   const getFixedItems = (sourceArray, count = 9) => {
+    if (!sourceArray || sourceArray.length == 0) {
+      return [];
+    }
     let items = [];
     while (items.length < count) {
       items = [...items, ...sourceArray];
@@ -51,17 +22,17 @@ const Marquee = () => {
 
   const rows = [
     {
-      items: getFixedItems(row1ImagesData, 9),
+      items: getFixedItems(row1, 9),
       animationClass: "animate-marquee",
       overlayClass: "bg-black/0",
     },
     {
-      items: getFixedItems(row2ImagesData, 9),
+      items: getFixedItems(row2, 9),
       animationClass: "animate-marquee-reverse",
       overlayClass: "bg-black/20",
     },
     {
-      items: getFixedItems(row3ImagesData, 9),
+      items: getFixedItems(row3, 9),
       animationClass: "animate-marquee",
       overlayClass: "bg-black/50",
     },
@@ -85,11 +56,13 @@ const Marquee = () => {
                   className="h-[max(20vh,250px)] aspect-[3/4] shrink-0 overflow-hidden relative group/item"
                 >
                   <img
-                    src={item.img}
+                    onClick={() => navigate(`/articket/exhibition/${item.id}`)}
+                    src={item.imgUrl}
                     alt={item.title}
                     className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all duration-300 cursor-pointer"
                   />
                   <div
+                    onClick={() => navigate(`/articket/exhibition/${item.id}`)}
                     className={`absolute inset-0 ${row.overlayClass} group-hover/item:bg-black/0 transition-all duration-300 cursor-pointer`}
                   />
                 </div>

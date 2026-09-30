@@ -1,14 +1,15 @@
 import gsap from "gsap";
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "./Intro.css";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Observer } from "gsap/Observer";
 import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import Marquee from "./Marquee";
-import AnimationText from "./AnimationText";
 import { getExhibitionList } from "../../api/exhibitionApi";
+import MovingImage from "./MovingImage";
+import { getVenueList } from "../../api/venueApi";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
 if ("scrollRestoration" in history) {
@@ -18,6 +19,12 @@ const IntroComponent = () => {
   const textRef = useRef(null);
   const containerRef = useRef(null);
   const [posters, setPosters] = useState([]);
+  const [venues, setVenues] = useState([]);
+  const items = [
+    { title: "srtinfe", text: "tstes" },
+    { title: "2", text: "2323" },
+  ];
+  const navigate = useNavigate();
 
   const fetchPosters = async () => {
     try {
@@ -30,9 +37,26 @@ const IntroComponent = () => {
     }
   };
 
+  const fetchVenues = async () => {
+    try {
+      const response = await getVenueList();
+      const venueList = response?.content || [];
+      const validVenues = venueList.filter((v) => v && v.photoUrl);
+      if (validVenues.length == 0) {
+        return;
+      }
+      const shuffled = [...validVenues].sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 4);
+      setVenues(selected);
+    } catch (e) {
+      console.error("fail to load venue", e);
+    }
+  };
+
   useEffect(() => {
     fetchPosters();
-  });
+    fetchVenues();
+  }, []);
 
   useGSAP(
     () => {
@@ -280,14 +304,15 @@ const IntroComponent = () => {
             </svg>
           </div>
           <div className="poster-box flex flex-row justify-end items-center h-full px-10 gap-2 shrink-0">
-            {posters[0]?.slice(0, 4).map((item) => (
+            {posters[0]?.content?.slice(0, 4).map((item) => (
               <div
                 key={item.id}
+                onClick={() => navigate(`/articket/exhibition/${item.id}`)}
                 className="relative h-160 w-50 rounded-none overflow-hidden transition-all 
                 duration-500 ease-out hover:w-112.5 cursor-pointer"
               >
                 <img
-                  src={item.img}
+                  src={item.imgUrl}
                   alt={item.title}
                   className="absolute inset-0 h-full w-full object-cover"
                 />
@@ -343,14 +368,15 @@ const IntroComponent = () => {
         background
       </div>
 
-      <div className="head-text font-bold text-6xl mb-50 ml-20">
+      <div className="head-text font-bold text-5xl mb-50 ml-20">
         <div className="my-5 text-7xl relative z-10">Articket은,</div>
-        <div className="translate-y-[-10px] translate-x-15">
+        <div className="translate-y-[-5px] translate-x-[-10px]">
           <div className="bg-[#ede6d6] h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-60 h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-120 h-80 w-80 rounded-full absolute z-0"></div>
+          <div className="bg-[#ede6d6] ml-180 h-80 w-80 rounded-full absolute z-0"></div>
         </div>
-        <div className="z-10 relative mt-15 ml-10">
+        <div className="z-10 relative mt-23 ml-10">
           <div className="my-2">대한민국에서 열리는 전시에 대한 정보</div>
           <div className="my-2">
             대한민국에 위치한 전시장에 대한 정보를 제공하고
@@ -364,7 +390,7 @@ const IntroComponent = () => {
       <div>
         <div className="text-7xl head-text font-bold ml-10">보고싶은 전시</div>
         <div className="flex ">
-          <Marquee />
+          <Marquee posters={posters} />
           <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15">
             <br /> 다채로운
             <br /> 전시 정보를
@@ -383,6 +409,21 @@ const IntroComponent = () => {
         <div className="text-7xl head-text font-bold ml-10 mt-50">
           가고싶은 전시장
         </div>
+        <div className="flex justify-between">
+          <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
+            <br /> 머무를 전시장의
+            <br /> 다양한 정보를
+            <br /> 알기쉽게
+            <Link to="/articket/venue">
+              <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                &nbsp;한눈에
+              </span>
+            </Link>
+          </div>
+          <div className="mt-10">
+            <MovingImage venues={venues} />
+          </div>
+        </div>
       </div>
 
       <div>
@@ -391,7 +432,6 @@ const IntroComponent = () => {
         </div>
       </div>
 
-      <AnimationText />
       <div className=" bg-white flex flex-col items-center justify-center p-6 mt-50">
         <div className="text-8xl font-bold mb-6 text-slate-900 self-start ml-30 relative z-20">
           Contact Us
