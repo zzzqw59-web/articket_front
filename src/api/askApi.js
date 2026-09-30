@@ -98,17 +98,23 @@ export const getExhibitionSearchListForAsk = async ({
 };
 
 // 4. 문의글 수정 (PUT /api/asks/{askId} - multipart/form-data)
-export const updateAsk = async (askId, updateData, newFiles = []) => {
+export const updateAsk = async (askId, data, files = []) => {
   const formData = new FormData();
 
-  const jsonBlob = new Blob([JSON.stringify(updateData)], {
+  // 💡 상위 컴포넌트에서 { requestDto, newFiles } 객체로 넘기든, 개별 인자로 넘기든 모두 수용하도록 방어 코드 추가
+  const requestDto = data.requestDto || data;
+  const newFiles = files.length > 0 ? files : (data.newFiles || []);
+
+  const jsonBlob = new Blob([JSON.stringify(requestDto)], {
     type: "application/json",
   });
   formData.append("requestDto", jsonBlob);
 
   if (newFiles && newFiles.length > 0) {
     newFiles.forEach((file) => {
-      formData.append("newFiles", file);
+      if (file) {
+        formData.append("newFiles", file);
+      }
     });
   }
 

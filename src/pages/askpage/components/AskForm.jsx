@@ -75,7 +75,7 @@ const AskForm = ({
     }));
   };
 
-  // 폼 제출 핸들러
+  /// 폼 제출 핸들러
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.category) return showAlert({ message: "문의 종류를 선택해 주세요." });
@@ -92,15 +92,33 @@ const AskForm = ({
     };
 
     if (isEditMode) {
-      const keepImageFilenames = existingImages
-        .map((img) => img.askImageFilename || img.filename)
+      // 💡 1. existingImages를 askImageOrder 순서대로 오름차순 정렬 (기존 파일 우선 순위 보장)
+      const sortedExistingImages = [...existingImages].sort((a, b) => {
+        const orderA = a.askImageOrder ?? 0;
+        const orderB = b.askImageOrder ?? 0;
+        return orderA - orderB;
+      });
+
+      // 💡 2. URL 및 다양한 파일명 속성 대응하여 순수 파일명(UUID_파일명.ext)만 정확히 추출
+      const keepImageFilenames = sortedExistingImages
+        .map((img) => {
+          if (img.imageUrl) {
+            // URL의 마지막 경로(파일명) 추출 및 쿼리스트링 제거
+            const filenameFromUrl = img.imageUrl.split("/").pop().split("?")[0];
+            return filenameFromUrl;
+          }
+          return img.askImageFilename || img.filename || img.fileName || img.savedFilename;
+        })
         .filter(Boolean);
+
+      console.log("🚀 최종 정렬되어 전송될 keepImageFilenames:", keepImageFilenames);
 
       onSubmit({
         requestDto: { ...requestDto, keepImageFilenames },
         newFiles: validFiles,
       });
     } else {
+      // 💡 [수정] 작성 모드일 때도 정상적으로 onSubmit을 호출하도록 분기 추가!
       onSubmit({
         requestDto,
         files: validFiles,
