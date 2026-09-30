@@ -10,7 +10,7 @@ const AskDetailPage = () => {
   const navigate = useNavigate();
   const { askId } = useParams();
 
-  // 🚀 커스텀 훅을 통해 비즈니스 로직 및 상태 바인딩
+  // 🚀 훅에서 totalReplyCount를 정상적으로 받아옵니다.
   const {
     askData,
     selectedImage,
@@ -19,6 +19,7 @@ const AskDetailPage = () => {
     replyList,
     replyPage,
     totalReplyPages,
+    totalReplyCount, // 👈 여기서 받아옴
     isReplyLoading,
     setReplyPage,
     handleAddComment,
@@ -151,6 +152,7 @@ const AskDetailPage = () => {
             onDeleteComment={handleDeleteComment}
             currentPage={replyPage}
             totalPages={totalReplyPages}
+            totalComments={totalReplyCount}
             onPageChange={(page) => setReplyPage(page)}
             isLoading={isReplyLoading}
           />

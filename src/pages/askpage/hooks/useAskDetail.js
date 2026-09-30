@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from "react"; // useRef 추가
 import { useNavigate } from "react-router-dom";
 import { getAskDetail, deleteAsk } from "../../../api/askApi";
+
 import {
   getReplyList,
   createReply,
@@ -24,6 +25,7 @@ export const useAskDetail = (askId) => {
   const [replyList, setReplyList] = useState([]);
   const [replyPage, setReplyPage] = useState(1);
   const [totalReplyPages, setTotalReplyPages] = useState(1);
+  const [totalReplyCount, setTotalReplyCount] = useState(0);
   const [isReplyLoading, setIsReplyLoading] = useState(false);
 
   // 중복 에러 알럿 및 호출 방지용 Ref
@@ -76,6 +78,8 @@ export const useAskDetail = (askId) => {
     setIsReplyLoading(true);
     try {
       const response = await getReplyList(askId, replyPage, 10);
+      console.log("댓글 API 응답 데이터:", response);
+
       if (response && response.dtoList) {
         const formattedReplies = response.dtoList.map((item) => ({
           id: item.askReplyId || item.id,
@@ -88,6 +92,9 @@ export const useAskDetail = (askId) => {
         }));
         setReplyList(formattedReplies);
         setTotalReplyPages(response.totalPage || 1);
+        
+        // 💡 서버 응답 필드명인 totalCount를 정확히 반영
+        setTotalReplyCount(response.totalCount || 0);
       }
     } catch (error) {
       console.error("댓글 목록 로딩 실패:", error);
@@ -176,6 +183,7 @@ export const useAskDetail = (askId) => {
     replyList,
     replyPage,
     totalReplyPages,
+    totalReplyCount,
     isReplyLoading,
     setReplyPage,
     handleAddComment,
