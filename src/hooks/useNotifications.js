@@ -46,17 +46,25 @@ export const useNotifications = (memberId = 15) => {
 
   // 3. 단건 읽음 처리
   const handleRead = async (notificationId) => {
+    // 실패 시 복구를 위해 현재 상태 백업 (스냅샷)
+    const previousNotifications = [...notifications];
+    const previousUnreadCount = unreadCount;
+
     try {
       await readNotification(notificationId, memberId);
       // 상태 즉시 반영 (낙관적 업데이트)
       setNotifications((prev) =>
         prev.map((item) =>
-          item.notificationId === notificationId ? { ...item, isRead: true } : item
+          item.notificationId === notificationId ? { ...item, notificationIsRead: 1 } : item
         )
       );
       fetchUnreadCount(); // 개수 동기화
     } catch (error) {
       console.error("알림 읽음 처리에 실패했습니다.", error);
+
+      // 실패 시 백업해 둔 이전 상태로 롤백
+      setNotifications(previousNotifications);
+      setUnreadCount(previousUnreadCount);
     }
   };
 
@@ -64,7 +72,7 @@ export const useNotifications = (memberId = 15) => {
   const handleReadAll = async () => {
     try {
       await readAllNotifications(memberId);
-      setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
+      setNotifications((prev) => prev.map((item) => ({ ...item, notificationIsRead: 1 })));
       setUnreadCount(0);
     } catch (error) {
       console.error("전체 읽음 처리에 실패했습니다.", error);
