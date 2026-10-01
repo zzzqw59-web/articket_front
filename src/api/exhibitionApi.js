@@ -1,4 +1,5 @@
 import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 //서버 주소 
 const API_SERVER_HOST =  "http://localhost:8080";
@@ -57,7 +58,7 @@ export const updateExhibition = async(
         formData.append("image", image);
     }
 
-    const response = await axios.put(
+    const response = await axiosInstance.put(
         `${PREFIX}/${exhibitionId}`,
         formData,
         {
@@ -69,7 +70,7 @@ export const updateExhibition = async(
 
 //전시 삭제
 export const deleteExhibition = async(exhibitionId) => {
-    const response = await axios.delete(
+    const response = await axiosInstance.delete(
         `${PREFIX}/${exhibitionId}`,
         {
             withCredentials: true,
