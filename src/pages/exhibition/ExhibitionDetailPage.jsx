@@ -183,6 +183,17 @@ const ExhibitionDetailPage = ({ user }) => {
             </button>
         )}
 
+        {!exhibition.free && (
+            <button
+                type="button"
+                onClick={() =>
+                        navigate(`/articket/exhibition/${exhibitionId}/reservation`)}
+                className="exhibition-reservation-button"
+            >
+                예약하기
+            </button>
+        )}
+
       </div>
 
       {/* 전시 설명 */}

@@ -309,7 +309,7 @@ exhibition-detail-title .wish-button {
 }
 
 .wish-heart {
-  font-size: 24px;
+  font-size: 32px;
   line-height: 1;
 }
 
@@ -408,6 +408,35 @@ exhibition-detail-title .wish-button {
 }
 
 .exhibition-homepage-button:active {
+    transform: translateY(0);
+}
+
+.exhibition-reservation-button {
+    display: inline-block;
+    margin-top: 20px;
+    margin-left: 20px;
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: #333;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.exhibition-reservation-button:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+}
+
+.exhibition-reservation-button:active {
     transform: translateY(0);
 }
 
