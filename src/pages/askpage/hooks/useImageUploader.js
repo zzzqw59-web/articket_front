@@ -19,16 +19,28 @@ export const useImageUploader = (maxLimit = 3, initialImages = []) => {
     }
   }, [initialImages]);
 
-  // 신규 파일 단일 변경
+  // 신규 파일 단일 변경 (💡 총 개수 제한 검증 추가)
   const handleFileChange = (index, e) => {
     const selectedFile = e.target.files[0];
-    if (selectedFile) {
-      setFiles((prev) => {
-        const updated = [...prev];
-        updated[index] = selectedFile;
-        return updated;
-      });
+    if (!selectedFile) return;
+
+    // 1. 현재 등록된 기존 이미지 개수
+    const existingCount = existingImages.length;
+
+    // 2. 현재 새로 추가된 파일들의 개수 (현재 바꾸려는 슬롯 제외)
+    const currentNewFilesCount = files.filter((file, i) => i !== index && file !== null).length;
+
+    // 3. 총합이 maxLimit을 초과하는지 검사
+    if (existingCount + currentNewFilesCount + 1 > maxLimit) {
+      alert(`이미지는 기존 이미지와 신규 첨부를 포함하여 총 ${maxLimit}개까지만 업로드할 수 있습니다.`);
+      return;
     }
+
+    setFiles((prev) => {
+      const updated = [...prev];
+      updated[index] = selectedFile;
+      return updated;
+    });
   };
 
   // 신규 파일 단일 제거

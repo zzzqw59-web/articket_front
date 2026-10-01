@@ -17,9 +17,7 @@ export const useNotifications = (memberId) => {
   const fetchNotifications = useCallback(async () => {
     try {
       setLoading(true);
-      // 페이징 기본값 지정 (필요에 따라 page, size 조절 가능)
       const data = await getMyNotifications(1, 10, memberId);
-      // 백엔드 PageResponseDTO 구조에 따라 dtoList 또는 content 추출 (프로젝트 구조에 맞춤)
       setNotifications(data.dtoList || data.content || []);
     } catch (error) {
       console.error("알림 목록을 불러오는 데 실패했습니다.", error);
@@ -38,11 +36,16 @@ export const useNotifications = (memberId) => {
     }
   }, [memberId]);
 
-  // 컴포넌트 마운트 시 데이터 동기화
-  useEffect(() => {
+  // 💡 훅 내부에서 목록과 뱃지 개수를 동시에 갱신하는 통합 함수 정의
+  const refetchAll = useCallback(() => {
     fetchNotifications();
     fetchUnreadCount();
   }, [fetchNotifications, fetchUnreadCount]);
+
+  // 컴포넌트 마운트 시 데이터 동기화
+  useEffect(() => {
+    refetchAll();
+  }, [refetchAll]);
 
   // 3. 단건 읽음 처리
   const handleRead = async (notificationId) => {
@@ -105,7 +108,7 @@ export const useNotifications = (memberId) => {
     notifications,
     unreadCount,
     loading,
-    refetch: fetchNotifications,
+    refetch: refetchAll, // 목록과 개수 함께 갱신
     handleRead,
     handleReadAll,
     handleDelete,

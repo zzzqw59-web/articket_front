@@ -8,6 +8,7 @@ import {
   ASK_TABS,
   ASK_SEARCH_OPTIONS,
   ASK_COLUMNS,
+  ASK_SORT_OPTIONS,
 } from "../../constants/askConstants";
 
 const AskListPage = () => {
@@ -45,7 +46,7 @@ const AskListPage = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={(page) => setCurrentPage(page)}
-        sortOptions={[{ label: "최신순", value: "latest" }]}
+        sortOptions={ASK_SORT_OPTIONS} // 👈 상수로 주입
         selectedSort={selectedSort}
         onSortChange={(sort) => setSelectedSort(sort)}
         onRowClick={handleRowClick}

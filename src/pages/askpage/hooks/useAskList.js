@@ -34,8 +34,6 @@ export const useAskList = () => {
         }),
       };
 
-      console.log("📢 API 전송 파라미터:", params); // Console에서 전송되는 값 확인용
-
       const response = await getAskList(params);
 
       if (response && response.dtoList) {
@@ -69,9 +67,14 @@ export const useAskList = () => {
     setCurrentPage(1);
   };
 
+  // 🚀 정렬 변경 핸들러 추가 (정렬 시 1페이지로 리셋)
+  const handleSortChange = (sortValue) => {
+    setSelectedSort(sortValue);
+    setCurrentPage(1);
+  };
+
   // 🚀 검색 실행 시 파라미터 수신 및 페이지 1로 리셋
   const handleSearch = ({ type, keyword }) => {
-    console.log("🔎 검색 이벤트 수신:", { type, keyword });
     setSearchParams({ searchType: type, keyword });
     setCurrentPage(1);
   };
@@ -104,7 +107,7 @@ export const useAskList = () => {
     totalPages,
     isLoading,
     setCurrentPage,
-    setSelectedSort,
+    setSelectedSort: handleSortChange, // 👈 기존 대신 핸들러 반환
     handleTabChange,
     handleSearch,
     handleRowClick,

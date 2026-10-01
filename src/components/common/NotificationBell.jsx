@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import NotificationDropdown from "./NotificationDropdown";
 import { useNotifications } from "../../hooks/useNotifications"; // 커스텀 훅 경로에 맞게 수정
 import { CURRENT_USER } from "../../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
@@ -6,18 +7,28 @@ import { CURRENT_USER } from "../../constants/config"; // 임시 회원 ID const
 const NotificationBell = () => {
   const [isNotiOpen, setIsNotiOpen] = useState(false);
   const bellRef = useRef(null);
+  const location = useLocation(); // 👈 현재 경로 추적
 
   // 커스텀 훅을 통해 알림 데이터 및 액션 함수들 가져오기
   const {
     notifications,
     unreadCount,
+    refetch,
     handleRead,
     handleReadAll,
     handleDelete,
     handleDeleteAll,
+    
   } = useNotifications(CURRENT_USER.memberId); 
 
-  // 외부 영역 클릭 시 드롭다운 닫기
+  // 💡 1. 페이지가 이동할 때마다 알림 데이터 자동 갱신
+  useEffect(() => {
+    if (refetch) {
+      refetch();
+    }
+  }, [location.pathname, refetch]);
+
+  // 외부 영역 클릭 시 드롭다운 닫기 및 드롭다운을 열 때 최신화
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (bellRef.current && !bellRef.current.contains(e.target)) {
@@ -26,11 +37,15 @@ const NotificationBell = () => {
     };
     if (isNotiOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      // 💡 2. 알림 종을 클릭해서 열 때마다 즉시 최신 알림 및 개수 동기화
+      if (refetch) {
+        refetch();
+      }
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isNotiOpen]);
+  }, [isNotiOpen, refetch]);
 
   return (
     <div ref={bellRef} className="relative flex items-center">
