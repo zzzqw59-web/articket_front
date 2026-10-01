@@ -1,4 +1,4 @@
-import "./Marquee.css";
+import "./IntroMarqueeComponent.css";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
