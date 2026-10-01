@@ -4,17 +4,18 @@ import ActionButton from "../../components/common/ActionButton";
 import CommentSection from "../../components/common/CommentSection";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { useAskDetail } from "./hooks/useAskDetail";
+import { getStoredUser, MEMBER_ROLE } from "../../constants/config";
 
 const AskDetailPage = () => {
   const navigate = useNavigate();
   const { askId } = useParams();
 
-  // 💡 저장소에서 현재 로그인한 유저 정보 가져오기 (JWT 저장 방식 기준)
-  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-  const currentMemberId = storedUser?.memberId;
-  const currentMemberType = storedUser?.memberType || storedUser?.role;
+  // 💡 config.js의 getStoredUser 헬퍼 사용
+  const currentUser = getStoredUser();
+  const currentMemberId = currentUser?.memberId;
+  const currentMemberType = currentUser?.memberType || currentUser?.role;
 
-  // 🚀 훅에서 데이터 및 제어 핸들러 받아오기
+  // 🚀 커스텀 훅 데이터 및 핸들러
   const {
     askData,
     selectedImage,
@@ -45,16 +46,15 @@ const AskDetailPage = () => {
 
   if (!askData) return null;
 
-  // 💡 1. 백엔드에서 boolean 권한값을 직접 넘겨준 경우 최우선 사용
-  // 💡 2. 없는 경우 로그인 유저 ID 비교 또는 관리자 권한 확인
-  const isOwner = 
-    askData.isOwner ?? 
-    askData.canEdit ?? 
+  // 💡 권한 검증: 작성자 본인 여부 또는 관리자(ADMIN) 권한 확인
+  const isOwner =
+    askData.isOwner ??
+    askData.canEdit ??
     (currentMemberId && String(askData.memberId) === String(currentMemberId));
 
-  const isAdmin = 
-    currentMemberType === "ADMIN" || 
-    currentMemberType === "ROLE_ADMIN";
+  const isAdmin =
+    currentMemberType === MEMBER_ROLE.ADMIN ||
+    currentMemberType === `ROLE_${MEMBER_ROLE.ADMIN}`;
 
   const canModify = Boolean(isOwner || isAdmin);
 
@@ -111,7 +111,7 @@ const AskDetailPage = () => {
               <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible">
                 {askData.images.map((img, idx) => (
                   <div
-                    key={idx}
+                    key={img.imageId || img.imageUrl || idx}
                     onClick={() => setSelectedImage(img.imageUrl)}
                     className={`w-full bg-gray-100 aspect-[4/3] rounded-sm border cursor-pointer overflow-hidden flex items-center justify-center ${
                       selectedImage === img.imageUrl
@@ -143,7 +143,7 @@ const AskDetailPage = () => {
               onClick={() => navigate("/articket/ask")}
             />
 
-            {/* 💡 권한이 있는 사용자에게만 수정/삭제 버튼 노출 */}
+            {/* 권한이 있는 사용자에게만 수정/삭제 버튼 노출 */}
             {canModify && (
               <div className="flex gap-2">
                 <ActionButton
@@ -170,7 +170,7 @@ const AskDetailPage = () => {
             currentPage={replyPage}
             totalPages={totalReplyPages}
             totalComments={totalReplyCount}
-            onPageChange={(page) => setReplyPage(page)}
+            onPageChange={setReplyPage}
             isLoading={isReplyLoading}
           />
         </div>
