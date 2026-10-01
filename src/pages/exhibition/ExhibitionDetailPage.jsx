@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/ExhibitionAndVenue.css";
+import { getExhibitionDetail, deleteExhibition,} from "../../api/exhibitionApi";
+import { toggleWish, countWish } from "../../api/wishApi";
 
-import {
-  getExhibitionDetail,
-  deleteExhibition,
-} from "../../api/exhibitionApi";
-import MainLayout from "../../layouts/MainLayout";
 
 const ExhibitionDetailPage = ({ user }) => {
   const { exhibitionId } = useParams();
@@ -19,15 +16,24 @@ const ExhibitionDetailPage = ({ user }) => {
 
   const [error, setError] = useState("");
 
+  const [isWished, setIsWished] = useState(false);
+
+  const [wishCount, setWishCount] = useState(0);
+
   useEffect(() => {
     const fetchDetail = async () => {
       try {
         setLoading(true);
         setError("");
 
-        const data = await getExhibitionDetail( exhibitionId);
+        const [ data, wishData] = await Promise.all([
+            getExhibitionDetail(exhibitionId),
+            countWish(exhibitionId),
+        ]); 
         
         setExhibition(data);
+        setWishCount(wishData.totalWishCount);
+        setIsWished(wishData.wished);
       } catch (error) {
         console.error(error);
 
@@ -41,6 +47,18 @@ const ExhibitionDetailPage = ({ user }) => {
 
     fetchDetail();
   }, [exhibitionId]);
+
+  const handleWishToggle = async () => {
+    try {
+        const data = await toggleWish(exhibitionId);
+
+        setIsWished(data.wished);
+        setWishCount(data.totalWishCount);
+    } catch (error) {
+        console.error("찜 처리 실패:", error);
+        alert("찜 처리에 실패했습니다.");
+    }
+  };
 
   const handleDelete = async () => {
     const result = window.confirm(
@@ -86,7 +104,7 @@ const ExhibitionDetailPage = ({ user }) => {
 
   const isAdmin = user?.role === "ADMIN";
 
-  const isStaff = user?.role === "EXHIBITION_STAFF";
+  const isStaff = user?.role === "STAFF";
 
 //   관리자 + 전시관계자만 수정 가능
 //   const canEdit = isAdmin || isStaff;
@@ -114,10 +132,19 @@ const ExhibitionDetailPage = ({ user }) => {
 
       {/* 전시 정보 */}
       <div className="exhibition-detail-info">
+       <div className="exhibition-detail-title">
+        <h1>{exhibition.title}</h1>
 
-        <h1>
-          {exhibition.title}
-        </h1>
+        <button type="button" className = {`wish-button ${isWished ? "wished" : ""}`}
+                onClick={handleWishToggle} >
+                    <span className="wish-heart">
+                        {isWished ? "♥" : "♡"}
+                    </span>
+                    <span className="wish-count">
+                        {wishCount}
+                    </span>
+        </button>
+       </div> 
         
         <p>
           {exhibition.startDate}

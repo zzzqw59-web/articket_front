@@ -28,7 +28,7 @@ const ExhibitionEditPage = ({ user }) => {
 
   const isAdmin = user?.role === "ADMIN";
 
-  const isStaff = user?.role === "EXHIBITION_STAFF";
+  const isStaff = user?.role === "STAFF";
 
   useEffect(() => {
     // 관리자 + 전시 관계자 수정 가능 나중에 !isAdmin으로 변경

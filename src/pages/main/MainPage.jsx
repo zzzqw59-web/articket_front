@@ -1,12 +1,12 @@
 import React from "react";
-import MainLayout from "../layouts/MainLayout";
-import { Outlet } from "react-router";
+import MainLayout from "../../layouts/MainLayout";
+import MainComponent from "./MainComponent";
 
 const MainPage = () => {
   return (
     <>
       <MainLayout>
-        <p>메인 페이지</p>
+        <MainComponent />
       </MainLayout>
     </>
   );
