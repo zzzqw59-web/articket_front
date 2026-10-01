@@ -49,3 +49,10 @@ export const ASK_COLUMNS = [
   { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
   { key: "views", label: "조회수", width: "w-24", align: "center" },
 ];
+
+// 🚀 7. 문의 목록 정렬 옵션 추가
+export const ASK_SORT_OPTIONS = [
+  { label: "최신순", value: "latest" },
+  { label: "오래된순", value: "oldest" },
+  { label: "조회수순", value: "views" },
+];

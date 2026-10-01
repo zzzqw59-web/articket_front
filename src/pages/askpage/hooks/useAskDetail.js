@@ -1,13 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from "react"; // useRef 추가
 import { useNavigate } from "react-router-dom";
 import { getAskDetail, deleteAsk } from "../../../api/askApi";
+import { useModal } from "../../../hooks/useModal";
+
 import {
   getReplyList,
   createReply,
   updateReply,
   deleteReply,
 } from "../../../api/askReplyApi";
-import { useModal } from "../../../hooks/useModal";
+
 
 export const useAskDetail = (askId) => {
   const navigate = useNavigate();
@@ -24,24 +26,17 @@ export const useAskDetail = (askId) => {
   const [replyList, setReplyList] = useState([]);
   const [replyPage, setReplyPage] = useState(1);
   const [totalReplyPages, setTotalReplyPages] = useState(1);
+  const [totalReplyCount, setTotalReplyCount] = useState(0);
   const [isReplyLoading, setIsReplyLoading] = useState(false);
-
-  // 중복 에러 알럿 및 호출 방지용 Ref
-  const hasErrorHandled = useRef(false);
 
   // 1. 상세 본문 데이터 조회
   const fetchAskDetail = useCallback(async () => {
-    // 이미 에러 처리가 진행되었거나 진입했으면 절대 실행 안 함
-    if (!askId || hasErrorHandled.current) return;
-    
-    // 진입하자마자 곧바로 true로 잠궈서 두 번째 요청의 동시 진입을 원천 차단
-    hasErrorHandled.current = true;
+    if (!askId) return;
     
     setIsLoading(true);
     try {
       const response = await getAskDetail(askId);
 
-      // 방어 코드: 데이터가 비어있거나 null인 경우
       if (!response) {
         alert("이미 삭제되었거나 존재하지 않는 문의글입니다.");
         navigate("/articket/ask", { replace: true });
@@ -54,8 +49,6 @@ export const useAskDetail = (askId) => {
       }
     } catch (error) {
       console.error("문의 상세 조회 실패:", error);
-
-      // 서버에서 404 Not Found를 내려주거나 삭제된 게시물인 경우
       const status = error.response?.status;
 
       if (status === 404) {
@@ -76,6 +69,7 @@ export const useAskDetail = (askId) => {
     setIsReplyLoading(true);
     try {
       const response = await getReplyList(askId, replyPage, 10);
+
       if (response && response.dtoList) {
         const formattedReplies = response.dtoList.map((item) => ({
           id: item.askReplyId || item.id,
@@ -88,6 +82,7 @@ export const useAskDetail = (askId) => {
         }));
         setReplyList(formattedReplies);
         setTotalReplyPages(response.totalPage || 1);
+        setTotalReplyCount(response.totalCount || 0);
       }
     } catch (error) {
       console.error("댓글 목록 로딩 실패:", error);
@@ -96,13 +91,17 @@ export const useAskDetail = (askId) => {
     }
   }, [askId, replyPage]);
 
+  // 💡 [수정 포인트] useEffect 깔끔하게 분리
+  // 1) askId가 바뀔 때: 페이지를 1페이지로 초기화하고 상세 본문 조회
   useEffect(() => {
+    setReplyPage(1);
     fetchAskDetail();
-  }, [fetchAskDetail]);
+  }, [askId, fetchAskDetail]);
 
+  // 2) askId 또는 replyPage가 바뀔 때: 댓글 목록 조회
   useEffect(() => {
     fetchReplyList();
-  }, [fetchReplyList]);
+  }, [askId, replyPage, fetchReplyList]);
 
   // 3. 댓글 등록
   const handleAddComment = async (text) => {
@@ -129,7 +128,7 @@ export const useAskDetail = (askId) => {
     }
   };
 
-  // 5. 댓글 삭제 (Confirm 모달 적용)
+  // 5. 댓글 삭제
   const handleDeleteComment = (replyId) => {
     showConfirm({
       title: "댓글 삭제",
@@ -147,7 +146,7 @@ export const useAskDetail = (askId) => {
     });
   };
 
-  // 6. 게시글 삭제 (Confirm 모달 적용)
+  // 6. 게시글 삭제
   const handleDeleteAsk = () => {
     showConfirm({
       title: "문의글 삭제",
@@ -176,14 +175,15 @@ export const useAskDetail = (askId) => {
     replyList,
     replyPage,
     totalReplyPages,
+    totalReplyCount,
     isReplyLoading,
     setReplyPage,
     handleAddComment,
     handleEditComment,
     handleDeleteComment,
     handleDeleteAsk,
-    modalState,
-    handleConfirm,
-    handleCancel,
+      modalState,
+      handleConfirm,
+      handleCancel,
   };
 };

@@ -6,19 +6,19 @@ const CommentSection = ({
   comments = [],
   showInput = true,
   onAddComment,
-  onEditComment,   // 댓글 수정 핸들러 (replyId, newContent)
-  onDeleteComment, // 댓글 삭제 핸들러 (replyId)
+  onEditComment,
+  onDeleteComment,
   currentUserId,
   currentPage = 1,
   totalPages = 1,
+  totalComments = 0,
   onPageChange,
   isLoading = false,
+  pageSize = 10,
 }) => {
   const [commentText, setCommentText] = useState("");
-  // 현재 어떤 댓글의 드롭다운이 열려있는지 관리
   const [activeMenuId, setActiveMenuId] = useState(null);
   
-  // ★ 인라인 수정을 위한 상태 관리
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState("");
 
@@ -110,34 +110,39 @@ const CommentSection = ({
           <tbody>
             {comments.length > 0 ? (
               comments.map((item, index) => {
-                const commentId = item.id || index + 1;
+                const commentId = item.id;
                 const isMenuOpen = activeMenuId === commentId;
                 const isEditing = editingId === commentId;
 
+                // 등록순 번호 계산
+                const displayNo = totalComments - ((currentPage - 1) * pageSize + index);
+
+                // 작성자 권한/역할 값 추출
+                const roleValue = item.memberType || item.role;
+
                 return (
                   <tr
-                    key={commentId}
+                    key={commentId || index}
                     className="border-b border-gray-100 last:border-none hover:bg-gray-50/50 relative group"
                   >
                     {/* 번호 */}
                     <td className="py-3 px-4 text-center text-gray-500">
-                      {commentId}
+                      {displayNo}
                     </td>
 
                     {/* 작성자 & 뱃지 */}
                     <td className="py-3 px-4 text-gray-600">
                       <div className="flex items-center gap-1.5">
                         <span className="font-medium text-gray-700">{item.writer}</span>
-                        {(item.memberType === "ADMIN" || item.role === "admin") && (
-                          <Badge label="관리자" variant="admin" />
-                        )}
-                        {(item.memberType === "STAFF" || item.role === "staff") && (
-                          <Badge label="전시 관계자" variant="staff" />
+                        
+                        {/* 💡 하드코딩 조건식 제거 및 roleValue를 variant에 바로 바인딩 */}
+                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_USER" && (
+                          <Badge variant={roleValue} />
                         )}
                       </div>
                     </td>
 
-                    {/* 댓글 내용 (인라인 수정 모드 조건부 렌더링) */}
+                    {/* 댓글 내용 */}
                     <td className="py-3 px-4 text-gray-800 leading-relaxed">
                       {isEditing ? (
                         <div className="flex items-center gap-2">
@@ -177,7 +182,7 @@ const CommentSection = ({
                       {item.createdAt}
                     </td>
 
-                    {/* 옵션 버튼 (더보기/수정/삭제) */}
+                    {/* 옵션 버튼 */}
                     <td className="py-3 px-2 text-center relative">
                       {!isEditing && (
                         <button

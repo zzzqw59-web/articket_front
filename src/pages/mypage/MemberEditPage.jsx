@@ -4,7 +4,7 @@ import ProfileFormStep from "./components/ProfileFormStep";
 
 const MemberEditPage = () => {
   const {
-    isVerified,
+    isVerifyingPassword, // 💡 비밀번호 검증 모드 여부
     checkPassword,
     setCheckPassword,
     showCheckPassword,
@@ -22,6 +22,7 @@ const MemberEditPage = () => {
     handleCancelEdit,
     handlePhoneVerify,
     handleUpdateSubmit,
+    handleWithdrawal, // 💡 회원 탈퇴 실행
   } = useMemberEdit();
 
   // 비밀번호 보이기 / 가리기 아이콘 공통 렌더러
@@ -49,7 +50,8 @@ const MemberEditPage = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6 flex flex-col items-center gap-6">
-      {!isVerified ? (
+      {/* 💡 회원 정보 수정 버튼을 눌러 비밀번호 검증 모드(isVerifyingPassword)일 때만 검증 창 표시 */}
+      {isVerifyingPassword ? (
         <PasswordVerifyStep
           checkPassword={checkPassword}
           setCheckPassword={setCheckPassword}
@@ -72,6 +74,7 @@ const MemberEditPage = () => {
           onCancelEdit={handleCancelEdit}
           onPhoneVerify={handlePhoneVerify}
           onUpdateSubmit={handleUpdateSubmit}
+          onWithdrawal={handleWithdrawal} // 💡 회원 탈퇴 연결
           renderEyeIcon={renderEyeIcon}
         />
       )}

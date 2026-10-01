@@ -1,23 +1,33 @@
 import { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import NotificationDropdown from "./NotificationDropdown";
-import { useNotifications } from "../../hooks/useNotifications"; // 커스텀 훅 경로에 맞게 수정
-import { CURRENT_USER } from "../../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
+import { useNotifications } from "../../hooks/useNotifications";
 
 const NotificationBell = () => {
   const [isNotiOpen, setIsNotiOpen] = useState(false);
   const bellRef = useRef(null);
+  const location = useLocation();
 
-  // 커스텀 훅을 통해 알림 데이터 및 액션 함수들 가져오기
+  const token = localStorage.getItem("accessToken");
+
   const {
     notifications,
     unreadCount,
+    refetch,
     handleRead,
     handleReadAll,
     handleDelete,
     handleDeleteAll,
-  } = useNotifications(CURRENT_USER.memberId); 
+  } = useNotifications();
 
-  // 외부 영역 클릭 시 드롭다운 닫기
+  // 💡 페이지 이동 시 알림 동기화 (로그인 상태일 때만)
+  useEffect(() => {
+    if (token && refetch) {
+      refetch();
+    }
+  }, [location.pathname, refetch, token]);
+
+  // 외부 영역 클릭 처리 및 드롭다운 오픈 시 갱신
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (bellRef.current && !bellRef.current.contains(e.target)) {
@@ -26,21 +36,30 @@ const NotificationBell = () => {
     };
     if (isNotiOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+      if (token && refetch) {
+        refetch();
+      }
     }
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isNotiOpen]);
+  }, [isNotiOpen, refetch, token]);
+
+  // 종 버튼 클릭 핸들러
+  const handleBellClick = (e) => {
+    e.stopPropagation();
+    if (!token) {
+      alert("로그인이 필요한 서비스입니다.");
+      return;
+    }
+    setIsNotiOpen((prev) => !prev);
+  };
 
   return (
     <div ref={bellRef} className="relative flex items-center">
-      {/* 종 아이콘 버튼 */}
       <button
         type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setIsNotiOpen((prev) => !prev);
-        }}
+        onClick={handleBellClick}
         className="relative w-15 h-15 border-2 border-[#0b2342] rounded-full select-none cursor-pointer 
         flex items-center justify-center hover:bg-[#0b2342] hover:text-white transition-colors duration-300 text-[#0b2342]"
         title="알림"
@@ -54,25 +73,27 @@ const NotificationBell = () => {
           />
         </svg>
 
-        {/* 읽지 않은 알림 뱃지 */}
-        {unreadCount > 0 && (
+        {/* 💡 로그인 상태이고 읽지 않은 알림이 있을 때만 뱃지 표시 */}
+        {token && unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[11px] font-bold rounded-full flex items-center justify-center border-2 border-[#ede6d6] shadow-sm">
             {unreadCount > 99 ? "99+" : unreadCount}
           </span>
         )}
       </button>
 
-      {/* 알림 드롭다운 팝업 목록 (훅에서 가져온 데이터 및 핸들러 전달) */}
-      <NotificationDropdown
-        isOpen={isNotiOpen}
-        onClose={() => setIsNotiOpen(false)}
-        notifications={notifications}
-        unreadCount={unreadCount}
-        onRead={handleRead}
-        onReadAll={handleReadAll}
-        onDelete={handleDelete}
-        onDeleteAll={handleDeleteAll}
-      />
+      {/* 로그인 상태에서만 드롭다운 표시 */}
+      {token && (
+        <NotificationDropdown
+          isOpen={isNotiOpen}
+          onClose={() => setIsNotiOpen(false)}
+          notifications={notifications}
+          unreadCount={unreadCount}
+          onRead={handleRead}
+          onReadAll={handleReadAll}
+          onDelete={handleDelete}
+          onDeleteAll={handleDeleteAll}
+        />
+      )}
     </div>
   );
 };
