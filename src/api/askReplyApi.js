@@ -1,49 +1,118 @@
-import axios from "axios";
-import { TEMP_MEMBER_ID } from "../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
+import axiosInstance from "./axiosInstance";
 
 const BASE_URL = "/api/asks";
+const EXHIBITION_PREFIX = "/api/exhibitions";
 
-// 1. 댓글 목록 조회
-export const getReplyList = async (askId, page = 1, size = 10) => {
-  const response = await axios.get(`${BASE_URL}/${askId}/replies`, {
-    params: { page, size },
-  });
-  return response.data; // PageResponseDTO<AskReplyDTO>
-};
+// 1. 문의글 목록 조회
+export const getAskList = async (params = {}) => {
+  const {
+    page = 1,
+    size = 10,
+    searchType,
+    keyword,
+    askType,
+    sort,
+  } = params;
 
-// 2. 댓글 등록
-export const createReply = async (askId, askReplyBody) => {
-  const response = await axios.post(
-    `${BASE_URL}/${askId}/replies`,
-    { askReplyBody },
-    { params: { memberId: TEMP_MEMBER_ID } }
-  );
-  return response.data; // replyId 반환
-};
-
-// 3. 댓글 수정
-export const updateReply = async (askId, replyId, askReplyBody) => {
-  console.log("🚀 updateReply 전송 payload:", { askReplyBody }); // 콘솔에서 값 확인
-
-  const response = await axios.put(
-    `/api/asks/${askId}/replies/${replyId}`,
-    {
-      askReplyBody: askReplyBody, // 👈 DTO 필드명과 정확히 일치해야 함
+  const response = await axiosInstance.get(BASE_URL, {
+    params: {
+      page,
+      size,
+      searchType,
+      keyword,
+      askType,
+      sort,
     },
-    {
-      params: {
-        memberId: 15, // 관리자 계정 ID
-      },
-    }
-  );
+  });
   return response.data;
 };
 
-// 4. 댓글 삭제
-export const deleteReply = async (askId, replyId) => {
-  const response = await axios.delete(
-    `${BASE_URL}/${askId}/replies/${replyId}`,
-    { params: { memberId: TEMP_MEMBER_ID } }
-  );
+// 2. 문의글 상세 조회
+export const getAskDetail = async (askId) => {
+  const response = await axiosInstance.get(`${BASE_URL}/${askId}`);
+  return response.data;
+};
+
+// 3. 문의글 작성 (multipart/form-data)
+export const createAsk = async (requestData, files = []) => {
+  const formData = new FormData();
+
+  const jsonBlob = new Blob([JSON.stringify(requestData)], {
+    type: "application/json",
+  });
+  formData.append("requestDto", jsonBlob);
+
+  if (files && files.length > 0) {
+    files.forEach((file) => {
+      formData.append("files", file);
+    });
+  }
+
+  const response = await axiosInstance.post(BASE_URL, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// 3-1. 문의글 작성용 전시회 검색
+export const getExhibitionSearchListForAsk = async ({
+  keyword = "",
+  page = 0,
+  size = 5,
+} = {}) => {
+  try {
+    const [freeRes, paidRes] = await Promise.all([
+      axiosInstance.get(EXHIBITION_PREFIX, {
+        params: { keyword, page, size, free: true },
+      }),
+      axiosInstance.get(EXHIBITION_PREFIX, {
+        params: { keyword, page, size, free: false },
+      }),
+    ]);
+
+    const freeItems = freeRes.data.content || freeRes.data.dtoList || freeRes.data || [];
+    const paidItems = paidRes.data.content || paidRes.data.dtoList || paidRes.data || [];
+
+    const combined = [...freeItems, ...paidItems];
+    return combined.slice(0, size);
+  } catch (error) {
+    console.error("전시 통합 검색 실패:", error);
+    return [];
+  }
+};
+
+// 4. 문의글 수정 (multipart/form-data)
+export const updateAsk = async (askId, data, files = []) => {
+  const formData = new FormData();
+
+  const requestDto = data.requestDto || data;
+  const newFiles = files.length > 0 ? files : (data.newFiles || []);
+
+  const jsonBlob = new Blob([JSON.stringify(requestDto)], {
+    type: "application/json",
+  });
+  formData.append("requestDto", jsonBlob);
+
+  if (newFiles && newFiles.length > 0) {
+    newFiles.forEach((file) => {
+      if (file) {
+        formData.append("newFiles", file);
+      }
+    });
+  }
+
+  const response = await axiosInstance.put(`${BASE_URL}/${askId}`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
+// 5. 문의글 삭제
+export const deleteAsk = async (askId) => {
+  const response = await axiosInstance.delete(`${BASE_URL}/${askId}`);
   return response.data;
 };

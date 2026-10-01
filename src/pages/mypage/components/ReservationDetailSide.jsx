@@ -1,4 +1,3 @@
-import React from "react";
 import Badge from "../../../components/common/Badge";
 
 const ReservationDetailSide = ({ data, type = "booking", onClose }) => {

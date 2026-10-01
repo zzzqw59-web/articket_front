@@ -1,4 +1,3 @@
-import React from "react";
 import ActionButton from "../../../components/common/ActionButton";
 
 const PasswordVerifyStep = ({

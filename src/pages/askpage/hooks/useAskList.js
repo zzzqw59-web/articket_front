@@ -1,9 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAskList } from "../../../api/askApi";
-import { CURRENT_USER } from "../../../constants/config";
 
-export const useAskList = () => {
+export const useAskList = (showAlert) => {
   const navigate = useNavigate();
 
   const [activeTab, setActiveTab] = useState("all");
@@ -18,7 +17,7 @@ export const useAskList = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
 
-  // API 호출 함수
+  // API 호출 함수 (getAskList 내부에서 axiosInstance를 통해 JWT 토큰 자동 전달)
   const fetchAskList = useCallback(async () => {
     setIsLoading(true);
     try {
@@ -27,7 +26,6 @@ export const useAskList = () => {
         size: 10,
         sort: selectedSort,
         ...(activeTab !== "all" && { askType: parseInt(activeTab, 10) }),
-        // 💡 keyword가 존재할 때만 searchType과 keyword 전송
         ...(searchParams.keyword && {
           searchType: searchParams.searchType,
           keyword: searchParams.keyword,
@@ -67,13 +65,11 @@ export const useAskList = () => {
     setCurrentPage(1);
   };
 
-  // 🚀 정렬 변경 핸들러 추가 (정렬 시 1페이지로 리셋)
   const handleSortChange = (sortValue) => {
     setSelectedSort(sortValue);
     setCurrentPage(1);
   };
 
-  // 🚀 검색 실행 시 파라미터 수신 및 페이지 1로 리셋
   const handleSearch = ({ type, keyword }) => {
     setSearchParams({ searchType: type, keyword });
     setCurrentPage(1);
@@ -84,18 +80,28 @@ export const useAskList = () => {
   };
 
   const handleWriteClick = () => {
-    // 1. 비로그인 상태 체크 (현재는 CURRENT_USER가 null이거나 memberId가 없는 경우)
-    if (!CURRENT_USER || !CURRENT_USER.memberId) {
-      showAlert({
-        title: "로그인 필요",
-        message: "문의글을 작성하려면 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?",
-        // 확인을 누르면 로그인(또는 회원가입) 페이지로 이동
-        onConfirm: () => navigate("/articket/login"), 
-      });
+    // 💡 JWT 인증 기반 비로그인 상태 체크 (accessToken 존재 여부로 확인)
+    const token = localStorage.getItem("accessToken");
+
+    if (!token) {
+      if (showAlert) {
+        showAlert({
+          title: "로그인 필요",
+          message:
+            "문의글을 작성하려면 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?",
+          onConfirm: () => navigate("/articket/login"),
+        });
+      } else if (
+        window.confirm(
+          "문의글을 작성하려면 로그인이 필요합니다.\n로그인 페이지로 이동하시겠습니까?"
+        )
+      ) {
+        navigate("/articket/login");
+      }
       return;
     }
 
-    // 2. 로그인된 회원인 경우 정상적으로 글쓰기 페이지로 이동
+    // 로그인된 회원은 정상적으로 글쓰기 페이지로 이동
     navigate("/articket/ask/write");
   };
 
@@ -107,7 +113,7 @@ export const useAskList = () => {
     totalPages,
     isLoading,
     setCurrentPage,
-    setSelectedSort: handleSortChange, // 👈 기존 대신 핸들러 반환
+    setSelectedSort: handleSortChange,
     handleTabChange,
     handleSearch,
     handleRowClick,

@@ -1,58 +1,47 @@
-import axios from "axios";
-import { TEMP_MEMBER_ID } from "../constants/config"; // 임시 회원 ID constants/config.js에서 가져오기
+import axiosInstance from "./axiosInstance";
+
+const BASE_URL = "/api/notifications";
 
 // NOTI-001: 내 알림 목록 조회 (페이징)
-export const getMyNotifications = async (page = 1, size = 10, memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.get("/api/notifications", {
-    params: { memberId, page, size },
+export const getMyNotifications = async (page = 1, size = 10) => {
+  const response = await axiosInstance.get(BASE_URL, {
+    params: { page, size },
   });
   return response.data;
 };
 
 // NOTI-002: 단건 알림 읽음 처리
-export const readNotification = async (notificationId, memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.patch(`/api/notifications/${notificationId}/read`, null, {
-    params: { memberId },
-  });
+export const readNotification = async (notificationId) => {
+  const response = await axiosInstance.patch(`${BASE_URL}/${notificationId}/read`);
   return response.data;
 };
 
 // NOTI-003: 전체 알림 일괄 읽음 처리
-export const readAllNotifications = async (memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.patch("/api/notifications/read-all", null, {
-    params: { memberId },
-  });
+export const readAllNotifications = async () => {
+  const response = await axiosInstance.patch(`${BASE_URL}/read-all`);
   return response.data;
 };
 
 // NOTI-004: 단건 알림 삭제
-export const deleteNotification = async (notificationId, memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.delete(`/api/notifications/${notificationId}`, {
-    params: { memberId },
-  });
+export const deleteNotification = async (notificationId) => {
+  const response = await axiosInstance.delete(`${BASE_URL}/${notificationId}`);
   return response.data;
 };
 
 // NOTI-005: 전체 알림 일괄 삭제
-export const deleteAllNotifications = async (memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.delete("/api/notifications", {
-    params: { memberId },
-  });
+export const deleteAllNotifications = async () => {
+  const response = await axiosInstance.delete(BASE_URL);
   return response.data;
 };
 
 // NOTI-006: 안 읽은 알림 목록 조회
-export const getUnreadNotifications = async (memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.get("/api/notifications/unread", {
-    params: { memberId },
-  });
+export const getUnreadNotifications = async () => {
+  const response = await axiosInstance.get(`${BASE_URL}/unread`);
   return response.data;
 };
 
 // NOTI-007: 안 읽은 알림 개수 조회 (배지/N 표시용)
-export const getUnreadCount = async (memberId = TEMP_MEMBER_ID) => {
-  const response = await axios.get("/api/notifications/unread/count", {
-    params: { memberId },
-  });
+export const getUnreadCount = async () => {
+  const response = await axiosInstance.get(`${BASE_URL}/unread/count`);
   return response.data;
 };

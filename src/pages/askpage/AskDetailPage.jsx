@@ -4,13 +4,17 @@ import ActionButton from "../../components/common/ActionButton";
 import CommentSection from "../../components/common/CommentSection";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { useAskDetail } from "./hooks/useAskDetail";
-import { CURRENT_USER, MEMBER_ROLE } from "../../constants/config"; // 임시 회원 ID, 권한명 constants/config.js에서 가져오기
 
 const AskDetailPage = () => {
   const navigate = useNavigate();
   const { askId } = useParams();
 
-  // 🚀 훅에서 totalReplyCount를 정상적으로 받아옵니다.
+  // 💡 저장소에서 현재 로그인한 유저 정보 가져오기 (JWT 저장 방식 기준)
+  const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+  const currentMemberId = storedUser?.memberId;
+  const currentMemberType = storedUser?.memberType || storedUser?.role;
+
+  // 🚀 훅에서 데이터 및 제어 핸들러 받아오기
   const {
     askData,
     selectedImage,
@@ -19,7 +23,7 @@ const AskDetailPage = () => {
     replyList,
     replyPage,
     totalReplyPages,
-    totalReplyCount, // 👈 여기서 받아옴
+    totalReplyCount,
     isReplyLoading,
     setReplyPage,
     handleAddComment,
@@ -40,6 +44,19 @@ const AskDetailPage = () => {
   }
 
   if (!askData) return null;
+
+  // 💡 1. 백엔드에서 boolean 권한값을 직접 넘겨준 경우 최우선 사용
+  // 💡 2. 없는 경우 로그인 유저 ID 비교 또는 관리자 권한 확인
+  const isOwner = 
+    askData.isOwner ?? 
+    askData.canEdit ?? 
+    (currentMemberId && String(askData.memberId) === String(currentMemberId));
+
+  const isAdmin = 
+    currentMemberType === "ADMIN" || 
+    currentMemberType === "ROLE_ADMIN";
+
+  const canModify = Boolean(isOwner || isAdmin);
 
   return (
     <div>
@@ -126,8 +143,8 @@ const AskDetailPage = () => {
               onClick={() => navigate("/articket/ask")}
             />
 
-            {/* 작성자 본인일 때만 수정/삭제 버튼 노출 (TEMP_MEMBER_ID와 비교) */}
-            {(askData.memberId === CURRENT_USER.memberId || CURRENT_USER.memberType === MEMBER_ROLE.ADMIN) && (
+            {/* 💡 권한이 있는 사용자에게만 수정/삭제 버튼 노출 */}
+            {canModify && (
               <div className="flex gap-2">
                 <ActionButton
                   label="삭제하기"
@@ -159,7 +176,7 @@ const AskDetailPage = () => {
         </div>
       </div>
 
-      {/* 🚀 커스텀 모달 컴포넌트 연동 */}
+      {/* 커스텀 모달 컴포넌트 */}
       <ConfirmModal
         modalState={modalState}
         onConfirm={handleConfirm}

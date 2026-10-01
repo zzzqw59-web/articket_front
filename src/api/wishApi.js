@@ -1,13 +1,11 @@
-import axios from "axios";
-import { CURRENT_USER } from "../constants/config";
+import axiosInstance from "./axiosInstance";
 
 const BASE_URL = "/api/wishes";
 
-// 내 위시리스트 목록 조회 (page 기본값을 1로 설정하여 백엔드 DTO 규격에 맞춤)
+// 내 위시리스트 목록 조회
 export const getMyWishList = async (page = 1, size = 10) => {
-  const response = await axios.get(`${BASE_URL}/me`, {
+  const response = await axiosInstance.get(`${BASE_URL}/me`, {
     params: {
-      memberId: CURRENT_USER.memberId,
       page,
       size,
     },
@@ -15,12 +13,26 @@ export const getMyWishList = async (page = 1, size = 10) => {
   return response.data;
 };
 
-// 위시 토글 (추가 / 취소) -> 찜 해제 버튼에 활용
+// 위시 토글 (추가 / 취소)
 export const toggleWish = async (exhibitionId) => {
-  const response = await axios.post(`${BASE_URL}/${exhibitionId}`, null, {
-    params: {
-      memberId: CURRENT_USER.memberId,
-    },
-  });
-  return response.data; 
+  const response = await axiosInstance.post(`${BASE_URL}/${exhibitionId}`);
+  return response.data;
+};
+
+// 특정 전시의 총 위시 수 및 내 찜 여부 조회
+export const getWishCount = async (exhibitionId) => {
+  const response = await axiosInstance.get(`${BASE_URL}/count/${exhibitionId}`);
+  return response.data;
+};
+
+// 만료된 위시 일괄 삭제
+export const deleteExpiredWishes = async () => {
+  const response = await axiosInstance.delete(`${BASE_URL}/deleteexpired`);
+  return response.data;
+};
+
+// 전체 위시 일괄 삭제
+export const deleteAllWishes = async () => {
+  const response = await axiosInstance.delete(`${BASE_URL}/deleteall`);
+  return response.data;
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import PageHeader from "../../../components/common/PageHeader";
 import ActionButton from "../../../components/common/ActionButton";
 import Badge from "../../../components/common/Badge";
@@ -17,13 +17,16 @@ const ProfileFormStep = ({
   onCancelEdit,
   onPhoneVerify,
   onUpdateSubmit,
+  onWithdrawal,
   renderEyeIcon,
 }) => {
-  // 인증번호 발송 상태 및 타이머 관련 상태
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(180); // 3분 (180초)
+  const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
 
-  // 타이머 작동 로직
+  // 💡 회원 탈퇴 동의 관련 모달 상태
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [isAgreed, setIsAgreed] = useState(false);
+
   useEffect(() => {
     let timer;
     if (isCodeSent && !isPhoneVerified && timeLeft > 0) {
@@ -36,22 +39,30 @@ const ProfileFormStep = ({
     return () => clearInterval(timer);
   }, [isCodeSent, isPhoneVerified, timeLeft]);
 
-  // 초를 MM:SS 형식으로 변환
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  // 인증번호 전송 핸들러
   const handleSendCode = () => {
     if (!formData.phone) {
       alert("전화번호를 입력해주세요.");
       return;
     }
     setIsCodeSent(true);
-    setTimeLeft(RESEND_TIMER_SECONDS); // 시간 초기화
+    setTimeLeft(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
     alert("인증번호가 발송되었습니다. (테스트용)");
+  };
+
+  // 탈퇴 확정 클릭
+  const handleConfirmWithdrawal = () => {
+    if (!isAgreed) {
+      alert("탈퇴 동의 체크박스에 동의해 주세요.");
+      return;
+    }
+    setShowWithdrawModal(false);
+    onWithdrawal();
   };
 
   return (
@@ -75,25 +86,23 @@ const ProfileFormStep = ({
               <Badge label="활동중" variant="ongoing" />
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
-              <span>가입일 : 2026년 9월 17일</span>
+              <span>가입일 : {formData.createdAt || "2026년 9월 17일"}</span>
             </div>
           </div>
         </div>
 
         {/* 회원 정보 폼 */}
         <form onSubmit={onUpdateSubmit} className="flex flex-col gap-4">
-          {/* 이메일 (고정) */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700">이메일</label>
             <input
               type="email"
-              value={formData.email}
+              value={formData.email || ""}
               disabled
               className="w-full px-3 py-2 text-sm border border-gray-200 bg-gray-50 text-gray-500 rounded cursor-default"
             />
           </div>
 
-          {/* 비밀번호 */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700">비밀번호</label>
             <div className="relative w-full">
@@ -114,13 +123,12 @@ const ProfileFormStep = ({
             </div>
           </div>
 
-          {/* 닉네임 */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700">닉네임</label>
             <input
               type="text"
               name="nickname"
-              value={formData.nickname}
+              value={formData.nickname || ""}
               onChange={onFormChange}
               disabled={!isEditing}
               className={`w-full px-3 py-2 text-sm border rounded transition-colors ${
@@ -131,25 +139,23 @@ const ProfileFormStep = ({
             />
           </div>
 
-          {/* 이름 (고정) */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700">이름</label>
             <input
               type="text"
-              value={formData.name}
+              value={formData.name || ""}
               disabled
               className="w-full px-3 py-2 text-sm border border-gray-200 bg-gray-50 text-gray-500 rounded cursor-default"
             />
           </div>
 
-          {/* 전화번호 및 인증번호 전송 버튼 */}
           <div className="flex flex-col gap-1">
             <label className="text-xs font-semibold text-gray-700">전화번호</label>
             <div className="flex gap-2 items-center">
               <input
                 type="text"
                 name="phone"
-                value={formData.phone}
+                value={formData.phone || ""}
                 onChange={onFormChange}
                 disabled={!isEditing || isPhoneVerified}
                 className={`flex-1 px-3 py-2 text-sm border rounded transition-colors ${
@@ -170,7 +176,6 @@ const ProfileFormStep = ({
             </div>
           </div>
 
-          {/* 문자 인증번호 입력 영역 (인증번호 전송을 눌렀을 때만 노출) */}
           {isEditing && isCodeSent && (
             <div className="flex flex-col gap-1 mt-1">
               <div className="flex justify-between items-center">
@@ -184,11 +189,11 @@ const ProfileFormStep = ({
               <div className="flex gap-2 items-center">
                 <input
                   type="text"
-                  placeholder={`인증번호 ${AUTH_CONSTANTS.SMS_CODE_LENGTH}자리`}
+                  placeholder={`인증번호 ${AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6}자리`}
                   value={authCode}
                   onChange={(e) => setAuthCode(e.target.value)}
                   disabled={isPhoneVerified || timeLeft === 0}
-                  maxLength={AUTH_CONSTANTS.SMS_CODE_LENGTH}
+                  maxLength={AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6}
                   className={`flex-1 px-3 py-2 text-xs border rounded transition-colors placeholder:text-gray-300 ${
                     isPhoneVerified
                       ? "border-emerald-300 bg-emerald-50 text-emerald-800"
@@ -208,21 +213,11 @@ const ProfileFormStep = ({
                   {isPhoneVerified ? "인증완료" : "인증하기"}
                 </button>
               </div>
-              {isPhoneVerified && (
-                <span className="text-[11px] text-emerald-600 mt-0.5">
-                  ✓ 전화번호 인증이 완료되었습니다.
-                </span>
-              )}
-              {timeLeft === 0 && !isPhoneVerified && (
-                <span className="text-[11px] text-red-500 mt-0.5">
-                  인증 유효시간이 만료되었습니다. 재전송을 눌러주세요.
-                </span>
-              )}
             </div>
           )}
 
-          {/* 하단 버튼 */}
-          <div className="mt-4">
+          {/* 하단 액션 버튼 */}
+          <div className="mt-4 flex flex-col gap-3">
             {isEditing ? (
               <div className="flex justify-center gap-3">
                 <ActionButton
@@ -232,23 +227,89 @@ const ProfileFormStep = ({
                   onClick={onCancelEdit}
                 />
                 <ActionButton
-                  label="수정"
+                  label="저장"
                   variant="primary"
                   type="submit"
                 />
               </div>
             ) : (
-              <button
-                type="button"
-                onClick={onStartEdit}
-                className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors"
-              >
-                회원 정보 수정
-              </button>
+              <>
+                <button
+                  type="button"
+                  onClick={onStartEdit}
+                  className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
+                >
+                  회원 정보 수정
+                </button>
+
+                {/* 🔴 1. 붉은색으로 꽉 채운 경고 스타일 회원 탈퇴 버튼 */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsAgreed(false);
+                    setShowWithdrawModal(true);
+                  }}
+                  className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+                >
+                  회원 탈퇴
+                </button>
+              </>
             )}
           </div>
         </form>
       </div>
+
+      {/* 🔴 2. 회원 탈퇴 확인 및 동의 모달 */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 flex flex-col gap-4 shadow-xl border border-gray-100">
+            <h3 className="text-lg font-bold text-gray-900 border-b pb-2 border-gray-100">
+              {AUTH_CONSTANTS.WITHDRAWAL_CONFIRM_TITLE}
+            </h3>
+
+            {/* 안내 문구 (AUTH_CONSTANTS 참조) */}
+            <p className="text-xs text-gray-600 leading-relaxed bg-red-50 p-3 rounded-lg border border-red-100 text-red-800 font-medium">
+              {AUTH_CONSTANTS.WITHDRAWAL_WARNING_MESSAGE}
+            </p>
+
+            {/* 체크박스 확인 */}
+            <label className="flex items-center gap-2 cursor-pointer mt-2 select-none">
+              <input
+                type="checkbox"
+                checked={isAgreed}
+                onChange={(e) => setIsAgreed(e.target.checked)}
+                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
+              />
+              <span className="text-xs font-semibold text-gray-800">
+                {AUTH_CONSTANTS.WITHDRAWAL_CHECKBOX_LABEL}
+              </span>
+            </label>
+
+            {/* 모달 하단 버튼 */}
+            <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={() => setShowWithdrawModal(false)}
+                className="px-4 py-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-medium transition-colors"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmWithdrawal}
+                disabled={!isAgreed}
+                className={`px-4 py-2 text-xs rounded font-bold text-white transition-colors ${
+                  isAgreed
+                    ? "bg-red-600 hover:bg-red-700"
+                    : "bg-red-300 cursor-not-allowed"
+                }`}
+              >
+                탈퇴 진행
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
