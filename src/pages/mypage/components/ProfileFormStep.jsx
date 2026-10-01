@@ -23,7 +23,7 @@ const ProfileFormStep = ({
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
 
-  // 💡 회원 탈퇴 동의 관련 모달 상태
+  // 회원 탈퇴 동의 관련 모달 상태
   const [showWithdrawModal, setShowWithdrawModal] = useState(false);
   const [isAgreed, setIsAgreed] = useState(false);
 
@@ -83,7 +83,8 @@ const ProfileFormStep = ({
               <span className="font-bold text-base text-gray-900">
                 {formData.nickname} 님
               </span>
-              <Badge label="활동중" variant="ongoing" />
+              {/* 💡 하드코딩 문구 제거 및 권한(Role) 기반 동적 배지 바인딩 */}
+              <Badge variant={formData.role || formData.memberRole || "USER"} />
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
               <span>가입일 : {formData.createdAt || "2026년 9월 17일"}</span>
@@ -242,7 +243,6 @@ const ProfileFormStep = ({
                   회원 정보 수정
                 </button>
 
-                {/* 🔴 1. 붉은색으로 꽉 채운 경고 스타일 회원 탈퇴 버튼 */}
                 <button
                   type="button"
                   onClick={() => {
@@ -259,7 +259,7 @@ const ProfileFormStep = ({
         </form>
       </div>
 
-      {/* 🔴 2. 회원 탈퇴 확인 및 동의 모달 */}
+      {/* 회원 탈퇴 확인 및 동의 모달 */}
       {showWithdrawModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
           <div className="bg-white rounded-xl max-w-md w-full p-6 flex flex-col gap-4 shadow-xl border border-gray-100">
@@ -267,12 +267,10 @@ const ProfileFormStep = ({
               {AUTH_CONSTANTS.WITHDRAWAL_CONFIRM_TITLE}
             </h3>
 
-            {/* 안내 문구 (AUTH_CONSTANTS 참조) */}
             <p className="text-xs text-gray-600 leading-relaxed bg-red-50 p-3 rounded-lg border border-red-100 text-red-800 font-medium">
               {AUTH_CONSTANTS.WITHDRAWAL_WARNING_MESSAGE}
             </p>
 
-            {/* 체크박스 확인 */}
             <label className="flex items-center gap-2 cursor-pointer mt-2 select-none">
               <input
                 type="checkbox"
@@ -285,7 +283,6 @@ const ProfileFormStep = ({
               </span>
             </label>
 
-            {/* 모달 하단 버튼 */}
             <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
               <button
                 type="button"

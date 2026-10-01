@@ -11,7 +11,7 @@ const CommentSection = ({
   currentUserId,
   currentPage = 1,
   totalPages = 1,
-  totalComments = 0, // 👈 이 부분이 totalComments로 되어 있어야 합니다!
+  totalComments = 0,
   onPageChange,
   isLoading = false,
   pageSize = 10,
@@ -114,10 +114,11 @@ const CommentSection = ({
                 const isMenuOpen = activeMenuId === commentId;
                 const isEditing = editingId === commentId;
 
-                // 💡 [등록순 번호 계산]
-                // 전체 댓글 수에서 현재 페이지와 인덱스 오프셋을 빼서,
-                // 가장 먼저 등록된 글이 1번이 되고 최신 글이 전체 개수(totalComments)가 되도록 역산합니다.
+                // 등록순 번호 계산
                 const displayNo = totalComments - ((currentPage - 1) * pageSize + index);
+
+                // 작성자 권한/역할 값 추출
+                const roleValue = item.memberType || item.role;
 
                 return (
                   <tr
@@ -133,11 +134,10 @@ const CommentSection = ({
                     <td className="py-3 px-4 text-gray-600">
                       <div className="flex items-center gap-1.5">
                         <span className="font-medium text-gray-700">{item.writer}</span>
-                        {(item.memberType === "ADMIN" || item.role === "admin") && (
-                          <Badge label="관리자" variant="admin" />
-                        )}
-                        {(item.memberType === "STAFF" || item.role === "staff") && (
-                          <Badge label="전시 관계자" variant="staff" />
+                        
+                        {/* 💡 하드코딩 조건식 제거 및 roleValue를 variant에 바로 바인딩 */}
+                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_USER" && (
+                          <Badge variant={roleValue} />
                         )}
                       </div>
                     </td>
