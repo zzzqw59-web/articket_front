@@ -8,8 +8,8 @@ import { useGSAP } from "@gsap/react";
 import { ScrollToPlugin } from "gsap/ScrollToPlugin";
 import Marquee from "./Marquee";
 import { getExhibitionList } from "../../api/exhibitionApi";
-import MovingImage from "./MovingImage";
 import { getVenueList } from "../../api/venueApi";
+import CustomCarousel from "./CustomCarousel";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
 if ("scrollRestoration" in history) {
@@ -20,10 +20,6 @@ const IntroComponent = () => {
   const containerRef = useRef(null);
   const [posters, setPosters] = useState([]);
   const [venues, setVenues] = useState([]);
-  const items = [
-    { title: "srtinfe", text: "tstes" },
-    { title: "2", text: "2323" },
-  ];
   const navigate = useNavigate();
 
   const fetchPosters = async () => {
@@ -46,8 +42,7 @@ const IntroComponent = () => {
         return;
       }
       const shuffled = [...validVenues].sort(() => 0.5 - Math.random());
-      const selected = shuffled.slice(0, 4);
-      setVenues(selected);
+      setVenues(shuffled);
     } catch (e) {
       console.error("fail to load venue", e);
     }
@@ -56,6 +51,7 @@ const IntroComponent = () => {
   useEffect(() => {
     fetchPosters();
     fetchVenues();
+    ScrollTrigger.refresh();
   }, []);
 
   useGSAP(
@@ -81,8 +77,8 @@ const IntroComponent = () => {
           duration: 0.5,
           ease: "none",
           scrollTrigger: {
-            trigger: ".first-tape",
-            start: "top 80%",
+            trigger: ".tape-wrapper",
+            start: "top -30%",
             toggleActions: "play none none none",
           },
         },
@@ -96,8 +92,8 @@ const IntroComponent = () => {
           duration: 0.5,
           ease: "none",
           scrollTrigger: {
-            trigger: ".second-tape",
-            start: "top 80%",
+            trigger: ".tape-wrapper",
+            start: "top -50%",
             toggleActions: "play none none none",
           },
         },
@@ -281,7 +277,7 @@ const IntroComponent = () => {
 
   return (
     <div
-      className="flex flex-col w-full min-h-screen bg-white uppermost-container"
+      className="flex flex-col w-full min-h-screen bg-white uppermost-container overflow-x-hidden"
       ref={containerRef}
     >
       <div className="first-screen second-screen select-none">
@@ -368,15 +364,15 @@ const IntroComponent = () => {
         background
       </div>
 
-      <div className="head-text font-bold text-5xl mb-50 ml-20">
-        <div className="my-5 text-7xl relative z-10">Articket은,</div>
-        <div className="translate-y-[-5px] translate-x-[-10px]">
+      <div className="head-text text-5xl mb-50 ml-40">
+        <div className="my-5 text-7xl relative z-10 font-bold">Articket은,</div>
+        <div className="translate-y-[-5px] translate-x-10">
           <div className="bg-[#ede6d6] h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-60 h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-120 h-80 w-80 rounded-full absolute z-0"></div>
           <div className="bg-[#ede6d6] ml-180 h-80 w-80 rounded-full absolute z-0"></div>
         </div>
-        <div className="z-10 relative mt-23 ml-10">
+        <div className="z-10 relative mt-23 ml-25">
           <div className="my-2">대한민국에서 열리는 전시에 대한 정보</div>
           <div className="my-2">
             대한민국에 위치한 전시장에 대한 정보를 제공하고
@@ -388,8 +384,8 @@ const IntroComponent = () => {
       </div>
 
       <div>
-        <div className="text-7xl head-text font-bold ml-10">보고싶은 전시</div>
-        <div className="flex ">
+        <div className="text-7xl head-text font-bold ml-40">보고싶은 전시</div>
+        <div className="flex ml-40">
           <Marquee posters={posters} />
           <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15">
             <br /> 다채로운
@@ -406,29 +402,31 @@ const IntroComponent = () => {
       </div>
 
       <div>
-        <div className="text-7xl head-text font-bold ml-10 mt-50">
+        <div className="text-7xl head-text font-bold ml-40 mt-50">
           가고싶은 전시장
         </div>
-        <div className="flex justify-between">
-          <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
-            <br /> 머무를 전시장의
-            <br /> 다양한 정보를
-            <br /> 알기쉽게
-            <Link to="/articket/venue">
-              <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
-                &nbsp;한눈에
-              </span>
-            </Link>
+        <div className="flex justify-between mr-40">
+          <div className="self-end ml-auto mr-10 mb-5">
+            <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
+              <br /> 머무를 전시장의
+              <br /> 다양한 정보를
+              <br /> 알기쉽게
+              <Link to="/articket/venue">
+                <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                  &nbsp;한번에
+                </span>
+              </Link>
+            </div>
           </div>
-          <div className="mt-10">
-            <MovingImage venues={venues} />
+          <div className="mt-10 mr-30">
+            <CustomCarousel venues={venues} />
           </div>
         </div>
       </div>
 
       <div>
-        <div className="text-7xl head-text font-bold ml-10 mt-50">
-          관람객의 이야기
+        <div className="text-7xl head-text font-bold ml-40 mt-50">
+          관람객 이야기
         </div>
       </div>
 
@@ -437,7 +435,7 @@ const IntroComponent = () => {
           Contact Us
         </div>
 
-        <div className=" p-10 self-start ml-60 z-10 relative">
+        <div className=" p-10 self-start ml-60 z-10 relative tape-wrapper">
           <div
             onClick={() => (window.location.href = "mailto:Articket@gmail.com")}
             className="body-text text-5xl cursor-pointer hover:text-gray-50 hover:font-bold"

@@ -1,5 +1,5 @@
 import MainLayout from "../../layouts/MainLayout";
-import StaffComponent from "./StaffComponent";
+import StaffComponent from "../../components/staff/StaffComponent";
 
 const Staffpage = () => {
   return (

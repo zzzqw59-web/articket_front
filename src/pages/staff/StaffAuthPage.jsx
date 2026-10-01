@@ -1,5 +1,5 @@
 import MainLayout from "../../layouts/MainLayout";
-import StaffAuthComponent from "./StaffAuthComponent";
+import StaffAuthComponent from "../../components/staff/StaffAuthComponent";
 
 const StaffAuthPage = () => {
   return (

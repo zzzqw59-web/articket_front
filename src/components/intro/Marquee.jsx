@@ -39,7 +39,7 @@ const Marquee = ({ posters }) => {
   ];
 
   return (
-    <div className="w-[1500px] overflow-hidden py-3 select-none ml-20">
+    <div className="w-[1300px] overflow-hidden py-3 select-none ml-20">
       {rows.map((row, rowIndex) => (
         <div
           key={`row-${rowIndex}`}

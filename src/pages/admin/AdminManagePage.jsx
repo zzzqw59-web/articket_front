@@ -1,12 +1,9 @@
-import AdminManageCompontent from "./AdminManageComponent";
-import MainLayout from "../../layouts/MainLayout";
+import AdminManageCompontent from "../../components/admin/AdminManageComponent";
 
 const AdminManagePage = () => {
   return (
     <>
-      <MainLayout>
-        <AdminManageCompontent />
-      </MainLayout>
+      <AdminManageCompontent />
     </>
   );
 };

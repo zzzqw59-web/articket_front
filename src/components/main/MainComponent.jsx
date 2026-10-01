@@ -2,7 +2,6 @@ import main1 from "../../asset/main1.jpg";
 import main2 from "../../asset/main2.jpg";
 import main3 from "../../asset/main3.jpg";
 import main4 from "../../asset/main4.jpg";
-import banner from "../../asset/banner.png";
 import "./Main.css";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -46,9 +45,7 @@ const MainComponent = () => {
         <div className="h-[800px]">.</div>
       </div>
       <div className="flex justify-center w-[1700px] mx-auto mb-30">
-        <Link to="/articket/venue">
-          <img src={banner} className="self-center cursor-pointer" />
-        </Link>
+        <Link to="/articket/venue"></Link>
       </div>
     </>
   );
