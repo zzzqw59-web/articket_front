@@ -22,5 +22,15 @@ export const toggleWish = async (exhibitionId) => {
       memberId: CURRENT_USER.memberId,
     },
   });
+  return response.data; // WishToggleResponseDTO 반환
+};
+
+// 추가 기능: 위시 카운트 조회...
+export const countWish = async (exhibitionId) => {
+  const response = await axios.get(`${BASE_URL}/count/${exhibitionId}`, {
+    params: {
+      memberId: CURRENT_USER.memberId,
+    },
+  });
   return response.data;
 };
