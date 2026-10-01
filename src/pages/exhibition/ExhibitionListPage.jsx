@@ -5,6 +5,7 @@ import ExhibitionSort from "../../components/exhibition/ExhibitionSort";
 import ExhibitionList from "../../components/exhibition/ExhibitionList";
 import ExhibitionPagination from "../../components/exhibition/ExhibitionPagination";
 import "../../styles/ExhibitionAndVenue.css";
+import MainLayout from "../../layouts/MainLayout";
 
 const SIZE = 9;
 

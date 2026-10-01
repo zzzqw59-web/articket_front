@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {useNavigate,useParams} from "react-router-dom";
 import {getExhibitionDetail,updateExhibition} from "../../api/exhibitionApi";
 import "../../styles/ExhibitionAndVenue.css";
+import MainLayout from "../../layouts/MainLayout";
 
 const ExhibitionEditPage = ({ user }) => {
   const { exhibitionId } = useParams();
@@ -27,7 +28,7 @@ const ExhibitionEditPage = ({ user }) => {
 
   const isAdmin = user?.role === "ADMIN";
 
-  const isStaff = user?.role === "EXHIBITION_STAFF";
+  const isStaff = user?.role === "STAFF";
 
   useEffect(() => {
     // 관리자 + 전시 관계자 수정 가능 나중에 !isAdmin으로 변경
@@ -328,11 +329,8 @@ const ExhibitionEditPage = ({ user }) => {
           >
             취소
           </button>
-
         </div>
-
       </form>
-
     </div>
   );
 };

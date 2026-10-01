@@ -6,6 +6,7 @@ import Loading from "../../components/common/Loading";
 import "../../styles/ExhibitionAndVenue.css";
 import "../../components/common/kakaomap/KakaoMap";
 import KakaoMap from "../../components/common/kakaomap/KakaoMap";
+import MainLayout from "../../layouts/MainLayout";
 
 const VenueDetailPage = () => {
     const { venueId } = useParams();
