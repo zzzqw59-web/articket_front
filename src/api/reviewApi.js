@@ -25,3 +25,22 @@ export const createReview = async (formData) => {
 
   return response.data;
 };
+
+// 리뷰 수정
+export const updateReview = async (reviewId, formData) => {
+  const response = await axiosInstance.put(
+    `${BASE_URL}/${reviewId}`,
+    formData
+  );
+
+  return response.data;
+};
+
+// 리뷰 삭제
+export const deleteReview = async (reviewId) => {
+  const response = await axiosInstance.delete(
+    `${BASE_URL}/${reviewId}`
+  );
+
+  return response.data;
+};

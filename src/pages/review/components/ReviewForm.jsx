@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import ActionButton from "../../../components/common/ActionButton";
 import { useImageUploader } from "../../askpage/hooks/useImageUploader";
-import ExhibitionSearchField from "../../askpage/components/ExhibitionSearchField";
 import ImageUploadSection from "../../askpage/components/ImageUploadSection";
+import { getMyReservations } from "../../../api/reservationApi";
 
 const REVIEW_IMAGE_LIMIT = 3;
 
@@ -21,6 +21,39 @@ const ReviewForm = ({
       : null,
     title: initialData?.reviewTitle || "",
     content: initialData?.reviewBody || "",
+  });
+
+  const [reservations, setReservations] = useState([]);
+
+  useEffect(() => {
+    const fetchReservations = async () => {
+      try {
+        const data = await getMyReservations();
+
+        console.log("내 예약 목록:", data);
+
+        setReservations(data.dtoList || []);
+      } catch (error) {
+        console.error("리뷰 등록 실패:", error);
+
+        const message =
+        error.response?.data?.message || "리뷰 등록에 실패했습니다.";
+
+  showAlert({
+    message,
+  });
+}
+    };
+
+    fetchReservations();
+  }, []);
+
+  // 리뷰 작성 가능한 예약만 필터링
+  const availableReservations = reservations.filter((reservation) => {
+    return (
+      reservation.reservationStatus === "RESERVED" &&
+      reservation.reservationDay <= new Date().toISOString().slice(0, 10)
+    );
   });
 
   const {
@@ -79,23 +112,38 @@ const ReviewForm = ({
       onSubmit={handleSubmit}
       className="w-full flex flex-col gap-4"
     >
-      {/* 관련 전시 */}
-      <ExhibitionSearchField
-        isExhibitionCategory={true}
-        selectedExhibition={formData.selectedExhibition}
-        onSelectExhibition={(ex) =>
+      {/* 관람한 전시 */}
+      <select
+        value={formData.selectedExhibition?.id || ""}
+        onChange={(e) => {
+          const selected = availableReservations.find(
+            (reservation) =>
+              reservation.exhibitionId === Number(e.target.value)
+          );
+
           setFormData((prev) => ({
             ...prev,
-            selectedExhibition: ex,
-          }))
-        }
-        onClearExhibition={() =>
-          setFormData((prev) => ({
-            ...prev,
-            selectedExhibition: null,
-          }))
-        }
-      />
+            selectedExhibition: selected
+              ? {
+                  id: selected.exhibitionId,
+                  title: selected.exhibitionTitle,
+                }
+              : null,
+          }));
+        }}
+        className="w-full px-3 py-2 text-sm border border-gray-300 rounded bg-white"
+      >
+        <option value="">관람한 전시를 선택해 주세요</option>
+
+        {availableReservations.map((reservation) => (
+          <option
+            key={reservation.reservationId}
+            value={reservation.exhibitionId}
+          >
+            {reservation.exhibitionTitle} ({reservation.reservationDay})
+          </option>
+        ))}
+      </select>
 
       {/* 제목 */}
       <input

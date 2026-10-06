@@ -1,5 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
-import { getReviewDetail } from "../../../api/reviewApi";
+import { useNavigate } from "react-router-dom";
+import {
+  getReviewDetail,
+  deleteReview,
+} from "../../../api/reviewApi";
 
 import {
   getReviewReplyList,
@@ -9,6 +13,8 @@ import {
 } from "../../../api/reviewReplyApi";
 
 export const useReviewDetail = (reviewId) => {
+  const navigate = useNavigate();
+
   const [reviewData, setReviewData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -39,6 +45,30 @@ export const useReviewDetail = (reviewId) => {
     }
   }, [reviewId]);
 
+  // 리뷰 삭제
+  const handleDeleteReview = async () => {
+    const confirmed = window.confirm(
+      "리뷰를 삭제하시겠습니까?\n삭제한 리뷰는 복구할 수 없습니다."
+    );
+
+    if (!confirmed) return;
+
+    try {
+      await deleteReview(reviewId);
+
+      alert("리뷰가 성공적으로 삭제되었습니다.");
+      navigate("/articket/review");
+    } catch (error) {
+      console.error("리뷰 삭제 실패:", error);
+
+      const message =
+        error.response?.data?.message ||
+        "리뷰 삭제 처리에 실패했습니다.";
+
+      alert(message);
+    }
+  };
+
   // 댓글 목록 조회
   const fetchReplyList = useCallback(async () => {
     if (!reviewId) return;
@@ -59,12 +89,10 @@ export const useReviewDetail = (reviewId) => {
           memberType: item.memberType,
           content: item.reviewReplyBody,
 
-          // 작성일 → 년-월-일 시:분까지만 표시
           createdAt: item.reviewReplyCreatedAt
             ? item.reviewReplyCreatedAt.replace("T", " ").slice(0, 16)
             : "",
 
-          // 수정일 → 년-월-일 시:분까지만 표시
           modifiedAt: item.reviewReplyModifiedAt
             ? item.reviewReplyModifiedAt.replace("T", " ").slice(0, 16)
             : "",
@@ -84,41 +112,43 @@ export const useReviewDetail = (reviewId) => {
   }, [reviewId, replyPage]);
 
   const handleAddComment = async (commentText) => {
-  if (!commentText.trim()) return;
+    if (!commentText.trim()) return;
 
-  try {
-    await createReviewReply(reviewId, commentText);
+    try {
+      await createReviewReply(reviewId, commentText);
+      await fetchReplyList();
+    } catch (error) {
+      console.error("리뷰 댓글 등록 실패:", error);
+      alert("댓글 등록에 실패했습니다.");
+    }
+  };
 
-    // 댓글 등록 후 목록 다시 조회
-    await fetchReplyList();
+  const handleEditComment = async (reviewReplyId, commentText) => {
+    if (!commentText.trim()) return;
 
-  } catch (error) {
-    console.error("리뷰 댓글 등록 실패:", error);
-    alert("댓글 등록에 실패했습니다.");
-  }
-};
+    try {
+      await updateReviewReply(
+        reviewId,
+        reviewReplyId,
+        commentText
+      );
 
-const handleEditComment = async (reviewReplyId, commentText) => {
-  if (!commentText.trim()) return;
+      await fetchReplyList();
+    } catch (error) {
+      console.error("리뷰 댓글 수정 실패:", error);
+      alert("댓글 수정에 실패했습니다.");
+    }
+  };
 
-  try {
-    await updateReviewReply(reviewId, reviewReplyId, commentText);
-    await fetchReplyList();
-  } catch (error) {
-    console.error("리뷰 댓글 수정 실패:", error);
-    alert("댓글 수정에 실패했습니다.");
-  }
-};
-
-const handleDeleteComment = async (reviewReplyId) => {
-  try {
-    await deleteReviewReply(reviewId, reviewReplyId);
-    await fetchReplyList();
-  } catch (error) {
-    console.error("리뷰 댓글 삭제 실패:", error);
-    alert("댓글 삭제에 실패했습니다.");
-  }
-};
+  const handleDeleteComment = async (reviewReplyId) => {
+    try {
+      await deleteReviewReply(reviewId, reviewReplyId);
+      await fetchReplyList();
+    } catch (error) {
+      console.error("리뷰 댓글 삭제 실패:", error);
+      alert("댓글 삭제에 실패했습니다.");
+    }
+  };
 
   // 댓글 페이지가 바뀌면 다시 조회
   useEffect(() => {
@@ -126,16 +156,17 @@ const handleDeleteComment = async (reviewReplyId) => {
   }, [fetchReplyList]);
 
   return {
-  reviewData,
-  isLoading,
-  replyList,
-  replyPage,
-  totalReplyPages,
-  totalReplyCount,
-  isReplyLoading,
-  setReplyPage,
-  handleAddComment,
-  handleEditComment,
-  handleDeleteComment,
-};
+    reviewData,
+    isLoading,
+    replyList,
+    replyPage,
+    totalReplyPages,
+    totalReplyCount,
+    isReplyLoading,
+    setReplyPage,
+    handleAddComment,
+    handleEditComment,
+    handleDeleteComment,
+    handleDeleteReview,
+  };
 };
