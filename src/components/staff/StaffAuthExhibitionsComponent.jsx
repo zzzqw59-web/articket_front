@@ -23,7 +23,7 @@ const StaffAuthExhibitionsComponent = ({ exhibitions }) => {
                 src={item.imgUrl}
                 alt={item.title}
                 onClick={() => navigate(`/articket/exhibition/${item.id}`)}
-                className="object-fill w-full h-full cursor-pointer"
+                className="object-fill w-full h-full cursor-pointer truncate"
               />
               <div className="flex justify-end">
                 <div

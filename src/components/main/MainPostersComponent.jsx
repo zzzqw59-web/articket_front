@@ -34,6 +34,14 @@ const MainPostersComponent = () => {
                 alt={poster.title}
                 className="w-full h-full object-fill"
               />
+              <div
+                className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent 
+              opacity-0 hover:opacity-100 transition-opacity duration-500 flex items-end p-3"
+              >
+                <span className="text-white text-xl font-bold whitespace-nowrap truncate">
+                  {poster.title}
+                </span>
+              </div>
             </div>
           </div>
         ))}

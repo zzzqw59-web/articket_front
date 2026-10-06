@@ -3,6 +3,7 @@ import { getExhibitionList } from "../../api/exhibitionApi";
 import StaffAuthExhibitionsComponent from "../../components/staff/StaffAuthExhibitionsComponent";
 import PageHeader from "../../components/common/PageHeader";
 import ExhibitionPagination from "../../components/exhibition/ExhibitionPagination";
+import ExhibitionSearch from "../../components/exhibition/ExhibitionSearch";
 
 const StaffAuthPage = () => {
   const [exhibitions, setExhibitions] = useState([]);
@@ -22,11 +23,15 @@ const StaffAuthPage = () => {
 
   return (
     <>
-      <PageHeader
-        title={"권한 요청 페이지"}
-        description={"신청 버튼을 눌러 권한을 신청하세요."}
-      />
-
+      <div className="mt-15">
+        <PageHeader
+          title={"권한 요청 페이지"}
+          description={"신청 버튼을 눌러 권한을 신청하세요."}
+        />
+      </div>
+      <div className="mt-10 translate-y-5">
+        <ExhibitionSearch />
+      </div>
       <div className="flex justify-center mt-30">
         <StaffAuthExhibitionsComponent exhibitions={exhibitions} />
       </div>
