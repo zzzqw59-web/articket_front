@@ -8,6 +8,9 @@ import askpageRouter from "./askpageRouter";
 import exhibitionRouter from "./exhibitionRouter";
 import venueRouter from "./venueRouter";
 import MainLayout from "../layouts/MainLayout";
+import reviewRouter from "./reviewRouter";
+import reservationRouter from "./reservationRouter";
+import paymentRouter from "./paymentRouter";
 
 const roots = createBrowserRouter([
   {
@@ -49,6 +52,18 @@ const roots = createBrowserRouter([
       },
       ...exhibitionRouter(),
       ...venueRouter(),
+      {
+        path: "review",
+        children: reviewRouter(),
+      },
+      {
+        path: "exhibition/:exhibitionId/reservation",
+        children: reservationRouter(),
+      },
+      {
+        path: "payment",
+        children: paymentRouter(),
+      }
     ],
   },
 ]);
