@@ -18,6 +18,9 @@ const ExhibitionSort = ({ value, onChange }) => {
                 </option>
                 <option value="oldest">
                    오래된 순    
+                </option>
+                <option value="wishCount">
+                    찜많은 순   
                 </option>    
             </select>    
         </div>
