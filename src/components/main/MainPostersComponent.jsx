@@ -11,7 +11,7 @@ const MainPostersComponent = () => {
       const posters = await getExhibitionList({ page: 5 });
       setPosters(posters.content.slice(0, 4));
     } catch (e) {
-      console.error("fail to get exhibition list");
+      console.error("fail to get exhibition list", e);
     }
   };
 

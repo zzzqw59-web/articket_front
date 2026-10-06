@@ -466,7 +466,11 @@ const IntroPage = () => {
             <div className="first-tape bg-[#bfd6df] select-none w-205 h-40 self-start ml-60 text-[#bfd6df] relative z-0 translate-y-[-150px] -rotate-3">
               .
             </div>
-            <div className="text-8xl font-bold mb-8 text-slate-900 self-end mr-30 relative z-20">
+            <div
+              className="text-8xl font-bold mb-8 text-slate-900 self-end mr-30 relative z-20
+              hover:text-gray-50 hover:font-bold cursor-pointer"
+              onClick={() => navigate("/articket/ask")}
+            >
               Ask Anything!
             </div>
             <div className="second-tape bg-[#ede6d6] w-180 h-35 select-none self-end mr-20 text-[#ede6d6] relative z-0 translate-y-[-160px] rotate-3">
