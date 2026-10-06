@@ -4,13 +4,18 @@ import ActionButton from "../../components/common/ActionButton";
 import CommentSection from "../../components/common/CommentSection";
 import ConfirmModal from "../../components/common/ConfirmModal";
 import { useAskDetail } from "./hooks/useAskDetail";
-import { CURRENT_USER, MEMBER_ROLE } from "../../constants/config"; // 임시 회원 ID, 권한명 constants/config.js에서 가져오기
+import { getStoredUser, MEMBER_ROLE } from "../../constants/config";
 
 const AskDetailPage = () => {
   const navigate = useNavigate();
   const { askId } = useParams();
 
-  // 🚀 훅에서 totalReplyCount를 정상적으로 받아옵니다.
+  // 💡 config.js의 getStoredUser 헬퍼 사용
+  const currentUser = getStoredUser();
+  const currentMemberId = currentUser?.memberId;
+  const currentMemberType = currentUser?.memberType || currentUser?.role;
+
+  // 🚀 커스텀 훅 데이터 및 핸들러
   const {
     askData,
     selectedImage,
@@ -19,7 +24,7 @@ const AskDetailPage = () => {
     replyList,
     replyPage,
     totalReplyPages,
-    totalReplyCount, // 👈 여기서 받아옴
+    totalReplyCount,
     isReplyLoading,
     setReplyPage,
     handleAddComment,
@@ -40,6 +45,18 @@ const AskDetailPage = () => {
   }
 
   if (!askData) return null;
+
+  // 💡 권한 검증: 작성자 본인 여부 또는 관리자(ADMIN) 권한 확인
+  const isOwner =
+    askData.isOwner ??
+    askData.canEdit ??
+    (currentMemberId && String(askData.memberId) === String(currentMemberId));
+
+  const isAdmin =
+    currentMemberType === MEMBER_ROLE.ADMIN ||
+    currentMemberType === `ROLE_${MEMBER_ROLE.ADMIN}`;
+
+  const canModify = Boolean(isOwner || isAdmin);
 
   return (
     <div>
@@ -94,7 +111,7 @@ const AskDetailPage = () => {
               <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible">
                 {askData.images.map((img, idx) => (
                   <div
-                    key={idx}
+                    key={img.imageId || img.imageUrl || idx}
                     onClick={() => setSelectedImage(img.imageUrl)}
                     className={`w-full bg-gray-100 aspect-[4/3] rounded-sm border cursor-pointer overflow-hidden flex items-center justify-center ${
                       selectedImage === img.imageUrl
@@ -126,8 +143,8 @@ const AskDetailPage = () => {
               onClick={() => navigate("/articket/ask")}
             />
 
-            {/* 작성자 본인일 때만 수정/삭제 버튼 노출 (TEMP_MEMBER_ID와 비교) */}
-            {(askData.memberId === CURRENT_USER.memberId || CURRENT_USER.memberType === MEMBER_ROLE.ADMIN) && (
+            {/* 권한이 있는 사용자에게만 수정/삭제 버튼 노출 */}
+            {canModify && (
               <div className="flex gap-2">
                 <ActionButton
                   label="삭제하기"
@@ -153,13 +170,13 @@ const AskDetailPage = () => {
             currentPage={replyPage}
             totalPages={totalReplyPages}
             totalComments={totalReplyCount}
-            onPageChange={(page) => setReplyPage(page)}
+            onPageChange={setReplyPage}
             isLoading={isReplyLoading}
           />
         </div>
       </div>
 
-      {/* 🚀 커스텀 모달 컴포넌트 연동 */}
+      {/* 커스텀 모달 컴포넌트 */}
       <ConfirmModal
         modalState={modalState}
         onConfirm={handleConfirm}
