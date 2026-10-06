@@ -21,7 +21,10 @@ const ReviewDetailPage = () => {
   totalReplyCount,
   isReplyLoading,
   setReplyPage,
-  } = useReviewDetail(reviewId);
+  handleAddComment,
+  handleEditComment,
+  handleDeleteComment,
+} = useReviewDetail(reviewId);
 
   useEffect(() => {
     console.log("reviewData:", reviewData);
@@ -149,7 +152,10 @@ const ReviewDetailPage = () => {
         </div>
         <CommentSection
             comments={replyList}
-            showInput={false}
+            showInput={true}
+            onAddComment={handleAddComment}
+            onEditComment={handleEditComment}
+            onDeleteComment={handleDeleteComment}
             currentPage={replyPage}
             totalPages={totalReplyPages}
             totalComments={totalReplyCount}

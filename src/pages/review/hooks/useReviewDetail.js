@@ -1,6 +1,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { getReviewDetail } from "../../../api/reviewApi";
-import { getReviewReplyList } from "../../../api/reviewReplyApi";
+
+import {
+  getReviewReplyList,
+  createReviewReply,
+  updateReviewReply,
+  deleteReviewReply,
+} from "../../../api/reviewReplyApi";
 
 export const useReviewDetail = (reviewId) => {
   const [reviewData, setReviewData] = useState(null);
@@ -77,19 +83,59 @@ export const useReviewDetail = (reviewId) => {
     }
   }, [reviewId, replyPage]);
 
+  const handleAddComment = async (commentText) => {
+  if (!commentText.trim()) return;
+
+  try {
+    await createReviewReply(reviewId, commentText);
+
+    // 댓글 등록 후 목록 다시 조회
+    await fetchReplyList();
+
+  } catch (error) {
+    console.error("리뷰 댓글 등록 실패:", error);
+    alert("댓글 등록에 실패했습니다.");
+  }
+};
+
+const handleEditComment = async (reviewReplyId, commentText) => {
+  if (!commentText.trim()) return;
+
+  try {
+    await updateReviewReply(reviewId, reviewReplyId, commentText);
+    await fetchReplyList();
+  } catch (error) {
+    console.error("리뷰 댓글 수정 실패:", error);
+    alert("댓글 수정에 실패했습니다.");
+  }
+};
+
+const handleDeleteComment = async (reviewReplyId) => {
+  try {
+    await deleteReviewReply(reviewId, reviewReplyId);
+    await fetchReplyList();
+  } catch (error) {
+    console.error("리뷰 댓글 삭제 실패:", error);
+    alert("댓글 삭제에 실패했습니다.");
+  }
+};
+
   // 댓글 페이지가 바뀌면 다시 조회
   useEffect(() => {
     fetchReplyList();
   }, [fetchReplyList]);
 
   return {
-    reviewData,
-    isLoading,
-    replyList,
-    replyPage,
-    totalReplyPages,
-    totalReplyCount,
-    isReplyLoading,
-    setReplyPage,
-  };
+  reviewData,
+  isLoading,
+  replyList,
+  replyPage,
+  totalReplyPages,
+  totalReplyCount,
+  isReplyLoading,
+  setReplyPage,
+  handleAddComment,
+  handleEditComment,
+  handleDeleteComment,
+};
 };
