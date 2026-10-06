@@ -1,10 +1,19 @@
-import MainLayout from "../../layouts/MainLayout";
+import React from "react";
+import IntroComponent from "./IntroComponent";
+import IntroLayout from "../../layouts/IntroLayout";
+import { useEffect } from "react";
 
 const IntroPage = () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
-    <MainLayout>
-      <div className="h-[2000px]">tstestsetaset</div>
-    </MainLayout>
+    <>
+      <IntroLayout>
+        <IntroComponent />
+      </IntroLayout>
+    </>
   );
 };
 

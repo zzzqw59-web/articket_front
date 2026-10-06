@@ -1,5 +1,6 @@
 import { NavLink, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
+import NotificationBell from "./NotificationBell";
 
 const Header = () => {
   const [isVisible, setIsVisible] = useState(true);
@@ -61,7 +62,10 @@ const Header = () => {
                 회원가입
               </div>
             </Link>
+
+            <NotificationBell />
           </div>
+
           <div className="head-text flex flex-row mr-5 mb-5 mt-3 text-2xl cursor-pointer">
             <NavLink
               to="/articket/exhibition"
@@ -114,7 +118,7 @@ const Header = () => {
 
             <div className="text-gray-600">&nbsp;·&nbsp;</div>
             <NavLink
-              to="/articket/wishlist"
+              to="/articket/mypage"
               className={({ isActive }) =>
                 isActive ? "font-bold " : "text-gray-600"
               }

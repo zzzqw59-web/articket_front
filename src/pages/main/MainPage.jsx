@@ -1,11 +1,12 @@
 import React from "react";
-import MainLayout from "../layouts/MainLayout";
+import MainLayout from "../../layouts/MainLayout";
+import MainComponent from "./MainComponent";
 
 const MainPage = () => {
   return (
     <>
       <MainLayout>
-        <div className="h-[1000px]">main page</div>
+        <MainComponent />
       </MainLayout>
     </>
   );

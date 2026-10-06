@@ -1,18 +1,24 @@
-import React from "react";
 import { createBrowserRouter } from "react-router-dom";
 import adminRouter from "./adminRouter";
 import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
+import MypageLayout from "../pages/mypage/components/MypageLayout";
+import mypageRouter from "./mypageRouter";
+import askpageRouter from "./askpageRouter";
+import exhibitionRouter from "./exhibitionRouter";
+import venueRouter from "./venueRouter";
+import MainLayout from "../layouts/MainLayout";
 
 const roots = createBrowserRouter([
   {
     path: "/articket",
+    element: <MainLayout />,
     HydrateFallback: () => <div>Loading...</div>,
     children: [
       {
         index: true,
         lazy: async () => {
-          const { default: Component } = await import("../pages/MainPage");
+          const { default: Component } = await import("../pages/main/MainPage");
           return { Component };
         },
       },
@@ -28,6 +34,21 @@ const roots = createBrowserRouter([
         path: "staffpage",
         children: staffRouter(),
       },
+      
+      // 마이페이지
+      {
+        path: "mypage",
+        element: <MypageLayout />,
+        children: mypageRouter(),
+      },
+
+      // 문의페이지
+      {
+        path: "ask",
+        children: askpageRouter(),
+      },
+      ...exhibitionRouter(),
+      ...venueRouter(),
     ],
   },
 ]);
