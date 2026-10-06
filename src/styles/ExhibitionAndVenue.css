@@ -1,0 +1,1024 @@
+/* =========================================================
+   공통
+========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family:
+    Arial,
+    "Noto Sans KR",
+    sans-serif;
+  color: #222;
+  background: #fff;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+
+/* =========================================================
+   Exhibition List Page
+========================================================= */
+
+.exhibition-list-page {
+  width: 1200px;
+  max-width: calc(100% - 40px);
+  margin: 60px auto;
+}
+
+.exhibition-list-page h1 {
+  margin-bottom: 35px;
+  font-size: 32px;
+  font-weight: 700;
+}
+.exhibition-list-page h2 {
+    margin-bottom: 20px;
+    margin-top: 50px;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+
+/* 검색 */
+
+.exhibition-search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.exhibition-search input {
+  width: 500px;
+  height: 45px;
+  padding: 0 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px 0 0 6px;
+  font-size: 15px;
+  outline: none;
+}
+
+.exhibition-search input:focus {
+  border-color: #222;
+}
+
+.exhibition-search button {
+  width: 80px;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  background: #222;
+  color: white;
+}
+
+
+/* 정렬 */
+
+.exhibition-sort {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.exhibition-sort select {
+  min-width: 120px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+
+/* 전시 목록 */
+
+.exhibition-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+
+/* 전시 카드 */
+
+.exhibition-card {
+  overflow: hidden;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: white;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.exhibition-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.exhibition-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.exhibition-card-top .wish-button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  font-size: 18px;
+}
+
+.exhibition-card-top .wish-button span {
+  font-size: 13px;
+}
+
+.exhibition-card-top .wish-button.wished {
+  color: red;
+}
+
+
+/* 이미지 */
+
+.exhibition-image {
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.exhibition-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* 카드 정보 */
+
+.exhibition-info {
+  padding: 18px;
+}
+
+.exhibition-info h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+  line-height: 1.4;
+}
+
+.exhibition-info p {
+  margin: 5px 0;
+  color: #777;
+  font-size: 14px;
+}
+
+
+/* 무료 / 유료 */
+
+.exhibition-badge {
+  display: inline-block;
+  margin-bottom: 10px;
+  padding: 4px 9px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.exhibition-badge.free {
+  background: #eef7ee;
+  color: #347a3a;
+}
+
+.exhibition-badge.paid {
+  background: #f3f3f3;
+  color: #555;
+}
+
+
+/* =========================================================
+   Exhibition Detail Page
+========================================================= */
+
+.exhibition-detail-page {
+  width: 1000px;
+  max-width: calc(100% - 40px);
+  margin: 60px auto;
+}
+
+
+/* 이미지 */
+
+.exhibition-detail-image {
+  width: 500px;
+  height: 650px;
+  margin: 0 auto 40px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #f5f5f5;
+  position: relative;
+}
+
+.exhibition-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 찜 버튼  */
+.exhibition-detail-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.exhibition-detail-title h1{
+    margin: 0;
+}
+
+exhibition-detail-title .wish-button {
+    flex-shrink: 0;
+
+    border: none;
+    background: transparent;
+
+    font-size: 24px;
+    cursor: pointer;
+
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.exhibition-detail-title .wish-button span {
+    font-size: 14px;
+}
+
+.exhibition-detail-title .wish-button.wished {
+    color: red;
+}
+
+.exhibition-wish-button {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 8px 12px;
+
+  border: none;
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.9);
+
+  cursor: pointer;
+
+  font-size: 16px;
+
+  transition: 0.2s;
+}
+
+.exhibition-wish-button:hover {
+  transform: scale(1.05);
+}
+
+.wish-heart {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.wish-count {
+  font-size: 14px;
+}
+
+.exhibition-wish-button.wished {
+  color: #e74c3c;
+}
+
+
+/* 정보 */
+
+.exhibition-detail-info {
+  padding: 30px 0;
+  border-top: 1px solid #eee;
+  border-bottom: 1px solid #eee;
+}
+
+.exhibition-detail-info h1 {
+  margin: 0 0 20px;
+  font-size: 32px;
+}
+
+.exhibition-detail-info p {
+  margin: 10px 0;
+  line-height: 1.6;
+  color: #555;
+}
+
+
+/* 설명 */
+
+.exhibition-description {
+  padding: 40px 0;
+}
+
+.exhibition-description h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+}
+
+.exhibition-description p {
+  white-space: pre-line;
+  line-height: 1.8;
+  color: #555;
+}
+
+
+/* 버튼 */
+
+.exhibition-detail-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 20px;
+}
+
+.exhibition-detail-buttons button {
+  min-width: 100px;
+  height: 42px;
+  padding: 0 20px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+.exhibition-detail-buttons button:hover {
+  background: #f5f5f5;
+}
+
+/* 전시 공식 홈페이지 버튼 */
+.exhibition-homepage-button {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: #333;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.exhibition-homepage-button:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+}
+
+.exhibition-homepage-button:active {
+    transform: translateY(0);
+}
+
+.exhibition-reservation-button {
+    display: inline-block;
+    margin-top: 20px;
+    margin-left: 20px;
+    padding: 12px 24px;
+
+    border: none;
+    border-radius: 8px;
+
+    background-color: #333;
+    color: white;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+.exhibition-reservation-button:hover {
+    background-color: #555;
+    transform: translateY(-2px);
+}
+
+.exhibition-reservation-button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================================
+   Exhibition Edit Page
+========================================================= */
+
+.exhibition-edit-page {
+  width: 900px;
+  max-width: calc(100% - 40px);
+  margin: 60px auto;
+}
+
+.exhibition-edit-page h1 {
+  margin-bottom: 35px;
+  font-size: 30px;
+}
+
+
+/* 폼 */
+
+.exhibition-edit-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+
+/* 이미지 영역 */
+
+.image-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  padding: 25px;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+.image-area img {
+  width: 300px;
+  height: 390px;
+  object-fit: cover;
+  border-radius: 6px;
+  background: #f5f5f5;
+}
+
+.image-area input {
+  width: 300px;
+}
+
+
+/* 입력 영역 */
+
+.form-area {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-area > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-area label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.form-area input,
+.form-area textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  outline: none;
+  font-size: 14px;
+}
+
+.form-area input {
+  height: 42px;
+}
+
+.form-area input:focus,
+.form-area textarea:focus {
+  border-color: #222;
+}
+
+.form-area textarea {
+  min-height: 180px;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+
+/* 버튼 */
+
+.button-area {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+}
+
+.button-area button {
+  min-width: 100px;
+  height: 42px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+.button-area button[type="submit"] {
+  border-color: #222;
+  background: #222;
+  color: white;
+}
+
+.button-area button:hover {
+  opacity: 0.85;
+}
+
+
+/* =========================================================
+   Venue List Page
+========================================================= */
+
+.venue-list-page {
+  width: 1200px;
+  max-width: calc(100% - 40px);
+  margin: 60px auto;
+}
+
+.venue-list-page h1 {
+  margin-bottom: 35px;
+  font-size: 32px;
+}
+
+
+/* 검색 */
+
+.venue-search {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 25px;
+}
+
+.venue-search input {
+  width: 500px;
+  height: 45px;
+  padding: 0 16px;
+  border: 1px solid #ddd;
+  border-radius: 6px 0 0 6px;
+  outline: none;
+}
+
+.venue-search button {
+  width: 80px;
+  border: none;
+  border-radius: 0 6px 6px 0;
+  background: #222;
+  color: white;
+}
+
+
+/* 정렬 */
+
+.venue-sort {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.venue-sort select {
+  min-width: 120px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+
+/* 전시장 목록 */
+
+.venue-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+
+
+/* 전시장 카드 */
+
+.venue-card {
+  overflow: hidden;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.venue-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+
+/* 이미지 */
+
+.venue-card-image {
+  width: 100%;
+  height: 260px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.venue-card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+
+/* 정보 */
+
+.venue-card-info {
+  padding: 18px;
+}
+
+.venue-card-info h3 {
+  margin: 0 0 10px;
+  font-size: 18px;
+}
+
+.venue-card-info p {
+  margin: 5px 0;
+  color: #777;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+
+/* =========================================================
+   Venue Detail Page
+========================================================= */
+
+.venue-detail-page {
+  width: 1000px;
+  max-width: calc(100% - 40px);
+  margin: 60px auto;
+}
+
+
+/* 메인 */
+
+.venue-main {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid #eee;
+}
+
+.venue-main > img {
+  width: 400px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+.venue-info {
+  padding: 10px 0;
+}
+
+.venue-info p {
+  line-height: 1.7;
+  color: #555;
+}
+
+.venue-info p:first-child {
+  font-size: 24px;
+  font-weight: 700;
+  color: #222;
+}
+
+
+/* 공식 홈페이지 버튼 */
+
+.venue-info + button {
+  grid-column: 2;
+  width: 150px;
+  height: 40px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+
+/* 섹션 */
+
+.venue-detail-page section {
+  padding: 40px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.venue-detail-page section h2 {
+  margin-bottom: 25px;
+  font-size: 22px;
+}
+
+
+/* 전시장에 연결된 전시 */
+
+.venue-exhibition-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.venue-exhibition-list > div {
+  overflow: hidden;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  background: white;
+}
+
+.venue-exhibition-list img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+}
+
+.venue-exhibition-list p {
+  margin: 10px 15px;
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   Weather
+========================================================= */
+
+/* 전체 날씨 카드 용기 */
+.weather-card {
+  max-width: 480px; /* 적절한 너비 제한 */
+  padding: 24px;
+  border-radius: 16px;
+  background: #ffffff;
+  border: 1px solid #eef0f2;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.weather-card:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+
+/* 상단 날씨 아이콘 & 온도 */
+.weather-main {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.weather-icon {
+  font-size: 2.8rem;
+  line-height: 1;
+}
+
+.weather-temp {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+}
+
+.weather-temp strong {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #111111;
+  letter-spacing: -0.5px;
+}
+
+.weather-temp .unit {
+  font-size: 1.2rem;
+  font-weight: 500;
+  color: #666666;
+}
+
+/* 하단 2x2 정보 그리드 */
+.weather-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* 세부 정보 박스 */
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #f1f3f5;
+}
+
+.info-item .label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #707784;
+}
+
+.info-item .value {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+
+/* =========================================================
+   Map
+========================================================= */
+
+.venue-map {
+  width: 100%;
+  height: 400px;
+  border-radius: 8px;
+  background: #f3f3f3;
+}
+
+
+/* =========================================================
+   Pagination
+========================================================= */
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 40px;
+}
+
+.pagination button {
+  min-width: 38px;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  background: white;
+}
+
+.pagination button:hover:not(:disabled) {
+  background: #f5f5f5;
+}
+
+.pagination button.active {
+  border-color: #222;
+  background: #222;
+  color: white;
+}
+
+.pagination button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+
+/* =========================================================
+   Loading / Error
+========================================================= */
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  color: #777;
+}
+
+.error-message {
+  margin: 30px auto;
+  padding: 20px;
+  border: 1px solid #f0cccc;
+  border-radius: 6px;
+  background: #fff5f5;
+  color: #c0392b;
+  text-align: center;
+}
+
+
+/* =========================================================
+   반응형 - 태블릿
+========================================================= */
+
+@media (max-width: 768px) {
+
+  .exhibition-list,
+  .venue-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .exhibition-detail-image {
+    width: 400px;
+    height: 520px;
+  }
+
+  .venue-main {
+    grid-template-columns: 1fr;
+  }
+
+  .venue-main > img {
+    width: 100%;
+    height: auto;
+  }
+
+  .venue-info + button {
+    grid-column: auto;
+  }
+
+  .venue-exhibition-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+}
+
+
+/* =========================================================
+   반응형 - 모바일
+========================================================= */
+
+@media (max-width: 480px) {
+
+  .exhibition-list-page,
+  .venue-list-page,
+  .exhibition-detail-page,
+  .exhibition-edit-page,
+  .venue-detail-page {
+    max-width: calc(100% - 30px);
+    margin: 35px auto;
+  }
+
+  .exhibition-list,
+  .venue-list {
+    grid-template-columns: 1fr;
+  }
+
+  .exhibition-search input,
+  .venue-search input {
+    width: 100%;
+  }
+
+  .exhibition-image {
+    height: 400px;
+  }
+
+  .exhibition-detail-image {
+    width: 100%;
+    height: 450px;
+  }
+
+  .venue-exhibition-list {
+    grid-template-columns: 1fr;
+  }
+
+  .weather-info {
+    grid-template-columns: 1fr;
+  }
+
+  .exhibition-detail-buttons {
+    flex-wrap: wrap;
+  }
+
+}
