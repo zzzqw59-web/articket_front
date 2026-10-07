@@ -26,7 +26,7 @@ const ReviewPage = () => {
         <div className="w-full max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
             {/* 1. 페이지 헤더 */}
             <PageHeader
-                title="문의 게시판"
+                title="리뷰 게시판"
                 description="전시 관련 문의 및 사이트 관련 문의 사항을 남겨주세요."
             />
 
