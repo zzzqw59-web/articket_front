@@ -6,13 +6,13 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
   const getRegression = (data) => {
     const n = data.length;
     const xMean = (n - 1) / 2;
-    const yMean = data.reduce((sum, item) => sum + item.visitors, 0) / n;
+    const yMean = data.reduce((sum, item) => sum + item.value, 0) / n;
 
     let numerator = 0;
     let denominator = 0;
 
     data.forEach((item, index) => {
-      numerator += (index - xMean) * (item.visitors - yMean);
+      numerator += (index - xMean) * (item.value - yMean);
 
       denominator += Math.pow(index - xMean, 2);
     });
@@ -21,8 +21,8 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
     const intercept = yMean - slope * xMean;
 
     return data.map((item, index) => ({
-      month: item.month,
-      visitors: Math.round(slope * index + intercept),
+      anchorDate: item.anchorDate,
+      value: Math.round(slope * index + intercept),
     }));
   };
 
@@ -62,8 +62,8 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
   const config = {
     data: data,
 
-    xField: "month",
-    yField: "visitors",
+    xField: "anchorDate",
+    yField: "value",
 
     colorField: "series",
 
@@ -84,8 +84,8 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
         type: "line",
 
         encode: {
-          x: "month",
-          y: "visitors",
+          x: "anchorDate",
+          y: "value",
           color: "series",
           series: "series",
         },
@@ -108,8 +108,8 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
         data: actualData,
 
         encode: {
-          x: "month",
-          y: "visitors",
+          x: "anchorDate",
+          y: "value",
 
           color: "series",
           series: "series",
@@ -132,7 +132,7 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
 
     //hover 하면 보이는 박스
     tooltip: {
-      title: (datum) => datum.month,
+      title: (datum) => datum.anchorDate,
 
       items: [
         {

@@ -28,7 +28,7 @@ const StaffAuthPostersComponent = ({
             {prev.map((poster) => (
               <div
                 key={poster.id}
-                onClick={() => onSelect(poster.id)}
+                onClick={() => onSelect(poster)}
                 className="w-50 h-80 mt-2 mb-7 overflow-hidden shrink-0"
               >
                 <img
@@ -45,7 +45,7 @@ const StaffAuthPostersComponent = ({
             {current.map((poster) => (
               <div
                 key={poster.id}
-                onClick={() => onSelect(poster.id)}
+                onClick={() => onSelect(poster)}
                 className="w-50 h-80 mt-2 mb-7 overflow-hidden shrink-0"
               >
                 <img
@@ -62,7 +62,7 @@ const StaffAuthPostersComponent = ({
             {next.map((poster) => (
               <div
                 key={poster.id}
-                onClick={() => onSelect(poster.id)}
+                onClick={() => onSelect(poster)}
                 className="w-50 h-80 mt-2 mb-7 overflow-hidden shrink-0"
               >
                 <img

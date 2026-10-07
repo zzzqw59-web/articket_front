@@ -384,7 +384,7 @@ const IntroPage = () => {
               <div className="bg-[#ede6d6] ml-180 h-80 w-80 rounded-full absolute z-0"></div>
             </div>
             <div className="z-10 relative mt-23 ml-25">
-              <div className="my-2">대한민국에서 열리는 전시에 대한 정보</div>
+              <div className="my-2">대한민국에서 열리는 전시에 대한 정보,</div>
               <div className="my-2">
                 대한민국에 위치한 전시장에 대한 정보를 제공하고
               </div>

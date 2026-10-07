@@ -2,14 +2,19 @@ import React from "react";
 import { Column } from "@ant-design/plots";
 
 const BarGraph = ({ data: rawDataGroup }) => {
-  const data = rawDataGroup.flatMap((group) => group.data);
+  const data = rawDataGroup.flatMap((group) =>
+    group.data.map((item) => ({
+      ...item,
+      group: group.groupName,
+    })),
+  );
 
   const config = {
     data: data,
 
-    xField: "month",
-    yField: "visitors",
-    colorField: "type",
+    xField: "anchorDate",
+    yField: "value",
+    colorField: "group",
 
     group: true,
 
