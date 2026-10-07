@@ -101,8 +101,8 @@ const CommentSection = ({
           <thead>
             <tr className="border-b border-gray-200 text-gray-600 font-medium">
               <th className="py-2.5 px-4 w-16 text-center">번호</th>
-              <th className="py-2.5 px-4 w-32">작성자</th>
               <th className="py-2.5 px-4">댓글 내용</th>
+              <th className="py-2.5 px-4 w-32">작성자</th>
               <th className="py-2.5 px-4 w-28 text-center">작성일</th>
               <th className="py-2.5 px-2 w-12 text-center"></th>
             </tr>
@@ -128,18 +128,6 @@ const CommentSection = ({
                     {/* 번호 */}
                     <td className="py-3 px-4 text-center text-gray-500">
                       {displayNo}
-                    </td>
-
-                    {/* 작성자 & 뱃지 */}
-                    <td className="py-3 px-4 text-gray-600">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-medium text-gray-700">{item.writer}</span>
-                        
-                        {/* 💡 하드코딩 조건식 제거 및 roleValue를 variant에 바로 바인딩 */}
-                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_USER" && (
-                          <Badge variant={roleValue} />
-                        )}
-                      </div>
                     </td>
 
                     {/* 댓글 내용 */}
@@ -175,6 +163,18 @@ const CommentSection = ({
                       ) : (
                         item.content
                       )}
+                    </td>
+
+                    {/* 작성자 & 뱃지 */}
+                    <td className="py-3 px-4 text-gray-600">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-medium text-gray-700">{item.writer}</span>
+                        
+                        {/* 💡 하드코딩 조건식 제거 및 roleValue를 variant에 바로 바인딩 */}
+                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_USER" && (
+                          <Badge variant={roleValue} />
+                        )}
+                      </div>
                     </td>
 
                     {/* 작성일 */}

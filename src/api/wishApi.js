@@ -1,6 +1,10 @@
 import axiosInstance from "./axiosInstance";
+import { CURRENT_USER } from "../constants/config";
 
 const BASE_URL = "/api/wishes";
+
+// 임시 회원 설정
+// const CURRENT_USER = {memberId: 1};
 
 // 내 위시리스트 목록 조회
 export const getMyWishList = async (page = 1, size = 10) => {
@@ -15,7 +19,22 @@ export const getMyWishList = async (page = 1, size = 10) => {
 
 // 위시 토글 (추가 / 취소)
 export const toggleWish = async (exhibitionId) => {
-  const response = await axiosInstance.post(`${BASE_URL}/${exhibitionId}`);
+  const response = await axiosInstance.post(`${BASE_URL}/${exhibitionId}`, null, {
+    params: {
+      memberId: CURRENT_USER.memberId,
+    },
+  });
+  return response.data; // WishToggleResponseDTO 반환
+};
+
+// 추가 기능: 위시 카운트 조회...
+export const countWish = async (exhibitionId) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/count/${exhibitionId}`,{
+      params: {
+        memberId: CURRENT_USER.memberId,
+      },
+    });
   return response.data;
 };
 
