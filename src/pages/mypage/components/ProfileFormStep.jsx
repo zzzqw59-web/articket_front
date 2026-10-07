@@ -17,15 +17,13 @@ const ProfileFormStep = ({
   onCancelEdit,
   onPhoneVerify,
   onUpdateSubmit,
-  onWithdrawal,
+  onWithdrawal, // 💡 회원 탈퇴 시작 (비밀번호 검증 단계로 이동하는 함수)
   renderEyeIcon,
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
 
-  // 회원 탈퇴 동의 관련 모달 상태
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [isAgreed, setIsAgreed] = useState(false);
+  // 💡 모달은 비밀번호 검증 성공 후에 띄울 것이므로 이 컴포넌트 내부의 모달 상태(showWithdrawModal, isAgreed)는 삭제 처리했습니다.
 
   useEffect(() => {
     let timer;
@@ -55,16 +53,6 @@ const ProfileFormStep = ({
     alert("인증번호가 발송되었습니다. (테스트용)");
   };
 
-  // 탈퇴 확정 클릭
-  const handleConfirmWithdrawal = () => {
-    if (!isAgreed) {
-      alert("탈퇴 동의 체크박스에 동의해 주세요.");
-      return;
-    }
-    setShowWithdrawModal(false);
-    onWithdrawal();
-  };
-
   return (
     <div className="w-full flex flex-col items-center gap-6">
       <PageHeader
@@ -83,7 +71,6 @@ const ProfileFormStep = ({
               <span className="font-bold text-base text-gray-900">
                 {formData.nickname} 님
               </span>
-              {/* 💡 하드코딩 문구 제거 및 권한(Role) 기반 동적 배지 바인딩 */}
               <Badge variant={formData.role || formData.memberRole || "USER"} />
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
@@ -243,12 +230,10 @@ const ProfileFormStep = ({
                   회원 정보 수정
                 </button>
 
+                {/* 💡 회원 탈퇴 버튼 클릭 시 바로 비밀번호 확인 단계로 이동하도록 수정 */}
                 <button
                   type="button"
-                  onClick={() => {
-                    setIsAgreed(false);
-                    setShowWithdrawModal(true);
-                  }}
+                  onClick={onWithdrawal}
                   className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
                 >
                   회원 탈퇴
@@ -258,55 +243,6 @@ const ProfileFormStep = ({
           </div>
         </form>
       </div>
-
-      {/* 회원 탈퇴 확인 및 동의 모달 */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 flex flex-col gap-4 shadow-xl border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 border-b pb-2 border-gray-100">
-              {AUTH_CONSTANTS.WITHDRAWAL_CONFIRM_TITLE}
-            </h3>
-
-            <p className="text-xs text-gray-600 leading-relaxed bg-red-50 p-3 rounded-lg border border-red-100 text-red-800 font-medium">
-              {AUTH_CONSTANTS.WITHDRAWAL_WARNING_MESSAGE}
-            </p>
-
-            <label className="flex items-center gap-2 cursor-pointer mt-2 select-none">
-              <input
-                type="checkbox"
-                checked={isAgreed}
-                onChange={(e) => setIsAgreed(e.target.checked)}
-                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-              />
-              <span className="text-xs font-semibold text-gray-800">
-                {AUTH_CONSTANTS.WITHDRAWAL_CHECKBOX_LABEL}
-              </span>
-            </label>
-
-            <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => setShowWithdrawModal(false)}
-                className="px-4 py-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-medium transition-colors"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmWithdrawal}
-                disabled={!isAgreed}
-                className={`px-4 py-2 text-xs rounded font-bold text-white transition-colors ${
-                  isAgreed
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-red-300 cursor-not-allowed"
-                }`}
-              >
-                탈퇴 진행
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
