@@ -53,8 +53,15 @@ export const useMemberEdit = () => {
       }));
 
       // 💡 탈퇴 상태 조회 API 호출
-      const withdrawData = await getWithdrawStatus();
-      setWithdrawInfo(withdrawData);
+      try {
+        const withdrawData = await getWithdrawStatus();
+        setWithdrawInfo(withdrawData);
+      } catch (withdrawError) {
+        // 탈퇴 이력이 없는 경우 500 에러가 넘어오므로 예외를 잡아 null 처리
+        console.warn("탈퇴 신청 이력이 없거나 조회 실패:", withdrawError);
+        setWithdrawInfo(null); 
+      }
+
     } catch (error) {
       console.error("회원 정보 조회 실패:", error);
     }
