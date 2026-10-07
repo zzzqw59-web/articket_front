@@ -2,8 +2,8 @@ import axiosInstance from "./axiosInstance";
 
 // 💡 문의글 관련 기본 URL
 const ASK_BASE_URL = "/api/asks";
-// 💡 회원 관련 기본 URL
-const MEMBER_BASE_URL = "/api/members";
+// 💡 회원 정보 관련 기본 URL
+const MEMBER_BASE_URL = "/api/members/me";
 // 💡 리뷰 관련 기본 URL
 const REVIEW_BASE_URL = "/api/reviews";
 // 💡 마이페이지 관련 기본 URL
@@ -12,27 +12,46 @@ const MYPAGE_BASE_URL = "/api/mypage";
 
 // MEMBER-001: 회원 정보 조회
 export const getMyProfile = async () => {
-  const response = await axiosInstance.get(`${MEMBER_BASE_URL}/me`);
+  const response = await axiosInstance.get(`${MEMBER_BASE_URL}`);
   return response.data; // MemberResponseDTO
 };
 
 // MEMBER-002: 회원 정보 수정
 export const updateMyProfile = async (updateData) => {
   // updateData: { nickname, password, phone }
-  const response = await axiosInstance.patch(`${MEMBER_BASE_URL}/me`, updateData);
+  const response = await axiosInstance.patch(`${MEMBER_BASE_URL}`, updateData);
   return response.data;
+};
+
+// MEMBER-005 회원탈퇴 신청
+export const requestWithdraw = async (password) => {
+  const response = await axiosInstance.post(`${MEMBER_BASE_URL}/withdraw`, { password });
+  return response.data;
+};
+
+// MEMBER-006 회원 탈퇴 신청 취소
+export const cancelWithdraw = async () => {
+  const response = await axiosInstance.delete(`${MEMBER_BASE_URL}/withdraw`);
+  return response.data;
+};
+
+// MEMBER-007 회원탈퇴 상태 조회
+export const getWithdrawStatus = async () => {
+  const response = await axiosInstance.get(`${MEMBER_BASE_URL}/withdraw`);
+  return response.data; // WithdrawResponseDTO
 };
 
 // MEMBER-008: 비밀번호 재확인
 export const checkMyPassword = async (password) => {
-  const response = await axiosInstance.post(`${MEMBER_BASE_URL}/me/password/check`, {
+  const response = await axiosInstance.post(`${MEMBER_BASE_URL}/password/check`, {
     password,
   });
   return response.data; // boolean (matches)
 };
 
+
 // ASK-006: 내 문의글 목록 조회
-export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword = "") => {
+export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword = "", sort = "") => {
   const response = await axiosInstance.get(`${ASK_BASE_URL}/my`, {
     params: { page, size, searchType, keyword, sort },
   });
@@ -40,7 +59,7 @@ export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword
 };
 
 // REV-010: 내 리뷰 목록 조회
-export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyword = "") => {
+export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyword = "", sort = "") => {
   const response = await axiosInstance.get(`${REVIEW_BASE_URL}/me`, {
     params: { page, size, searchType, keyword, sort },
   });
@@ -48,7 +67,7 @@ export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyw
 };
 
 // MYPOST-001: 내 댓글 목록 조회
-export const getMyReplyList = async (page = 1, size = 10, searchType = "", keyword = "") => {
+export const getMyReplyList = async (page = 1, size = 10, searchType = "", keyword = "", sort = "") => {
   const response = await axiosInstance.get(`${MYPAGE_BASE_URL}/replies`, {
     params: { page, size, searchType, keyword, sort },
   });

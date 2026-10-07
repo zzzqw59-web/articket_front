@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { getMyProfile, checkMyPassword, updateMyProfile } from "../../../api/mypageApi";
+import { 
+  getMyProfile, 
+  checkMyPassword, 
+  updateMyProfile, 
+  requestWithdraw,
+  cancelWithdraw,     // 💡 추가
+  getWithdrawStatus   // 💡 추가
+} from "../../../api/mypageApi";
 import { AUTH_CONSTANTS } from "../../../constants/authConstants";
 
 export const useMemberEdit = () => {
@@ -7,9 +14,7 @@ export const useMemberEdit = () => {
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [checkPassword, setCheckPassword] = useState("");
   const [showCheckPassword, setShowCheckPassword] = useState(false);
-  
-  // 검증 목적 상태: null | "EDIT" (정보 수정) | "WITHDRAW" (회원 탈퇴)
-  const [verifyPurpose, setVerifyPurpose] = useState(null);
+  const [verifyPurpose, setVerifyPurpose] = useState(null); // null | "EDIT" | "WITHDRAW"
 
   // 2. 정보 수정 모드 상태
   const [isEditing, setIsEditing] = useState(false);
@@ -30,30 +35,36 @@ export const useMemberEdit = () => {
   const [authCode, setAuthCode] = useState("");
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
-  // 초기 렌더링 시 회원 정보 불러오기
-  useEffect(() => {
-    const fetchMemberData = async () => {
-      try {
-        const data = await getMyProfile();
-        setFormData((prev) => ({
-          ...prev,
-          email: data.email || "",
-          nickname: data.nickname || "",
-          name: data.name || "",
-          phone: data.phone || "",
-          memberType: data.memberType || "",
-          joinCreatedAt: data.joinCreatedAt || "",
-        }));
-      } catch (error) {
-        console.error("회원 정보 조회 실패:", error);
-        alert("회원 정보를 불러오는 데 실패했습니다.");
-      }
-    };
+  // 5. 💡 회원 탈퇴 상태 정보 (WithdrawResponseDTO: withdrawStatus, withdrawDue, withdrawRequestAt 등)
+  const [withdrawInfo, setWithdrawInfo] = useState(null);
 
+  // 초기 렌더링 시 회원 정보 & 탈퇴 상태 함께 불러오기
+  const fetchMemberData = async () => {
+    try {
+      const data = await getMyProfile();
+      setFormData((prev) => ({
+        ...prev,
+        email: data.email || "",
+        nickname: data.nickname || "",
+        name: data.name || "",
+        phone: data.phone || "",
+        memberType: data.memberType || "",
+        joinCreatedAt: data.joinCreatedAt || "",
+      }));
+
+      // 💡 탈퇴 상태 조회 API 호출
+      const withdrawData = await getWithdrawStatus();
+      setWithdrawInfo(withdrawData);
+    } catch (error) {
+      console.error("회원 정보 조회 실패:", error);
+    }
+  };
+
+  useEffect(() => {
     fetchMemberData();
   }, []);
 
-  // '회원 정보 수정' 버튼 클릭 시 
+  // '회원 정보 수정' 버튼 클릭
   const handleStartEdit = () => {
     setCheckPassword("");
     setShowCheckPassword(false);
@@ -61,7 +72,7 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(true);
   };
 
-  // 💡 1단계: '회원 탈퇴' 버튼 클릭 시 바로 비밀번호 검증 창으로 진입
+  // '회원 탈퇴' 버튼 클릭
   const handleStartWithdrawal = () => {
     setCheckPassword("");
     setShowCheckPassword(false);
@@ -69,49 +80,74 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(true);
   };
 
-  // 비밀번호 입력 검증 제출
+  // 비밀번호 입력 제출 핸들러
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
     if (!checkPassword.trim()) {
-      alert(AUTH_CONSTANTS.MSG_ENTER_PASSWORD);
+      alert(AUTH_CONSTANTS.MSG_ENTER_PASSWORD || "비밀번호를 입력해 주세요.");
+      return;
+    }
+
+    if (verifyPurpose === "EDIT") {
+      try {
+        const matches = await checkMyPassword(checkPassword);
+        if (matches) {
+          setIsVerifyingPassword(false);
+          setIsEditing(true);
+          setIsPhoneVerified(false);
+          setAuthCode("");
+          setVerifyPurpose(null);
+        } else {
+          alert("비밀번호가 일치하지 않습니다.");
+        }
+      } catch (error) {
+        console.error("비밀번호 검증 오류:", error);
+        alert("비밀번호 확인 중 오류가 발생했습니다.");
+      }
+    } else if (verifyPurpose === "WITHDRAW") {
+      const isConfirmed = window.confirm(
+        "정말로 회원 탈퇴를 신청하시겠습니까?\n신청 후 30일간의 유예기간이 부여되며, 유예기간 내에 철회할 수 있습니다."
+      );
+      if (!isConfirmed) return;
+
+      try {
+        const result = await requestWithdraw(checkPassword);
+        alert(result?.message || "회원 탈퇴 신청이 완료되었습니다.");
+        
+        // 데이터 최신화 (또는 로그아웃)
+        fetchMemberData();
+        setIsVerifyingPassword(false);
+        setVerifyPurpose(null);
+      } catch (error) {
+        console.error("회원 탈퇴 신청 실패:", error);
+        const errorMessage = error.response?.data?.message || "회원 탈퇴 신청 중 오류가 발생했습니다.";
+        alert(errorMessage);
+      }
+    }
+  };
+
+  // 💡 6. 탈퇴 신청 취소(철회) 처리
+  const handleCancelWithdrawal = async () => {
+    if (!window.confirm("회원 탈퇴 신청을 취소하시겠습니까?\n취소 시 기존 계정을 정상적으로 이용하실 수 있습니다.")) {
       return;
     }
 
     try {
-      const matches = await checkMyPassword(checkPassword);
-      if (matches) {
-        setIsVerifyingPassword(false);
-
-        // 💡 2단계 & 3단계: 비밀번호 검증 성공 후 목적별 분기
-        if (verifyPurpose === "EDIT") {
-          setIsEditing(true);
-          setIsPhoneVerified(false);
-          setAuthCode("");
-        } else if (verifyPurpose === "WITHDRAW") {
-          // 비밀번호 확인 통과 후 최종 탈퇴 확인 창 띄우기
-          const isConfirmed = window.confirm("비밀번호가 확인되었습니다.\n정말로 탈퇴하시겠습니까? 탈퇴 시 복구할 수 없습니다.");
-          if (isConfirmed) {
-            executeWithdrawal();
-          }
-        }
-        
-        setVerifyPurpose(null); // 목적 초기화
-      } else {
-        alert("비밀번호가 일치하지 않습니다.");
-      }
+      await cancelWithdraw();
+      alert("회원 탈퇴 신청이 정상적으로 취소되었습니다.");
+      fetchMemberData(); // 회원 정보 및 탈퇴 상태 재조회
     } catch (error) {
-      console.error("비밀번호 검증 오류:", error);
-      alert("비밀번호 확인 중 오류가 발생했습니다.");
+      console.error("탈퇴 취소 실패:", error);
+      const errorMessage = error.response?.data?.message || "탈퇴 취소 처리 중 오류가 발생했습니다.";
+      alert(errorMessage);
     }
   };
 
-  // 폼 입력 변경
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 수정 및 검증 취소
   const handleCancelEdit = () => {
     setIsEditing(false);
     setIsVerifyingPassword(false);
@@ -121,7 +157,6 @@ export const useMemberEdit = () => {
     setFormData((prev) => ({ ...prev, password: "" }));
   };
 
-  // 전화번호 인증번호 확인
   const handlePhoneVerify = () => {
     const codeLength = AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
     if (!authCode.trim()) {
@@ -136,7 +171,6 @@ export const useMemberEdit = () => {
     }
   };
 
-  // 최종 정보 수정 제출
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
@@ -168,20 +202,6 @@ export const useMemberEdit = () => {
     }
   };
 
-  // 💡 3단계: 최종 탈퇴 실행 함수
-  const executeWithdrawal = async () => {
-    try {
-      // TODO: 백엔드 DELETE /api/members/me 연동 예정
-      alert(AUTH_CONSTANTS.MSG_WITHDRAWAL_SUCCESS);
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("user");
-      window.location.href = "/articket";
-    } catch (error) {
-      console.error("회원 탈퇴 실패:", error);
-      alert("회원 탈퇴 처리 중 오류가 발생했습니다.");
-    }
-  };
-
   return {
     isVerifyingPassword,
     checkPassword,
@@ -197,6 +217,8 @@ export const useMemberEdit = () => {
     authCode,
     setAuthCode,
     isPhoneVerified,
+    withdrawInfo, // 💡 전달
+    handleCancelWithdrawal, // 💡 전달
     handleFormChange,
     handleStartEdit,
     handleStartWithdrawal,
