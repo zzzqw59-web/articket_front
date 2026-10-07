@@ -64,7 +64,7 @@ const roots = createBrowserRouter([
         children: reviewRouter(),
       },
       {
-        path: "reservation",
+        path: "exhibition/:exhibitionId/reservation",
         children: reservationRouter(),
       },
       {
