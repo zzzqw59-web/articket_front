@@ -477,8 +477,13 @@ const IntroPage = () => {
             <div className="second-tape bg-[#ede6d6] w-180 h-35 select-none self-end mr-20 text-[#ede6d6] relative z-0 translate-y-[-160px] rotate-3">
               .
             </div>
-            <IntroAskComponent />
-            <div className="h-96"></div>
+            <div
+              className="flex justify-end w-full -translate-y-25 mr-50
+            "
+            >
+              <IntroAskComponent />
+            </div>
+            <div className="h-50"></div>
           </div>
         </div>
       </IntroLayout>
