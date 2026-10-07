@@ -1,8 +1,11 @@
+// ProfileFormStep.jsx
+
 import { useState, useEffect } from "react";
 import PageHeader from "../../../components/common/PageHeader";
 import ActionButton from "../../../components/common/ActionButton";
 import Badge from "../../../components/common/Badge";
 import { AUTH_CONSTANTS } from "../../../constants/authConstants";
+import { WITHDRAW_STATUS } from "../../../constants/config";
 
 const ProfileFormStep = ({
   formData,
@@ -12,18 +15,24 @@ const ProfileFormStep = ({
   authCode,
   setAuthCode,
   isPhoneVerified,
+  withdrawInfo, 
+  onCancelWithdrawal,
   onFormChange,
   onStartEdit,
   onCancelEdit,
   onPhoneVerify,
   onUpdateSubmit,
-  onWithdrawal, // 💡 회원 탈퇴 시작 (비밀번호 검증 단계로 이동하는 함수)
+  onWithdrawal,
   renderEyeIcon,
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
 
-  // 💡 모달은 비밀번호 검증 성공 후에 띄울 것이므로 이 컴포넌트 내부의 모달 상태(showWithdrawModal, isAgreed)는 삭제 처리했습니다.
+  // 탈퇴 대기 상태 여부 판단 (백엔드 응답 구조에 맞게 체크)
+  const isPendingWithdrawal =
+    withdrawInfo &&
+    (withdrawInfo.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
+     withdrawInfo.status === WITHDRAW_STATUS.IN_PROGRESS);
 
   useEffect(() => {
     let timer;
@@ -61,6 +70,33 @@ const ProfileFormStep = ({
       />
 
       <div className="w-full max-w-lg bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col gap-6">
+        
+        {/* 💡 3. 탈퇴 진행 중 안내 배너 추가 */}
+        {isPendingWithdrawal && (
+          <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <div className="p-1 bg-amber-500 text-white rounded-full mt-0.5">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex flex-col text-xs text-amber-900 gap-1">
+                <span className="font-bold text-sm">현재 회원 탈퇴가 진행 중입니다.</span>
+                <span>신청일: {withdrawInfo?.withdrawRequestAt || "조회 중"}</span>
+                <span>삭제 예정일: {withdrawInfo?.withdrawDue || withdrawInfo?.dueData || "유예 기간 내"}</span>
+                <span className="text-amber-700 mt-1">유예 기간 동안은 언제든지 탈퇴를 철회하실 수 있습니다.</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onCancelWithdrawal}
+              className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-colors shadow-sm"
+            >
+              회원 탈퇴 신청 취소 (계정 복구)
+            </button>
+          </div>
+        )}
+
         {/* 프로필 요약 카드 */}
         <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
           <div className="w-16 h-16 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-sm shadow-inner">
@@ -74,7 +110,7 @@ const ProfileFormStep = ({
               <Badge variant={formData.role || formData.memberRole || "USER"} />
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
-              <span>가입일 : {formData.createdAt || "2026년 9월 17일"}</span>
+              <span>가입일 : {formData.joinCreatedAt || "2026년 9월 17일"}</span>
             </div>
           </div>
         </div>
@@ -221,24 +257,25 @@ const ProfileFormStep = ({
                 />
               </div>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={onStartEdit}
-                  className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
-                >
-                  회원 정보 수정
-                </button>
+              !isPendingWithdrawal && (
+                <>
+                  <button
+                    type="button"
+                    onClick={onStartEdit}
+                    className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
+                  >
+                    회원 정보 수정
+                  </button>
 
-                {/* 💡 회원 탈퇴 버튼 클릭 시 바로 비밀번호 확인 단계로 이동하도록 수정 */}
-                <button
-                  type="button"
-                  onClick={onWithdrawal}
-                  className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
-                >
-                  회원 탈퇴
-                </button>
-              </>
+                  <button
+                    type="button"
+                    onClick={onWithdrawal}
+                    className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+                  >
+                    회원 탈퇴
+                  </button>
+                </>
+              )
             )}
           </div>
         </form>

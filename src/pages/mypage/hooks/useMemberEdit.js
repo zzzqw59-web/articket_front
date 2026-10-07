@@ -8,6 +8,7 @@ import {
   getWithdrawStatus   // 💡 추가
 } from "../../../api/mypageApi";
 import { AUTH_CONSTANTS } from "../../../constants/authConstants";
+import { WITHDRAW_STATUS } from "../../../constants/config";
 
 export const useMemberEdit = () => {
   // 1. 비밀번호 확인 모드 상태
@@ -52,12 +53,21 @@ export const useMemberEdit = () => {
         joinCreatedAt: data.joinCreatedAt || "",
       }));
 
-      // 💡 탈퇴 상태 조회 API 호출
       try {
         const withdrawData = await getWithdrawStatus();
-        setWithdrawInfo(withdrawData);
+        
+        // 💡 백엔드 응답의 withdrawStatus가 IN_PROGRESS일 때만 유지하고, 
+        // CANCELED나 COMPLETED 등 다른 상태이면 null 처리하여 UI 박스를 차단함
+        if (
+          withdrawData &&
+          (withdrawData.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
+          withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
+        ) {
+          setWithdrawInfo(withdrawData);
+        } else {
+          setWithdrawInfo(null);
+        }
       } catch (withdrawError) {
-        // 탈퇴 이력이 없는 경우 500 에러가 넘어오므로 예외를 잡아 null 처리
         console.warn("탈퇴 신청 이력이 없거나 조회 실패:", withdrawError);
         setWithdrawInfo(null); 
       }
