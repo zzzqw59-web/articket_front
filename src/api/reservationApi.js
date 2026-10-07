@@ -12,3 +12,13 @@ export const getMyReservations = async (page = 1, size = 100) => {
 
   return response.data;
 };
+
+// 예약 생성
+export const createReservation = async (reservationData) => {
+  const response = await axiosInstance.post(
+    BASE_URL,
+    reservationData
+  );
+
+  return response.data;
+};

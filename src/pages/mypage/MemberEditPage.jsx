@@ -4,11 +4,12 @@ import ProfileFormStep from "./components/ProfileFormStep";
 
 const MemberEditPage = () => {
   const {
-    isVerifyingPassword, // 💡 비밀번호 검증 모드 여부
+    isVerifyingPassword,
     checkPassword,
     setCheckPassword,
     showCheckPassword,
     setShowCheckPassword,
+    verifyPurpose,
     handleVerifySubmit,
     isEditing,
     formData,
@@ -17,15 +18,16 @@ const MemberEditPage = () => {
     authCode,
     setAuthCode,
     isPhoneVerified,
+    withdrawInfo,            
+    handleCancelWithdrawal,
     handleFormChange,
     handleStartEdit,
+    handleStartWithdrawal,
     handleCancelEdit,
     handlePhoneVerify,
     handleUpdateSubmit,
-    handleWithdrawal, // 💡 회원 탈퇴 실행
   } = useMemberEdit();
 
-  // 비밀번호 보이기 / 가리기 아이콘 공통 렌더러
   const renderEyeIcon = (isVisible, toggleFunc) => (
     <button
       type="button"
@@ -50,7 +52,6 @@ const MemberEditPage = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6 flex flex-col items-center gap-6">
-      {/* 💡 회원 정보 수정 버튼을 눌러 비밀번호 검증 모드(isVerifyingPassword)일 때만 검증 창 표시 */}
       {isVerifyingPassword ? (
         <PasswordVerifyStep
           checkPassword={checkPassword}
@@ -59,6 +60,7 @@ const MemberEditPage = () => {
           setShowCheckPassword={setShowCheckPassword}
           onVerifySubmit={handleVerifySubmit}
           renderEyeIcon={renderEyeIcon}
+          verifyPurpose={verifyPurpose}
         />
       ) : (
         <ProfileFormStep
@@ -69,12 +71,14 @@ const MemberEditPage = () => {
           authCode={authCode}
           setAuthCode={setAuthCode}
           isPhoneVerified={isPhoneVerified}
+          withdrawInfo={withdrawInfo}                     
+          onCancelWithdrawal={handleCancelWithdrawal}     
           onFormChange={handleFormChange}
           onStartEdit={handleStartEdit}
           onCancelEdit={handleCancelEdit}
           onPhoneVerify={handlePhoneVerify}
           onUpdateSubmit={handleUpdateSubmit}
-          onWithdrawal={handleWithdrawal} // 💡 회원 탈퇴 연결
+          onWithdrawal={handleStartWithdrawal}
           renderEyeIcon={renderEyeIcon}
         />
       )}

@@ -14,12 +14,12 @@ export const ROLE_BADGE_MAP = {
     label: "전시 관계자",
     style: "bg-amber-100 text-amber-800 border-amber-200",
   },
-  [MEMBER_ROLE.USER]: {
+  [MEMBER_ROLE.MEMBER]: {
     label: "일반 회원",
     style: "bg-gray-100 text-gray-600 border-gray-200",
   },
 
-  // Spring Security prefix 호환 (ROLE_ADMIN, ROLE_STAFF, ROLE_USER)
+  // Spring Security prefix 호환 (ROLE_ADMIN, ROLE_STAFF, ROLE_MEMBER)
   [`ROLE_${MEMBER_ROLE.ADMIN}`]: {
     label: "관리자",
     style: "bg-red-100 text-red-700 border-red-200",
@@ -28,7 +28,7 @@ export const ROLE_BADGE_MAP = {
     label: "전시 관계자",
     style: "bg-amber-100 text-amber-800 border-amber-200",
   },
-  [`ROLE_${MEMBER_ROLE.USER}`]: {
+  [`ROLE_${MEMBER_ROLE.MEMBER}`]: {
     label: "일반 회원",
     style: "bg-gray-100 text-gray-600 border-gray-200",
   },

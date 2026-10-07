@@ -171,7 +171,7 @@ const CommentSection = ({
                         <span className="font-medium text-gray-700">{item.writer}</span>
                         
                         {/* 💡 하드코딩 조건식 제거 및 roleValue를 variant에 바로 바인딩 */}
-                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_USER" && (
+                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_MEMBER" && (
                           <Badge variant={roleValue} />
                         )}
                       </div>
