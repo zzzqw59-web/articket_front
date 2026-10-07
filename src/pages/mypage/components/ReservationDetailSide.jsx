@@ -1,10 +1,12 @@
 import Badge from "../../../components/common/Badge";
+import TicketQRCode from "../../../components/common/TicketQRCode"; // 👈 분리한 QR 컴포넌트 import
 
 const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
   if (!data) return null;
 
-  const isCanceled = data.status.includes("취소");
+  const isCanceled = data.status?.includes("취소");
   const isPayment = type === "payment";
+  const reservationNo = data.bookingId || data.transactionId;
 
   return (
     <div className="w-[360px] flex flex-col gap-4 sticky top-20 h-fit shrink-0">
@@ -31,7 +33,7 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             {isPayment ? "PAYMENT DETAILS" : "RESERVATION RECEIPT"}
           </span>
           <span className="text-[11px] text-gray-500">
-            NO. {data.bookingId || data.transactionId}
+            NO. {reservationNo}
           </span>
         </div>
 
@@ -80,20 +82,9 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
 
         {/* 4. 하단 영역 (예약/결제 및 취소 여부에 따른 분기) */}
         <div className="border-t border-gray-100 mt-5 pt-5 flex flex-col items-center gap-3">
-          {/* A. 정상 예약 건: QR 코드 표출 */}
+          {/* A. 정상 예약 건: 분리된 QR 컴포넌트 표출 */}
           {!isPayment && !isCanceled && (
-            <>
-              <span className="text-[11px] text-gray-400">
-                현장 입장을 위한 QR 코드
-              </span>
-              <div className="w-24 h-24 p-1.5 border border-gray-100 rounded bg-white flex items-center justify-center">
-                <img
-                  src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${data.bookingId}`}
-                  alt="입장 QR 코드"
-                  className="w-full h-full"
-                />
-              </div>
-            </>
+            <TicketQRCode reservationNo={reservationNo} size={96} />
           )}
 
           {/* B. 취소된 예약 건 */}
@@ -103,7 +94,7 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             </span>
           )}
 
-          {/* C. 결제 내역 (취소 여부 상관없이 단순 하단 안냇글) */}
+          {/* C. 결제 내역 안내 */}
           {isPayment && (
             <span className="text-[11px] text-gray-400 py-1">
               {isCanceled ? "결제 취소가 완료되었습니다." : "정상 처리된 결제건입니다."}
