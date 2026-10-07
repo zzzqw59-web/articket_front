@@ -4,8 +4,8 @@ import {
   checkMyPassword, 
   updateMyProfile, 
   requestWithdraw,
-  cancelWithdraw,     // 💡 추가
-  getWithdrawStatus   // 💡 추가
+  cancelWithdraw, 
+  getWithdrawStatus 
 } from "../../../api/mypageApi";
 import { AUTH_CONSTANTS } from "../../../constants/authConstants";
 import { WITHDRAW_STATUS } from "../../../constants/config";
@@ -21,7 +21,7 @@ export const useMemberEdit = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showFormPassword, setShowFormPassword] = useState(false);
 
-  // 3. 회원 정보 Form State
+  // 3. 회원 정보 Form State & 기존 전화번호 저장 State (전화번호 변경 감지용)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -31,12 +31,13 @@ export const useMemberEdit = () => {
     memberType: "",
     joinCreatedAt: "",
   });
+  const [initialPhone, setInitialPhone] = useState(""); // 💡 ReferenceError 해결을 위한 state
 
   // 4. SMS 인증 상태
   const [authCode, setAuthCode] = useState("");
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
 
-  // 5. 💡 회원 탈퇴 상태 정보 (WithdrawResponseDTO: withdrawStatus, withdrawDue, withdrawRequestAt 등)
+  // 5. 회원 탈퇴 상태 정보 (WithdrawResponseDTO)
   const [withdrawInfo, setWithdrawInfo] = useState(null);
 
   // 초기 렌더링 시 회원 정보 & 탈퇴 상태 함께 불러오기
@@ -52,16 +53,19 @@ export const useMemberEdit = () => {
         memberType: data.memberType || "",
         joinCreatedAt: data.joinCreatedAt || "",
       }));
+      
+      // 💡 불러온 기존 전화번호 저장
+      setInitialPhone(data.phone || "");
 
+      // 탈퇴 상태 조회
       try {
         const withdrawData = await getWithdrawStatus();
         
-        // 💡 백엔드 응답의 withdrawStatus가 IN_PROGRESS일 때만 유지하고, 
-        // CANCELED나 COMPLETED 등 다른 상태이면 null 처리하여 UI 박스를 차단함
+        // 백엔드 응답의 withdrawStatus가 IN_PROGRESS일 때만 유지
         if (
           withdrawData &&
           (withdrawData.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
-          withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
+           withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
         ) {
           setWithdrawInfo(withdrawData);
         } else {
@@ -131,7 +135,6 @@ export const useMemberEdit = () => {
         const result = await requestWithdraw(checkPassword);
         alert(result?.message || "회원 탈퇴 신청이 완료되었습니다.");
         
-        // 데이터 최신화 (또는 로그아웃)
         fetchMemberData();
         setIsVerifyingPassword(false);
         setVerifyPurpose(null);
@@ -143,7 +146,7 @@ export const useMemberEdit = () => {
     }
   };
 
-  // 💡 6. 탈퇴 신청 취소(철회) 처리
+  // 탈퇴 신청 취소(철회) 처리
   const handleCancelWithdrawal = async () => {
     if (!window.confirm("회원 탈퇴 신청을 취소하시겠습니까?\n취소 시 기존 계정을 정상적으로 이용하실 수 있습니다.")) {
       return;
@@ -152,7 +155,10 @@ export const useMemberEdit = () => {
     try {
       await cancelWithdraw();
       alert("회원 탈퇴 신청이 정상적으로 취소되었습니다.");
-      fetchMemberData(); // 회원 정보 및 탈퇴 상태 재조회
+      
+      // 상태 즉시 리셋 후 서버 데이터 재조회
+      setWithdrawInfo(null);
+      await fetchMemberData();
     } catch (error) {
       console.error("탈퇴 취소 실패:", error);
       const errorMessage = error.response?.data?.message || "탈퇴 취소 처리 중 오류가 발생했습니다.";
@@ -174,48 +180,48 @@ export const useMemberEdit = () => {
     setFormData((prev) => ({ ...prev, password: "" }));
   };
 
+  // 💡 SMS 인증 완료 콜백 (ProfileFormStep에서 성공 시 호출)
+  // 알림창 중복 방지를 위해 alert 구문 제거 및 상태 업데이트만 진행
   const handlePhoneVerify = () => {
-    const codeLength = AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
-    if (!authCode.trim()) {
-      alert(AUTH_CONSTANTS.MSG_ENTER_AUTH_CODE.replace("{length}", codeLength));
-      return;
-    }
-    if (authCode.length === codeLength) {
-      setIsPhoneVerified(true);
-      alert(AUTH_CONSTANTS.MSG_PHONE_VERIFIED_SUCCESS);
-    } else {
-      alert(AUTH_CONSTANTS.MSG_EXACT_AUTH_CODE.replace("{length}", codeLength));
-    }
+    setIsPhoneVerified(true);
   };
 
+  // 프로필 정보 수정 저장 제출 핸들러
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isPhoneVerified) {
-      alert(AUTH_CONSTANTS.MSG_NEED_PHONE_VERIFY);
+    // 최초 로드된 전화번호와 현재 폼에 입력된 전화번호 비교
+    const isPhoneChanged = formData.phone !== initialPhone;
+
+    // 전화번호를 실제 변경한 경우에만 SMS 인증 체크
+    if (isPhoneChanged && !isPhoneVerified) {
+      alert("전화번호 변경을 위해 SMS 인증을 완료해 주세요.");
       return;
     }
 
+    // 백엔드 MemberUpdateRequestDTO 매핑 (nickname, password, phone)
+    // 💡 phone은 백엔드 encryptPhone()을 위해 필수 전달
+    const updateData = {
+      nickname: formData.nickname,
+      phone: formData.phone,
+    };
+
+    // 비밀번호를 입력한 경우에만 전달 (마스킹 문자열 제외)
+    if (formData.password && formData.password !== "••••••••••••" && formData.password.trim() !== "") {
+      updateData.password = formData.password;
+    }
+
     try {
-      const updateData = {
-        nickname: formData.nickname,
-        phone: formData.phone,
-      };
-
-      if (formData.password && formData.password.trim() !== "") {
-        updateData.password = formData.password;
-      }
-
       await updateMyProfile(updateData);
+      alert("회원 정보가 성공적으로 수정되었습니다.");
 
-      alert(AUTH_CONSTANTS.MSG_UPDATE_SUCCESS);
       setIsEditing(false);
       setIsPhoneVerified(false);
       setAuthCode("");
-      setFormData((prev) => ({ ...prev, password: "" }));
+      await fetchMemberData(); // 최신 정보 재조회
     } catch (error) {
       console.error("회원정보 수정 실패:", error);
-      alert("회원 정보 수정 중 오류가 발생했습니다.");
+      alert(error.response?.data?.message || "회원 정보 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -234,8 +240,8 @@ export const useMemberEdit = () => {
     authCode,
     setAuthCode,
     isPhoneVerified,
-    withdrawInfo, // 💡 전달
-    handleCancelWithdrawal, // 💡 전달
+    withdrawInfo,
+    handleCancelWithdrawal,
     handleFormChange,
     handleStartEdit,
     handleStartWithdrawal,
