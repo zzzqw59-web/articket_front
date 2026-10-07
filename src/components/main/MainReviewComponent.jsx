@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
-import { getAskList } from "../../api/askApi";
 import { useNavigate } from "react-router-dom";
+import { getReviewList } from "../../api/reviewApi";
 
-const MainAskComponent = () => {
+const MainReviewComponent = () => {
   const [asks, setAsks] = useState([]);
   const navigate = useNavigate();
 
   const fetchAsks = async () => {
     try {
-      const response = await getAskList({ sort: "hits" });
+      const response = await getReviewList({ sort: "reviewHits" });
       setAsks(response.dtoList.slice(0, 5));
     } catch (e) {
       console.error("fail to load ask", e);
@@ -26,13 +26,13 @@ const MainAskComponent = () => {
           <span className="block font-bold text-3xl border-b-4 w-[500px] h-12">
             <span className="ml-2 head-text">제목</span>
           </span>
-          {asks.map((ask) => (
-            <div key={ask.askId}>
+          {asks.map((review) => (
+            <div key={review.askId}>
               <div
-                className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate w-[470px]"
-                onClick={() => navigate(`/articket/ask/${ask.askId}`)}
+                className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate  w-[470px]"
+                onClick={() => navigate(`/articket/ask/${review.reviewId}`)}
               >
-                {ask.askTitle}
+                {review.reviewTitle}
               </div>
             </div>
           ))}
@@ -41,10 +41,10 @@ const MainAskComponent = () => {
           <span className="block font-bold text-3xl border-b-4 w-[100px] head-text h-12">
             <span className="ml-3">조회수</span>
           </span>
-          {asks.map((ask) => (
-            <div key={ask.askId}>
+          {asks.map((review) => (
+            <div key={review.reviewId}>
               <div className="text-2xl body-text text-center mt-1">
-                {ask.askHits}
+                {review.reviewHits}
               </div>
             </div>
           ))}
@@ -54,4 +54,4 @@ const MainAskComponent = () => {
   );
 };
 
-export default MainAskComponent;
+export default MainReviewComponent;
