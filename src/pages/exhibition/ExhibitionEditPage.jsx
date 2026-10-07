@@ -3,9 +3,11 @@ import {useNavigate,useParams} from "react-router-dom";
 import {getExhibitionDetail,updateExhibition} from "../../api/exhibitionApi";
 import "../../styles/ExhibitionAndVenue.css";
 import MainLayout from "../../layouts/MainLayout";
-import { MEMBER_ROLE } from "../../constants/config";
+import { MEMBER_ROLE, getStoredUser } from "../../constants/config";
 
-const ExhibitionEditPage = ({ user }) => {
+const ExhibitionEditPage = () => {
+  const user = getStoredUser();  
+
   const { exhibitionId } = useParams();
 
   const navigate = useNavigate();
@@ -27,9 +29,9 @@ const ExhibitionEditPage = ({ user }) => {
 
   const [loading, setLoading] = useState(true);
 
-  const isAdmin = user?.role === MEMBER_ROLE.ADMIN;
+  const isAdmin = user?.memberType === MEMBER_ROLE.ADMIN;
 
-  const isStaff = user?.role === MEMBER_ROLE.STAFF;
+  const isStaff = user?.memberType === MEMBER_ROLE.STAFF;
 
   useEffect(() => {
     // 관리자 + 전시 관계자 수정 가능 나중에 !isAdmin으로 변경

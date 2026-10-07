@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/ExhibitionAndVenue.css";
 import { getExhibitionDetail, deleteExhibition,} from "../../api/exhibitionApi";
 import { toggleWish, countWish } from "../../api/wishApi";
-import { MEMBER_ROLE } from "../../constants/config";
+import { MEMBER_ROLE, getStoredUser } from "../../constants/config";
 
 
-const ExhibitionDetailPage = ({ user }) => {
+const ExhibitionDetailPage = () => {
+  const user = getStoredUser();  
+
   const { exhibitionId } = useParams();
 
   const navigate = useNavigate();
@@ -103,9 +105,9 @@ const ExhibitionDetailPage = ({ user }) => {
     );
   }
 
-  const isAdmin = user?.role === MEMBER_ROLE.ADMIN;
+  const isAdmin = user?.memberType === MEMBER_ROLE.ADMIN;
 
-  const isStaff = user?.role === MEMBER_ROLE.STAFF;
+  const isStaff = user?.memberType === MEMBER_ROLE.STAFF;
 
 //   관리자 + 전시관계자만 수정 가능
 //   const canEdit = isAdmin || isStaff;
