@@ -1,77 +1,121 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import PageHeader from "../../components/common/PageHeader";
-import { getMyAskList } from "../../api/mypageApi"; // 방금 만든 API 임포트
+import { getMyAskList, getMyReviewList } from "../../api/mypageApi";
 
 const MyPostPage = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("ask"); // 내 문의를 먼저 테스트하기 위해 기본값 설정
+  const [activeTab, setActiveTab] = useState("review");
   const [currentPage, setCurrentPage] = useState(1);
-
-  // API 데이터 상태
-  const [askList, setAskList] = useState([]);
-  const [totalPages, setTotalPages] = useState(1);
-
-  // 검색 상태 관리
   const [searchQuery, setSearchQuery] = useState({ searchType: "title", keyword: "" });
 
-  // 탭 설정 및 컬럼 설정 (기존 코드 유지)
+  // 1. 탭별 통합 데이터 상태 관리 (목록 & totalPages)
+  const [postData, setPostData] = useState({
+    review: { list: [], totalPages: 1 },
+    ask: { list: [], totalPages: 1 },
+    reply: { list: [], totalPages: 1 }, // 추후 내 댓글용
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  // 탭 목록 설정
   const tabs = [
     { id: "review", label: "내 리뷰" },
     { id: "ask", label: "내 문의" },
     { id: "reply", label: "내 댓글" },
   ];
 
-  const postColumns = [
-    { key: "id", label: "번호", width: "w-24", align: "center" },
-    { key: "title", label: "게시물 제목", align: "left" },
-    { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
-  ];
+  // 2. 탭별 테이블 컬럼 설정 (댓글 탭 확장성 대응)
+  const columnsMap = {
+    review: [
+      { key: "id", label: "번호", width: "w-24", align: "center" },
+      { key: "title", label: "게시물 제목", align: "left" },
+      { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
+    ],
+    ask: [
+      { key: "id", label: "번호", width: "w-24", align: "center" },
+      { key: "title", label: "게시물 제목", align: "left" },
+      { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
+    ],
+    reply: [
+      { key: "id", label: "번호", width: "w-20", align: "center" },
+      { key: "replyContent", label: "댓글 내용", align: "left" }, // 댓글 전용 컬럼
+      { key: "title", label: "원문 제목", align: "left" },
+      { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
+    ],
+  };
 
   const postSearchOptions = [
     { label: "제목", value: "title" },
     { label: "내용", value: "content" },
   ];
 
-  // 내 문의 데이터 호출 (useEffect)
-  useEffect(() => {
-    if (activeTab === "ask") {
-      fetchMyAsks();
+  // 탭 변경 처리
+  const handleTabChange = (tabId) => {
+    setActiveTab(tabId);
+    setCurrentPage(1);
+    setSearchQuery({ searchType: "title", keyword: "" });
+  };
+
+  // 3. 통합 데이터 Fetch 함수
+  const fetchData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      let response = null;
+      let formattedList = [];
+
+      if (activeTab === "review") {
+        response = await getMyReviewList(
+          currentPage,
+          10,
+          searchQuery.searchType,
+          searchQuery.keyword
+        );
+        formattedList = (response.dtoList || []).map((item) => ({
+          id: item.reviewId,
+          title: item.reviewTitle,
+          createdAt: item.reviewCreatedAt ? item.reviewCreatedAt.substring(0, 10) : "",
+          targetUrl: `/articket/review/${item.reviewId}`,
+        }));
+      } else if (activeTab === "ask") {
+        response = await getMyAskList(
+          currentPage,
+          10,
+          searchQuery.searchType,
+          searchQuery.keyword
+        );
+        formattedList = (response.dtoList || []).map((item) => ({
+          id: item.askId,
+          title: item.askTitle,
+          createdAt: item.askCreatedAt ? item.askCreatedAt.substring(0, 10) : "",
+          targetUrl: `/articket/ask/${item.askId}`,
+        }));
+      } else if (activeTab === "reply") {
+        // TODO: 추후 getMyReplyList(currentPage, 10, ...) 연동
+        // response = await getMyReplyList(...);
+      }
+
+      if (response) {
+        setPostData((prev) => ({
+          ...prev,
+          [activeTab]: {
+            list: formattedList,
+            totalPages: response.totalPage || 1,
+          },
+        }));
+      }
+    } catch (error) {
+      console.error(`${activeTab} 목록을 불러오는 중 오류 발생:`, error);
+    } finally {
+      setIsLoading(false);
     }
   }, [activeTab, currentPage, searchQuery]);
 
-  const fetchMyAsks = async () => {
-    try {
-      const response = await getMyAskList(currentPage, 10, searchQuery.searchType, searchQuery.keyword);
-      
-      // 백엔드 PageResponseDTO -> 프론트 테이블 포맷으로 매핑
-      const formattedData = response.dtoList.map((item) => ({
-        id: item.askId,
-        title: item.askTitle,
-        createdAt: item.askCreatedAt ? item.askCreatedAt.substring(0, 10) : "",
-        targetUrl: `/articket/ask/${item.askId}`,
-      }));
-
-      setAskList(formattedData);
-      setTotalPages(response.totalPage || 1);
-    } catch (error) {
-      console.error("내 문의 목록을 불러오는 중 오류가 발생했습니다.", error);
-    }
-  };
-
-  // 탭에 따른 데이터 반환
-  const getData = () => {
-    switch (activeTab) {
-      case "ask":
-        return askList; // 실제 API 데이터 바인딩
-      case "review":
-      case "reply":
-      default:
-        return []; // 추후 연동 전까지 임시 빈 배열 또는 목업 유지
-    }
-  };
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleRowClick = (row) => {
     if (row.targetUrl) navigate(row.targetUrl);
@@ -87,30 +131,26 @@ const MyPostPage = () => {
       <DataTableContainer
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={(tabId) => {
-          setActiveTab(tabId);
-          setCurrentPage(1);
-        }}
-        columns={postColumns}
-        data={getData()}
+        onTabChange={handleTabChange}
+        columns={columnsMap[activeTab] || columnsMap.review} // 탭에 따른 동적 컬럼
+        data={postData[activeTab]?.list || []}
         currentPage={currentPage}
-        totalPages={activeTab === "ask" ? totalPages : 1}
+        totalPages={postData[activeTab]?.totalPages || 1}
         onPageChange={(page) => setCurrentPage(page)}
         sortOptions={[{ label: "최신순", value: "latest" }]}
         onRowClick={handleRowClick}
       />
 
-      {activeTab === "ask" && (
-        <div className="w-full max-w-xl mx-auto mt-2">
-          <SearchBar
-            options={postSearchOptions}
-            onSearch={(searchType, keyword) => {
-              setSearchQuery({ searchType, keyword });
-              setCurrentPage(1); // 검색 시 1페이지로 초기화
-            }}
-          />
-        </div>
-      )}
+      {/* 내 리뷰, 내 문의, 내 댓글 탭 모두 검색바 공유 가능 */}
+      <div className="w-full max-w-xl mx-auto mt-2">
+        <SearchBar
+          options={postSearchOptions}
+          onSearch={(searchType, keyword) => {
+            setSearchQuery({ searchType, keyword });
+            setCurrentPage(1);
+          }}
+        />
+      </div>
     </div>
   );
 };

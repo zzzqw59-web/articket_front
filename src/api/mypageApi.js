@@ -4,6 +4,9 @@ import axiosInstance from "./axiosInstance";
 const ASK_BASE_URL = "/api/asks";
 // 💡 회원 관련 기본 URL
 const MEMBER_BASE_URL = "/api/members";
+// 💡 리뷰 관련 기본 URL
+const REVIEW_BASE_URL = "/api/reviews";
+
 
 // MEMBER-001: 회원 정보 조회
 export const getMyProfile = async () => {
@@ -32,4 +35,12 @@ export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword
     params: { page, size, searchType, keyword },
   });
   return response.data; // PageResponseDTO<AskListResponseDTO>
+};
+
+// REV-010: 내 리뷰 목록 조회
+export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyword = "") => {
+  const response = await axiosInstance.get(`${REVIEW_BASE_URL}/me`, {
+    params: { page, size, searchType, keyword },
+  });
+  return response.data; // PageResponseDTO<MyReviewListResponseDTO>
 };
