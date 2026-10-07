@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import PageHeader from "../../components/common/PageHeader";
-import { getMyAskList, getMyReviewList } from "../../api/mypageApi";
+import { getMyAskList, getMyReviewList, getMyReplyList } from "../../api/mypageApi"; // 👈 getMyReplyList 추가
 
 const MyPostPage = () => {
   const navigate = useNavigate();
@@ -11,11 +11,11 @@ const MyPostPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState({ searchType: "title", keyword: "" });
 
-  // 1. 탭별 통합 데이터 상태 관리 (목록 & totalPages)
+  // 1. 탭별 통합 데이터 상태 관리
   const [postData, setPostData] = useState({
     review: { list: [], totalPages: 1 },
     ask: { list: [], totalPages: 1 },
-    reply: { list: [], totalPages: 1 }, // 추후 내 댓글용
+    reply: { list: [], totalPages: 1 },
   });
 
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,7 @@ const MyPostPage = () => {
     { id: "reply", label: "내 댓글" },
   ];
 
-  // 2. 탭별 테이블 컬럼 설정 (댓글 탭 확장성 대응)
+  // 2. 탭별 테이블 컬럼 설정 (요구사항 반영: 내 댓글은 번호 / 댓글 내용 / 작성일)
   const columnsMap = {
     review: [
       { key: "id", label: "번호", width: "w-24", align: "center" },
@@ -40,23 +40,31 @@ const MyPostPage = () => {
       { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
     ],
     reply: [
-      { key: "id", label: "번호", width: "w-20", align: "center" },
-      { key: "replyContent", label: "댓글 내용", align: "left" }, // 댓글 전용 컬럼
-      { key: "title", label: "원문 제목", align: "left" },
+      { key: "id", label: "번호", width: "w-24", align: "center" },
+      { key: "replyContent", label: "댓글 내용", align: "left" },
       { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
     ],
   };
 
-  const postSearchOptions = [
-    { label: "제목", value: "title" },
-    { label: "내용", value: "content" },
-  ];
+  // 탭별 검색 옵션 설정 (댓글 탭은 내용 중심 검색)
+  const getSearchOptions = () => {
+    if (activeTab === "reply") {
+      return [{ label: "내용", value: "content" }];
+    }
+    return [
+      { label: "제목", value: "title" },
+      { label: "내용", value: "content" },
+    ];
+  };
 
   // 탭 변경 처리
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     setCurrentPage(1);
-    setSearchQuery({ searchType: "title", keyword: "" });
+    setSearchQuery({
+      searchType: tabId === "reply" ? "content" : "title",
+      keyword: "",
+    });
   };
 
   // 3. 통합 데이터 Fetch 함수
@@ -93,8 +101,27 @@ const MyPostPage = () => {
           targetUrl: `/articket/ask/${item.askId}`,
         }));
       } else if (activeTab === "reply") {
-        // TODO: 추후 getMyReplyList(currentPage, 10, ...) 연동
-        // response = await getMyReplyList(...);
+        // MYPOST-001: 내 댓글 목록 연동
+        response = await getMyReplyList(
+          currentPage,
+          10,
+          searchQuery.searchType,
+          searchQuery.keyword
+        );
+        formattedList = (response.dtoList || []).map((item) => {
+          // 수정일이 작성일보다 이후면 수정일 표기, 아니면 작성일 표기
+          const displayDate = item.displayDate || item.replyModifiedAt || item.replyCreatedAt;
+
+          return {
+            id: item.replyId,
+            replyContent: item.replyContent,
+            createdAt: displayDate ? displayDate.substring(0, 10) : "",
+            // replyType ("REVIEW" 또는 "ASK")에 따라 원글 상세 URL 처리
+            targetUrl: item.replyType === "REVIEW"
+              ? `/articket/review/${item.targetId}`
+              : `/articket/ask/${item.targetId}`,
+          };
+        });
       }
 
       if (response) {
@@ -132,7 +159,7 @@ const MyPostPage = () => {
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        columns={columnsMap[activeTab] || columnsMap.review} // 탭에 따른 동적 컬럼
+        columns={columnsMap[activeTab] || columnsMap.review}
         data={postData[activeTab]?.list || []}
         currentPage={currentPage}
         totalPages={postData[activeTab]?.totalPages || 1}
@@ -141,10 +168,10 @@ const MyPostPage = () => {
         onRowClick={handleRowClick}
       />
 
-      {/* 내 리뷰, 내 문의, 내 댓글 탭 모두 검색바 공유 가능 */}
+      {/* 검색 바 */}
       <div className="w-full max-w-xl mx-auto mt-2">
         <SearchBar
-          options={postSearchOptions}
+          options={getSearchOptions()}
           onSearch={(searchType, keyword) => {
             setSearchQuery({ searchType, keyword });
             setCurrentPage(1);

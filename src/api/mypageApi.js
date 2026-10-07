@@ -6,6 +6,8 @@ const ASK_BASE_URL = "/api/asks";
 const MEMBER_BASE_URL = "/api/members";
 // 💡 리뷰 관련 기본 URL
 const REVIEW_BASE_URL = "/api/reviews";
+// 💡 마이페이지 관련 기본 URL
+const MYPAGE_BASE_URL = "/api/mypage";
 
 
 // MEMBER-001: 회원 정보 조회
@@ -43,4 +45,12 @@ export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyw
     params: { page, size, searchType, keyword },
   });
   return response.data; // PageResponseDTO<MyReviewListResponseDTO>
+};
+
+// MYPOST-001: 내 댓글 목록 조회
+export const getMyReplyList = async (page = 1, size = 10, searchType = "", keyword = "") => {
+  const response = await axiosInstance.get(`${MYPAGE_BASE_URL}/replies`, {
+    params: { page, size, searchType, keyword },
+  });
+  return response.data; // PageResponseDTO<MyReplyListResponseDTO>
 };
