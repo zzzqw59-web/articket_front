@@ -35,7 +35,7 @@ const ExhibitionEditPage = () => {
 
   useEffect(() => {
     // 관리자 + 전시 관계자 수정 가능 나중에 !isAdmin으로 변경
-    if (isAdmin || isStaff) {
+    if (!isAdmin && !isStaff) {
       alert(
         "수정 권한이 없습니다."
       );
@@ -157,7 +157,7 @@ const ExhibitionEditPage = () => {
     return <div>Loading...</div>;
   }
   // 이것도 나중에 !isAdmin으로 바꿔주기  
-  if (isAdmin) {
+  if (!isAdmin) {
     return null;
   }
 

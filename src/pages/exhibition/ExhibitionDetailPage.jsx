@@ -110,12 +110,12 @@ const ExhibitionDetailPage = () => {
   const isStaff = user?.memberType === MEMBER_ROLE.STAFF;
 
 //   관리자 + 전시관계자만 수정 가능
-//   const canEdit = isAdmin || isStaff;
-     const canEdit = true;
+   const canEdit = isAdmin || isStaff;
+     //const canEdit = true;
 
   // 관리자 삭제 가능
-//   const canDelete = isAdmin;
-     const canDelete = true;
+   const canDelete = isAdmin;
+     
 
   return (
     <div className="exhibition-detail-page">
