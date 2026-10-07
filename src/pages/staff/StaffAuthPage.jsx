@@ -10,14 +10,18 @@ const StaffAuthPage = () => {
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   const fetchExhibitions = async ({ keyword, page, free = false } = {}) => {
     try {
+      setLoading(true);
       const data = await getExhibitionList({ keyword, page, free });
       setExhibitions(data.content || data || []);
       setTotalPages(data.totalPages || 0);
     } catch (e) {
       console.error("fail to load exhibition list", e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -46,7 +50,15 @@ const StaffAuthPage = () => {
         <ExhibitionSearch onSearch={handleSearch} />
       </div>
       <div className="flex justify-center mt-30">
-        <StaffAuthExhibitionsComponent exhibitions={exhibitions} />
+        {loading ? (
+          <div className="text-4xl head-text">불러오는 중입니다...</div>
+        ) : exhibitions.length === 0 ? (
+          <div className="text-4xl head-text">
+            전시를 불러오는데 실패했습니다.
+          </div>
+        ) : (
+          <StaffAuthExhibitionsComponent exhibitions={exhibitions} />
+        )}
       </div>
       <ExhibitionPagination
         page={page}

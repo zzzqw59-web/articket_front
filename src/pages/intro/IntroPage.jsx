@@ -41,7 +41,7 @@ const IntroPage = () => {
       const response = await getVenueList();
       const venueList = response?.content || [];
       const validVenues = venueList.filter((v) => v && v.photoUrl);
-      if (validVenues.length == 0) {
+      if (validVenues.length === 0) {
         return;
       }
       const shuffled = [...validVenues].sort(() => 0.5 - Math.random());
@@ -222,8 +222,8 @@ const IntroPage = () => {
               currentIndex++;
               isAnimating = true;
 
-              const isFinalStep = currentIndex == 3;
-              const stepDuration = currentIndex == 3;
+              const isFinalStep = currentIndex === 3;
+              const stepDuration = currentIndex === 3;
 
               gsap.to(mainTl, {
                 time: steps[currentIndex],
@@ -231,7 +231,7 @@ const IntroPage = () => {
                 ease: isFinalStep ? (x) => Math.pow(x, 20) : "power1",
               });
 
-              if (currentIndex == 2) {
+              if (currentIndex === 2) {
                 textTl.play(0).then(() => {});
               }
 
