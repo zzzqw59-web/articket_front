@@ -478,6 +478,7 @@ const IntroPage = () => {
               .
             </div>
             <IntroAskComponent />
+            <div className="h-96"></div>
           </div>
         </div>
       </IntroLayout>

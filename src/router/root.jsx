@@ -26,10 +26,6 @@ const roots = createBrowserRouter([
           return { Component };
         },
       },
-      {
-        path: "intro",
-        element: <IntroPage />,
-      },
 
       // 로그인 / 회원가입 / 비밀번호 찾기
       ...authRouter(),
