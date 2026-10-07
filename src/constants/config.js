@@ -4,7 +4,7 @@
 export const MEMBER_ROLE = {
   ADMIN: "ADMIN",
   STAFF: "STAFF",
-  USER: "USER",
+  USER: "MEMBER",
 };
 
 // 🚀 추후 JWT 인증 연동 시, 로그인한 사용자 정보로 대체될 전역 객체

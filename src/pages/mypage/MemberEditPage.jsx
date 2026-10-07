@@ -4,11 +4,12 @@ import ProfileFormStep from "./components/ProfileFormStep";
 
 const MemberEditPage = () => {
   const {
-    isVerifyingPassword, // 💡 비밀번호 검증 모드 여부
+    isVerifyingPassword,
     checkPassword,
     setCheckPassword,
     showCheckPassword,
     setShowCheckPassword,
+    verifyPurpose, // 💡 필요시 UI에 목적별 안내 문구 표시에 사용 가능
     handleVerifySubmit,
     isEditing,
     formData,
@@ -19,10 +20,10 @@ const MemberEditPage = () => {
     isPhoneVerified,
     handleFormChange,
     handleStartEdit,
+    handleStartWithdrawal, // 💡 handleWithdrawal -> handleStartWithdrawal 로 변경
     handleCancelEdit,
     handlePhoneVerify,
     handleUpdateSubmit,
-    handleWithdrawal, // 💡 회원 탈퇴 실행
   } = useMemberEdit();
 
   // 비밀번호 보이기 / 가리기 아이콘 공통 렌더러
@@ -50,7 +51,7 @@ const MemberEditPage = () => {
 
   return (
     <div className="w-full max-w-4xl mx-auto px-4 py-6 flex flex-col items-center gap-6">
-      {/* 💡 회원 정보 수정 버튼을 눌러 비밀번호 검증 모드(isVerifyingPassword)일 때만 검증 창 표시 */}
+      {/* 💡 정보 수정 또는 회원 탈퇴 진행 시 비밀번호 검증 화면 분기 */}
       {isVerifyingPassword ? (
         <PasswordVerifyStep
           checkPassword={checkPassword}
@@ -59,6 +60,7 @@ const MemberEditPage = () => {
           setShowCheckPassword={setShowCheckPassword}
           onVerifySubmit={handleVerifySubmit}
           renderEyeIcon={renderEyeIcon}
+          verifyPurpose={verifyPurpose} // (선택) PasswordVerifyStep 내부에서 "탈퇴를 위한 비밀번호 확인" 문구 표시용
         />
       ) : (
         <ProfileFormStep
@@ -74,7 +76,7 @@ const MemberEditPage = () => {
           onCancelEdit={handleCancelEdit}
           onPhoneVerify={handlePhoneVerify}
           onUpdateSubmit={handleUpdateSubmit}
-          onWithdrawal={handleWithdrawal} // 💡 회원 탈퇴 연결
+          onWithdrawal={handleStartWithdrawal} // 💡 수정: 바로 탈퇴되지 않고 비밀번호 검증 모드로 전환
           renderEyeIcon={renderEyeIcon}
         />
       )}

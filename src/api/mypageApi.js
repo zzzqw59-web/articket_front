@@ -1,10 +1,34 @@
 import axiosInstance from "./axiosInstance";
 
-const BASE_URL = "/api/asks";
+// 💡 문의글 관련 기본 URL
+const ASK_BASE_URL = "/api/asks";
+// 💡 회원 관련 기본 URL
+const MEMBER_BASE_URL = "/api/members";
 
-// 1. 내 문의글 목록 조회
+// MEMBER-001: 회원 정보 조회
+export const getMyProfile = async () => {
+  const response = await axiosInstance.get(`${MEMBER_BASE_URL}/me`);
+  return response.data; // MemberResponseDTO
+};
+
+// MEMBER-002: 회원 정보 수정
+export const updateMyProfile = async (updateData) => {
+  // updateData: { nickname, password, phone }
+  const response = await axiosInstance.patch(`${MEMBER_BASE_URL}/me`, updateData);
+  return response.data;
+};
+
+// MEMBER-008: 비밀번호 재확인
+export const checkMyPassword = async (password) => {
+  const response = await axiosInstance.post(`${MEMBER_BASE_URL}/me/password/check`, {
+    password,
+  });
+  return response.data; // boolean (matches)
+};
+
+// ASK-006: 내 문의글 목록 조회
 export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword = "") => {
-  const response = await axiosInstance.get(`${BASE_URL}/my`, {
+  const response = await axiosInstance.get(`${ASK_BASE_URL}/my`, {
     params: { page, size, searchType, keyword },
   });
   return response.data; // PageResponseDTO<AskListResponseDTO>
