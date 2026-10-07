@@ -56,3 +56,9 @@ export const AUTH_CONSTANTS = {
   WITHDRAWAL_CHECKBOX_LABEL: "위 안내 사항을 모두 확인하였으며, 동의합니다.",
   MSG_WITHDRAWAL_SUCCESS: "회원 탈퇴 처리가 완료되었습니다.",
 };
+
+export const VERIFICATION_TYPE = {
+  SIGNUP: "SIGNUP",
+  PASSWORD_RESET: "PASSWORD_RESET",
+  PHONE_CHANGE: "PHONE_CHANGE",
+};
