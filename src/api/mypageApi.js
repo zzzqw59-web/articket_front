@@ -34,7 +34,7 @@ export const checkMyPassword = async (password) => {
 // ASK-006: 내 문의글 목록 조회
 export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword = "") => {
   const response = await axiosInstance.get(`${ASK_BASE_URL}/my`, {
-    params: { page, size, searchType, keyword },
+    params: { page, size, searchType, keyword, sort },
   });
   return response.data; // PageResponseDTO<AskListResponseDTO>
 };
@@ -42,7 +42,7 @@ export const getMyAskList = async (page = 1, size = 10, searchType = "", keyword
 // REV-010: 내 리뷰 목록 조회
 export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyword = "") => {
   const response = await axiosInstance.get(`${REVIEW_BASE_URL}/me`, {
-    params: { page, size, searchType, keyword },
+    params: { page, size, searchType, keyword, sort },
   });
   return response.data; // PageResponseDTO<MyReviewListResponseDTO>
 };
@@ -50,7 +50,7 @@ export const getMyReviewList = async (page = 1, size = 10, searchType = "", keyw
 // MYPOST-001: 내 댓글 목록 조회
 export const getMyReplyList = async (page = 1, size = 10, searchType = "", keyword = "") => {
   const response = await axiosInstance.get(`${MYPAGE_BASE_URL}/replies`, {
-    params: { page, size, searchType, keyword },
+    params: { page, size, searchType, keyword, sort },
   });
   return response.data; // PageResponseDTO<MyReplyListResponseDTO>
 };
