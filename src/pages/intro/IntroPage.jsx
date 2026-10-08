@@ -1,9 +1,283 @@
-import React from "react";
-import IntroComponent from "./IntroComponent";
+import gsap from "gsap";
+import { useEffect, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "../../components/intro/Intro.css";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { Observer } from "gsap/Observer";
+import { useGSAP } from "@gsap/react";
+import { ScrollToPlugin } from "gsap/ScrollToPlugin";
+import Marquee from "../../components/intro/IntroMarqueeComponent";
+import { getExhibitionList } from "../../api/exhibitionApi";
+import { getVenueList } from "../../api/venueApi";
+import CustomCarousel from "../../components/intro/IntroCustomCarouselComponent";
 import IntroLayout from "../../layouts/IntroLayout";
-import { useEffect } from "react";
+import IntroAskComponent from "../../components/intro/IntroAskComponent";
+
+gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
 
 const IntroPage = () => {
+  const textRef = useRef(null);
+  const containerRef = useRef(null);
+  const [posters, setPosters] = useState([]);
+  const [venues, setVenues] = useState([]);
+  const navigate = useNavigate();
+
+  const fetchPosters = async () => {
+    try {
+      const posters = await Promise.all(
+        Array.from({ length: 3 }, (_, i) => getExhibitionList({ page: i })),
+      );
+      setPosters(posters);
+    } catch (e) {
+      console.error("fail to get exhibition list");
+    }
+  };
+
+  const fetchVenues = async () => {
+    try {
+      const response = await getVenueList();
+      const venueList = response?.content || [];
+      const validVenues = venueList.filter((v) => v && v.photoUrl);
+      if (validVenues.length === 0) {
+        return;
+      }
+      const shuffled = [...validVenues].sort(() => 0.5 - Math.random());
+      setVenues(shuffled);
+    } catch (e) {
+      console.error("fail to load venue", e);
+    }
+  };
+
+  useEffect(() => {
+    fetchPosters();
+    fetchVenues();
+    ScrollTrigger.refresh();
+  }, []);
+
+  useGSAP(
+    () => {
+      //[전시 이미지들 등장 모션]
+      gsap.fromTo(
+        ".poster-box",
+        { x: -1500, y: -200 },
+        { x: 0, y: 0, duration: 1, ease: "back.out(0.5)" },
+      );
+      //[텍스트 등장 딜레이]
+      gsap.fromTo(
+        ".first-intro-text",
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.8, ease: "power2.out" },
+      );
+      //[contact us background]
+      gsap.fromTo(
+        ".first-tape",
+        { scaleX: 0, transformOrigin: "left center" },
+        {
+          scaleX: 1,
+          duration: 0.5,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".tape-wrapper",
+            start: "top -30%",
+            toggleActions: "play none none none",
+          },
+        },
+      );
+      //[ask anything background]
+      gsap.fromTo(
+        ".second-tape",
+        { scaleX: 0, transformOrigin: "left center" },
+        {
+          scaleX: 1,
+          duration: 0.5,
+          ease: "none",
+          scrollTrigger: {
+            trigger: ".tape-wrapper",
+            start: "top -50%",
+            toggleActions: "play none none none",
+          },
+        },
+      );
+
+      const textElement = textRef.current;
+      const length = 1500;
+
+      //[Articket 모션] 초기 상태 세팅 (선은 숨기고, fill은 채우지 않음)
+      gsap.set(textElement, {
+        strokeDasharray: length,
+        strokeDashoffset: length,
+        fill: "none",
+        visibility: "visible",
+      });
+      //[Articket 모션] 반복 타임라인 생성
+      const articketTl = gsap.timeline({
+        delay: 1.5,
+        repeat: -1,
+        repeatDelay: 0.5,
+      });
+
+      //[Articket 모션] [1단계] 선이 그려짐
+      articketTl
+        .to(textElement, {
+          strokeDashoffset: 0,
+          duration: 2.5,
+          ease: "power2.inOut",
+        })
+        //[Articket 모션] [2단계] 그려진 상태로 잠시 멈춤
+        .to(textElement, {
+          strokeDashoffset: 0, // 제자리 유지
+          duration: 1.0, // 멈춰있는 시간
+        })
+        //[Articket 모션] [3단계] 선이 다시 거꾸로 줄어들며 사라짐
+        .to(textElement, {
+          strokeDashoffset: length,
+          duration: 2.0,
+          ease: "power2.inOut",
+        });
+
+      const mainTl = gsap.timeline({ paused: true });
+      const firstScreenHeight = 1200;
+
+      mainTl
+        //자동 스크롤
+        .to(".first-screen", {
+          y: -firstScreenHeight,
+          duration: 2,
+        })
+
+        // 파란 박스 축소
+        .to(
+          ".frame-container",
+          {
+            scale: 0.2,
+            y: -500,
+            transformOrigin: "center center",
+            duration: 2,
+          },
+          2,
+        )
+        //자동 스크롤2
+        .to(
+          ".second-screen",
+          {
+            y: -5500,
+            duration: 3,
+          },
+          4,
+        );
+
+      const textTl = gsap.timeline({ paused: true });
+
+      textTl
+        // 작아진 박스 안에 글자 페이드 인
+        .to(".text-fadein-first", {
+          opacity: 1,
+          duration: 0.5,
+        })
+        .to(".text-fadein-second", {
+          opacity: 1,
+          duration: 0.5,
+        })
+        .to(".exhibition-fadein-text", {
+          opacity: 1,
+          duration: 1,
+        });
+
+      const steps = [0, 2, 4, 7];
+      const scrollTargets = [0, 60, 80, 5500];
+      let currentIndex = 0;
+      let isAnimating = false;
+
+      ScrollTrigger.create({
+        trigger: ".uppermost-container",
+        pin: true,
+        start: "top top",
+        end: "+=100",
+      });
+
+      Observer.create({
+        target: containerRef.current,
+        type: "wheel",
+        onChange: (self) => {
+          if (isAnimating) return;
+
+          const maxPinScroll = 5500;
+
+          //애니메이션 파트 끝난 이후
+          if (window.scrollY > maxPinScroll && self.deltaY < 0) {
+            if (
+              currentIndex === scrollTargets.length - 1 &&
+              window.scrollY > maxPinScroll + 50
+            ) {
+              return;
+            }
+          }
+
+          //스크롤 내리는 중
+          if (self.deltaY > 0) {
+            if (currentIndex < steps.length - 1) {
+              currentIndex++;
+              isAnimating = true;
+
+              const isFinalStep = currentIndex === 3;
+              const stepDuration = currentIndex === 3;
+
+              gsap.to(mainTl, {
+                time: steps[currentIndex],
+                duration: 1,
+                ease: isFinalStep ? (x) => Math.pow(x, 20) : "power1",
+              });
+
+              if (currentIndex === 2) {
+                textTl.play(0).then(() => {});
+              }
+
+              gsap.to(window, {
+                scrollTo: { y: scrollTargets[currentIndex], autoKill: false },
+                duration: stepDuration ? 2 : 1,
+                onComplete: () => {
+                  isAnimating = false;
+                },
+              });
+            }
+            //스크롤 올리는 중
+          } else if (self.deltaY < 0) {
+            if (currentIndex > 0) {
+              currentIndex--;
+              isAnimating = true;
+
+              if (currentIndex < 2) {
+                textTl
+                  .timeScale(3)
+                  .reverse()
+                  .then(() => {});
+              }
+
+              gsap.to(mainTl, {
+                time: steps[currentIndex],
+                duration: 1,
+                ease: "power1.out",
+              });
+
+              gsap.to(window, {
+                scrollTo: { y: scrollTargets[currentIndex], autoKill: false },
+                duration: 1,
+                onComplete: () => {
+                  isAnimating = false;
+                },
+              });
+            }
+          }
+        },
+      });
+    },
+    //선택자 범위 제한
+    { scope: containerRef },
+  );
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -11,7 +285,217 @@ const IntroPage = () => {
   return (
     <>
       <IntroLayout>
-        <IntroComponent />
+        <div
+          className="flex flex-col w-full min-h-screen bg-white uppermost-container overflow-x-hidden"
+          ref={containerRef}
+        >
+          <div className="first-screen second-screen select-none">
+            <div className="group flex flex-row items-center w-full justify-between h-[850px] w-full overflow-hidden bg-white">
+              <div className="flex flex-col">
+                <div className="first-intro-text head-text ml-30 mb-0  font-bold text-3xl">
+                  대한민국에서 열리는 모든 전시
+                </div>
+                <svg viewBox="0 0 800 300" className="svg-container ml-50">
+                  <text
+                    ref={textRef}
+                    x="50%"
+                    y="40%"
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="animated-text semi-logo"
+                  >
+                    Articket
+                  </text>
+                </svg>
+              </div>
+              <div className="poster-box flex flex-row justify-end items-center h-full px-10 gap-2 shrink-0">
+                {posters[0]?.content?.slice(0, 4).map((item) => (
+                  <div
+                    key={item.id}
+                    onClick={() => navigate(`/articket/exhibition/${item.id}`)}
+                    className="relative h-160 w-50 rounded-none overflow-hidden transition-all 
+                duration-500 ease-out hover:w-112.5 cursor-pointer"
+                  >
+                    <img
+                      src={item.imgUrl}
+                      alt={item.title}
+                      className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    <div
+                      className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent 
+              opacity-0 hover:opacity-100 transition-opacity duration-500 flex items-end p-6"
+                    >
+                      <span className="text-white text-xl font-bold whitespace-nowrap">
+                        {item.title}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex flex-col justify-center h-30 bg-[#ede6d6]">
+              <div className="logo text-6xl font-bold m-6 mb-12 ml-8">
+                <Link to="/articket">
+                  <span
+                    className="transition-colors duration-100 
+              hover:text-[#ede6d6] hover:[--text-stroke-width:0.5px] hover:[--text-stroke-color:#000000] 
+                hover:[-webkit-text-stroke-width:0.1px] hover:[-webkit-text-stroke-color:#000000]"
+                  >
+                    Articket
+                  </span>
+                </Link>
+              </div>
+            </div>
+
+            <div className="frame-container w-full h-[2500px] bg-[#214d72] flex items-center justify-center relative overflow-hidden">
+              <div className="frame-text text-white text-[250px] absolute top-1/2 left-1/2 -translate-x-1/2 translate-y-[-180%]">
+                Articket
+              </div>
+              <div className="flex flex-col items-center text-white text-center">
+                <div className="frame-text text-fadein-first text-[180px] ml-120 translate-x-[480px] translate-y-[-30px] opacity-0">
+                  에서
+                </div>
+                <div className="frame-text text-fadein-second text-[350px] font-bold translate-y-[300px] text-gray-50 opacity-0">
+                  한눈에
+                </div>
+              </div>
+            </div>
+            <div className=" text-center exhibition-fadein-text head-text text-6xl font-bold relative z-10 -mt-20 translate-y-[-1400px] opacity-0">
+              대한민국에서 열리는
+              <br /> 모든 전시를 만나보세요
+            </div>
+          </div>
+
+          <div className="bg-[#5c88a8] h-[900px] w-full text-[#5c88a8] select-none translate-y-[-1900px] second-screen">
+            background
+          </div>
+          <div className="bg-[#bfd6df] h-[1200px] w-full text-[#bfd6df] select-none translate-y-[-1900px] second-screen">
+            background
+          </div>
+
+          <div className="head-text text-5xl mb-50 ml-40">
+            <div className="my-5 text-7xl relative z-10 font-bold">
+              Articket은,
+            </div>
+            <div className="translate-y-[-5px] translate-x-10">
+              <div className="bg-[#ede6d6] h-80 w-80 rounded-full absolute z-0"></div>
+              <div className="bg-[#ede6d6] ml-60 h-80 w-80 rounded-full absolute z-0"></div>
+              <div className="bg-[#ede6d6] ml-120 h-80 w-80 rounded-full absolute z-0"></div>
+              <div className="bg-[#ede6d6] ml-180 h-80 w-80 rounded-full absolute z-0"></div>
+            </div>
+            <div className="z-10 relative mt-23 ml-25">
+              <div className="my-2">대한민국에서 열리는 전시에 대한 정보,</div>
+              <div className="my-2">
+                대한민국에 위치한 전시장에 대한 정보를 제공하고
+              </div>
+              <div className="my-2">
+                유료 전시의 예매와 후기를 지원하는 사이트입니다.
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-7xl head-text font-bold ml-40">
+              보고싶은 전시
+            </div>
+            <div className="flex ml-40">
+              <Marquee posters={posters} />
+              <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15">
+                <br /> 다채로운
+                <br /> 전시 정보를
+                <br />
+                <Link to="/articket/exhibition">
+                  <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                    한곳에&nbsp;
+                  </span>
+                </Link>
+                모아
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-7xl head-text font-bold ml-40 mt-50">
+              가고싶은 전시장
+            </div>
+            <div className="flex justify-between mr-40">
+              <div className="self-end ml-auto mr-10 mb-5">
+                <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
+                  <br /> 머무를 전시장의
+                  <br /> 다양한 정보를
+                  <br /> 알기쉽게
+                  <Link to="/articket/venue">
+                    <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                      &nbsp;한번에
+                    </span>
+                  </Link>
+                </div>
+              </div>
+              <div className="mt-10 mr-30">
+                <CustomCarousel venues={venues} />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-7xl head-text font-bold ml-40 mt-50">
+              관람객 이야기
+            </div>
+            <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
+              <br /> 내가 찾던 전시를
+              <br /> 관람한 이들의
+              <br /> 색다른
+              <Link to="/articket/review">
+                <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                  &nbsp;시선
+                </span>
+              </Link>
+            </div>
+          </div>
+
+          <div className=" bg-white flex flex-col items-center justify-center p-6 mt-50">
+            <div className="text-8xl font-bold mb-6 text-slate-900 self-start ml-30 relative z-20">
+              Contact Us
+            </div>
+
+            <div className=" p-10 self-start ml-60 z-10 relative tape-wrapper">
+              <div
+                onClick={() =>
+                  (window.location.href = "mailto:Articket@gmail.com")
+                }
+                className="body-text text-5xl cursor-pointer hover:text-gray-50 hover:font-bold"
+              >
+                email &emsp;&emsp;&emsp; Articket@gmail.com
+              </div>
+              <div
+                onClick={() => (window.location.href = "tel:01012341234")}
+                className="body-text text-5xl cursor-pointer hover:text-gray-50 hover:font-bold"
+              >
+                telephone &emsp;010-1234-1234
+              </div>
+            </div>
+            <div className="first-tape bg-[#bfd6df] select-none w-205 h-40 self-start ml-60 text-[#bfd6df] relative z-0 translate-y-[-150px] -rotate-3">
+              .
+            </div>
+            <div
+              className="text-8xl font-bold mb-8 text-slate-900 self-end mr-30 relative z-20
+              hover:text-gray-50 hover:font-bold cursor-pointer"
+              onClick={() => navigate("/articket/ask")}
+            >
+              Ask Anything!
+            </div>
+            <div className="second-tape bg-[#ede6d6] w-180 h-35 select-none self-end mr-20 text-[#ede6d6] relative z-0 translate-y-[-160px] rotate-3">
+              .
+            </div>
+            <div
+              className="flex justify-end w-full -translate-y-25 mr-50
+            "
+            >
+              <IntroAskComponent />
+            </div>
+            <div className="h-50"></div>
+          </div>
+        </div>
       </IntroLayout>
     </>
   );

@@ -26,10 +26,6 @@ const roots = createBrowserRouter([
           return { Component };
         },
       },
-      {
-        path: "intro",
-        element: <IntroPage />,
-      },
 
       // 로그인 / 회원가입 / 비밀번호 찾기
       ...authRouter(),
@@ -72,6 +68,11 @@ const roots = createBrowserRouter([
         children: paymentRouter(),
       },
     ],
+  },
+  {
+    path: "/articket/intro",
+    element: <IntroPage />,
+    HydrateFallback: () => <div>Loading...</div>,
   },
 ]);
 
