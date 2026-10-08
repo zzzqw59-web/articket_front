@@ -3,28 +3,22 @@ import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import ReservationDetailSide from "./components/ReservationDetailSide";
-import { getMyReservationList, getReservationDetail, getMyPaymentList, getPaymentDetail } from "../../api/mypageApi";
-import {
-  RESERVATION_TABS,
-  RESERVATION_SEARCH_OPTIONS,
-  RESERVATION_SORT_OPTIONS,
-  getBookingColumns,
-  getPaymentColumns,
-} from "../../constants/mypageConstants";
+import { getMyReservationList, getReservationDetail, getMyPaymentList, getPaymentDetail, cancelReservation } from "../../api/mypageApi";
+import { RESERVATION_TABS, RESERVATION_SEARCH_OPTIONS, RESERVATION_SORT_OPTIONS, getBookingColumns, getPaymentColumns,} from "../../constants/mypageConstants";
+import ReservationCancelModal from "./components/ReservationCancelModal";
 
 const ReservationListPage = () => {
   const [activeTab, setActiveTab] = useState("booking"); // 'booking' | 'payment'
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  
   const [dataList, setDataList] = useState([]);
   const [loading, setLoading] = useState(false);
-
   const [searchType, setSearchType] = useState("title");
   const [keyword, setKeyword] = useState("");
   const [sort, setSort] = useState("desc");
-
   const [selectedItem, setSelectedItem] = useState(null);
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   // 통합 데이터 Fetch (목록 조회)
   const fetchData = async () => {
@@ -129,6 +123,25 @@ const ReservationListPage = () => {
     setSelectedItem(null);
   };
 
+  // 예약 취소 제출 핸들러
+  const handleCancelSubmit = async (cancelData) => {
+    try {
+      setCancelLoading(true);
+      // selectedItem에 담긴 예약 번호(id 또는 reservationId) 활용
+      await cancelReservation(selectedItem.id, cancelData);
+      
+      alert("예약이 성공적으로 취소되었습니다.");
+      setIsCancelModalOpen(false);
+      setSelectedItem(null); // 상세 패널 닫기
+      fetchData(); // 목록 새로고침
+    } catch (error) {
+      console.error("예약 취소 실패:", error);
+      alert(error.response?.data?.message || "예약 취소 중 오류가 발생했습니다.");
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 py-6">
       <div className="flex gap-6 items-start w-full">
@@ -180,9 +193,19 @@ const ReservationListPage = () => {
             data={selectedItem}
             type={activeTab}
             onClose={handleCloseDetail}
+            onOpenCancelModal={() => setIsCancelModalOpen(true)} // 예약 취소 모달 오픈 핸들러
           />
         )}
       </div>
+
+      {/* 💡 예약 취소 전용 모달 */}
+      <ReservationCancelModal
+        isOpen={isCancelModalOpen}
+        onClose={() => setIsCancelModalOpen(false)}
+        onSubmit={handleCancelSubmit}
+        loading={cancelLoading}
+      />
+
     </div>
   );
 };

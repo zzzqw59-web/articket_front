@@ -2,7 +2,7 @@ import Badge from "../../../components/common/Badge";
 import TicketQRCode from "../../../components/common/TicketQRCode";
 import { RESERVATION_STATUS, PAYMENT_STATUS, STATUS_CONFIG } from "../../../constants/mypageConstants"; // 💡 상수 import
 
-const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
+const ReservationDetailSide = ({ data, type = "booking", onClose, onOpenCancelModal}) => {
   if (!data) return null;
 
   const isPayment = type === "payment";
@@ -113,9 +113,12 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
 
       {/* 5. 하단 버튼 */}
       <div className="flex flex-col gap-2">
-        {!isCanceled && (
-          <button className="w-full py-2 bg-amber-600 text-white text-xs font-bold rounded hover:bg-amber-700 transition-colors">
-            {isPayment ? "결제 취소" : "예약 취소"}
+        {!isCanceled && !isPayment && (
+          <button 
+            onClick={onOpenCancelModal} // 💡 예약 취소 모달 오픈 핸들러 연결
+            className="w-full py-2 bg-amber-600 text-white text-xs font-bold rounded hover:bg-amber-700 transition-colors"
+          >
+            예약 취소
           </button>
         )}
 

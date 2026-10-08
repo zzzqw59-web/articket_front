@@ -143,3 +143,23 @@ export const STATUS_CONFIG = {
     },
   },
 };
+
+// 💡 예약 취소 사유 Enum 상수
+export const RESERVATION_CANCEL_REASONS = {
+  PERSONAL: "PERSONAL",
+  SCHEDULE: "SCHEDULE",
+  PLAN_CHANGE: "PLAN_CHANGE",
+  COMPANION: "COMPANION",
+  WRONG_RESERVATION: "WRONG_RESERVATION",
+  OTHER: "OTHER",
+};
+
+// 💡 취소 모달 드롭다운용 옵션 목록
+export const CANCEL_REASON_OPTIONS = [
+  { value: RESERVATION_CANCEL_REASONS.PERSONAL, label: "개인 사정" },
+  { value: RESERVATION_CANCEL_REASONS.SCHEDULE, label: "일정 변경" },
+  { value: RESERVATION_CANCEL_REASONS.PLAN_CHANGE, label: "관람 계획 변경" },
+  { value: RESERVATION_CANCEL_REASONS.COMPANION, label: "동행인 사정" },
+  { value: RESERVATION_CANCEL_REASONS.WRONG_RESERVATION, label: "예약 정보 오류" },
+  { value: RESERVATION_CANCEL_REASONS.OTHER, label: "기타 (직접 입력)" },
+];
