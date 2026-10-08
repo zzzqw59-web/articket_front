@@ -1,4 +1,6 @@
+
 import { useState, useEffect, useRef } from "react";
+
 import {
   getMyProfile,
   checkMyPassword,
@@ -24,6 +26,8 @@ import {
   normalizePhone,
 } from "../../auth/utils/authFormUtils";
 
+import { WITHDRAW_STATUS } from "../../../constants/config";
+
 export const useMemberEdit = () => {
   // 1. 비밀번호 확인 모드 상태
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
@@ -35,7 +39,7 @@ export const useMemberEdit = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [showFormPassword, setShowFormPassword] = useState(false);
 
-  // 3. 회원 정보 Form State
+  // 3. 회원 정보 Form State & 기존 전화번호 저장 State (전화번호 변경 감지용)
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -52,7 +56,7 @@ export const useMemberEdit = () => {
   const [phoneVerifiedUntil, setPhoneVerifiedUntil] = useState(0);
   const savedProfileRef = useRef(null);
 
-  // 5. 회원 탈퇴 상태 정보
+  // 5. 회원 탈퇴 상태 정보 (WithdrawResponseDTO)
   const [withdrawInfo, setWithdrawInfo] = useState(null);
 
   const fetchMemberData = async () => {
@@ -72,9 +76,20 @@ export const useMemberEdit = () => {
       savedProfileRef.current = profile;
       setFormData(profile);
 
+      // 탈퇴 상태 조회
       try {
         const withdrawData = await getWithdrawStatus();
-        setWithdrawInfo(withdrawData);
+
+        // 백엔드 응답의 withdrawStatus가 IN_PROGRESS일 때만 유지
+        if (
+          withdrawData &&
+          (withdrawData.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
+            withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
+        ) {
+          setWithdrawInfo(withdrawData);
+        } else {
+          setWithdrawInfo(null);
+        }
       } catch (withdrawError) {
         console.warn(
           "탈퇴 신청 이력이 없거나 조회 실패:",
@@ -170,22 +185,25 @@ export const useMemberEdit = () => {
             "회원 탈퇴 신청이 완료되었습니다."
         );
 
-        fetchMemberData();
+        await fetchMemberData();
 
         setIsVerifyingPassword(false);
         setVerifyPurpose(null);
+        setCheckPassword("");
       } catch (error) {
         console.error("회원 탈퇴 신청 실패:", error);
 
-        const errorMessage =
-          error.response?.data?.message ||
-          "회원 탈퇴 신청 중 오류가 발생했습니다.";
-
-        alert(errorMessage);
+        alert(
+          getApiErrorMessage(
+            error,
+            "회원 탈퇴 신청 중 오류가 발생했습니다."
+          )
+        );
       }
     }
   };
 
+  // 탈퇴 신청 취소(철회) 처리
   const handleCancelWithdrawal = async () => {
     if (
       !window.confirm(
@@ -198,19 +216,22 @@ export const useMemberEdit = () => {
     try {
       await cancelWithdraw();
 
+      // 상태 즉시 리셋 후 서버 데이터 재조회
+      setWithdrawInfo(null);
+      await fetchMemberData();
+
       alert(
         "회원 탈퇴 신청이 정상적으로 취소되었습니다."
       );
-
-      fetchMemberData();
     } catch (error) {
       console.error("탈퇴 취소 실패:", error);
 
-      const errorMessage =
-        error.response?.data?.message ||
-        "탈퇴 취소 처리 중 오류가 발생했습니다.";
-
-      alert(errorMessage);
+      alert(
+        getApiErrorMessage(
+          error,
+          "탈퇴 취소 처리 중 오류가 발생했습니다."
+        )
+      );
     }
   };
 
@@ -305,6 +326,7 @@ export const useMemberEdit = () => {
 
     try {
       const verificationStartedAt = Date.now();
+
       await verifyPhoneVerification({
         phone: normalizePhone(formData.phone),
         code: authCode,
@@ -334,30 +356,35 @@ export const useMemberEdit = () => {
     }
   };
 
+  // 프로필 정보 수정 저장 제출 핸들러
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
     if (!isPhoneVerified || Date.now() >= phoneVerifiedUntil) {
       setIsPhoneVerified(false);
       setPhoneVerifiedUntil(0);
+
       alert(AUTH_CONSTANTS.MSG_NEED_PHONE_VERIFY);
 
       return;
     }
 
+    // 백엔드 MemberUpdateRequestDTO 매핑 (nickname, password, phone)
+    // phone은 백엔드 encryptPhone()을 위해 필수 전달
+    const updateData = {
+      nickname: formData.nickname,
+      phone: normalizePhone(formData.phone),
+    };
+
+    // 비밀번호를 입력한 경우에만 전달
+    if (
+      formData.password &&
+      formData.password.trim() !== ""
+    ) {
+      updateData.password = formData.password;
+    }
+
     try {
-      const updateData = {
-        nickname: formData.nickname,
-        phone: normalizePhone(formData.phone),
-      };
-
-      if (
-        formData.password &&
-        formData.password.trim() !== ""
-      ) {
-        updateData.password = formData.password;
-      }
-
       await updateMyProfile(updateData);
 
       alert(AUTH_CONSTANTS.MSG_UPDATE_SUCCESS);
@@ -372,7 +399,12 @@ export const useMemberEdit = () => {
     } catch (error) {
       console.error("회원정보 수정 실패:", error);
 
-      alert("회원 정보 수정 중 오류가 발생했습니다.");
+      alert(
+        getApiErrorMessage(
+          error,
+          "회원 정보 수정 중 오류가 발생했습니다."
+        )
+      );
     }
   };
 

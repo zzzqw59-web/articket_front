@@ -1,4 +1,4 @@
-// C:\articket\articket_front\src\constants\authConstants.js
+
 import { MEMBER_ROLE } from "./config";
 
 /**
@@ -12,7 +12,7 @@ export const ROLE_BADGE_MAP = {
   },
   [MEMBER_ROLE.STAFF]: {
     label: "전시 관계자",
-    style: "bg-amber-100 text-amber-800 border-amber-200",
+    style: "bg-amber-100 text-amber-800 border-200",
   },
   [MEMBER_ROLE.MEMBER]: {
     label: "일반 회원",
@@ -37,6 +37,14 @@ export const ROLE_BADGE_MAP = {
 /**
  * 인증, 회원가입 및 회원정보 관리 관련 상수 정의
  */
+
+export const VERIFICATION_TYPE = {
+  SIGNUP: "SIGNUP",
+  PASSWORD_RESET: "PASSWORD_RESET",
+  PHONE_CHANGE: "MEMBER_UPDATE",
+  MEMBER_UPDATE: "MEMBER_UPDATE",
+};
+
 export const AUTH_CONSTANTS = {
   SMS_CODE_LENGTH: 6,
   RESEND_TIMER_SECONDS: 300,
@@ -58,10 +66,4 @@ export const AUTH_CONSTANTS = {
   WITHDRAWAL_CHECKBOX_LABEL:
     "위 안내 사항을 모두 확인하였으며, 동의합니다.",
   MSG_WITHDRAWAL_SUCCESS: "회원 탈퇴 처리가 완료되었습니다.",
-};
-
-export const VERIFICATION_TYPE = {
-  SIGNUP: "SIGNUP",
-  PASSWORD_RESET: "PASSWORD_RESET",
-  MEMBER_UPDATE: "MEMBER_UPDATE",
 };

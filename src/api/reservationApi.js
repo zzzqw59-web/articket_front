@@ -22,3 +22,20 @@ export const createReservation = async (reservationData) => {
 
   return response.data;
 };
+
+export const getReservationDetail = async (reservationId) => {
+  const response = await axiosInstance.get(
+    `http://localhost:8080/api/reservations/${reservationId}`
+  );
+
+  return response.data;
+};
+
+// 주문번호로 예약 상세 조회
+export const getReservationByOrderId = async (orderId) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/order/${orderId}`
+  );
+
+  return response.data;
+};

@@ -1,81 +1,297 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { confirmPayment } from "../../api/paymentApi";
+import { getReservationDetail } from "../../api/reservationApi";
 
 const PaymentSuccess = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [reservation, setReservation] = useState(null);
+
+  const [payment, setPayment] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // React StrictMode 중복 결제 승인 방지
+  const confirmStarted = useRef(false);
+
+  useEffect(() => {
+    if (confirmStarted.current) {
+      return;
+    }
+
+    confirmStarted.current = true;
+
+    const handlePaymentConfirm = async () => {
+      try {
+        const paymentKey = searchParams.get("paymentKey");
+        const orderId = searchParams.get("orderId");
+        const amount = searchParams.get("amount");
+
+        console.log("결제 승인 요청:", {
+          paymentKey,
+          orderId,
+          amount,
+        });
+
+        if (!paymentKey || !orderId || !amount) {
+          throw new Error("결제 정보가 올바르지 않습니다.");
+        }
+
+        const response = await confirmPayment({
+          paymentKey,
+          orderId,
+          amount: Number(amount),
+        });
+
+        console.log("결제 승인 완료:", response);
+
+        const reservationResponse = await getReservationDetail(
+          response.reservationId
+        );
+
+        console.log("예약 상세 정보:", reservationResponse);
+
+        setPayment(response);
+        setReservation(reservationResponse);
+      } catch (error) {
+        console.error("결제 승인 실패 전체:", error);
+        console.error("error.response:", error.response);
+        console.error("error.message:", error.message);
+
+        setError(
+          error.response?.data?.message ||
+            error.message ||
+            "결제 승인에 실패했습니다."
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    handlePaymentConfirm();
+  }, [searchParams]);
+
+  // =====================================================
+  // 로딩
+  // =====================================================
+  if (isLoading) {
+    return (
+      <main className="min-h-[600px] flex items-center justify-center bg-white">
+        <p className="text-sm text-gray-400">
+          결제를 확인하는 중입니다...
+        </p>
+      </main>
+    );
+  }
+
+  // =====================================================
+  // 결제 실패
+  // =====================================================
+  if (error) {
+    return (
+      <main className="min-h-[600px] flex items-center justify-center bg-white px-6">
+        <div className="w-full max-w-xl text-center">
+          <p className="text-xs tracking-[0.3em] text-gray-400 mb-5">
+            ARTICKET
+          </p>
+
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">
+            결제 승인에 실패했습니다.
+          </h2>
+
+          <p className="text-sm text-gray-500 break-keep mb-8">
+            {error}
+          </p>
+
+          <button
+            type="button"
+            onClick={() => navigate("/articket")}
+            className="w-full max-w-sm h-12 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-800 transition"
+          >
+            전시회관으로 돌아가기
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // =====================================================
+  // 결제 완료
+  // =====================================================
   return (
-    <div className="flex justify-center items-center min-h-screen">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 p-6 relative">
-        
-        {/* 상단 타이틀 */}
-        <div className="text-center mb-6">
-          <div className="flex justify-center items-center gap-2 mb-1">
-            <svg className="w-7 h-7 text-amber-600 -rotate-45" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M22 10V6a2 2 0 0 0-2-2H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99.9 1.99 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.9-2 2-2zm-2-1.46c-1.19.69-2 1.97-2 3.46s.81 2.77 2 3.46V18H4v-1.54c1.19-.69 2-1.97 2-3.46 0-1.49-.81-2.77-2-3.46V6h16v2.54z"/>
-            </svg>
-            <h1 className="text-2xl font-extrabold tracking-wider text-amber-600">ARTICKET</h1>
-          </div>
-          <p className="text-xs text-gray-400 font-semibold tracking-widest">RESERVATION RECEIPT</p>
-          <p className="text-xs text-gray-400 font-medium mt-0.5">NO. XXXXXXXX</p>
-        </div>
+    <main className="min-h-[600px] bg-white flex justify-center px-6 py-12 md:py-16">
+      <div className="w-full max-w-[520px]">
+        {/* 예약 영수증 */}
+        <div className="bg-white border border-gray-200 rounded-md shadow-md overflow-hidden">
+          {/* ===============================================
+              상단
+          =============================================== */}
+          <div className="px-8 pt-8 pb-5">
+            <div className="text-center">
+              {/* ARTICKET */}
+              <div className="flex items-center justify-center gap-2">
+                <span className="text-2xl">
+                  🎟
+                </span>
 
-        {/* 점선 구분선 */}
-        <div className="border-t border-dashed border-gray-300 my-4"></div>
+                <span className="text-3xl font-bold text-[#e27800]">
+                  ARTICKET
+                </span>
+              </div>
 
-        {/* 예약 정보 리스트 */}
-        <div className="space-y-4 text-sm text-gray-700 py-2">
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">전시명</span>
-            <span className="font-semibold text-gray-900">카우스 친구, 그리고 이웃</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">장소</span>
-            <span className="font-semibold text-gray-900">한가람 미술관 1층</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">관람일시</span>
-            <span className="font-semibold text-gray-900">2026.09.20 11:00</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">예약인원</span>
-            <span className="font-semibold text-gray-900">3명</span>
-          </div>
-          <div className="flex justify-between items-center">
-            <span className="text-gray-400">예매일자</span>
-            <span className="font-semibold text-gray-900">2026.09.15 14:30</span>
-          </div>
-        </div>
+              <p className="text-xs text-gray-400 mt-2 tracking-[0.15em]">
+                RESERVATION RECEIPT
+              </p>
 
-        {/* 실선 구분선 */}
-        <div className="border-t border-gray-200 my-4"></div>
+              <p className="text-xs text-gray-400 mt-2">
+                NO. {payment?.orderId || "XXXXXXXX"}
+              </p>
+            </div>
 
-        {/* 예약 상태 (성공) */}
-        <div className="flex justify-between items-center py-2">
-          <span className="text-gray-400 text-sm">예약상태</span>
-          <span className="px-3.5 py-1 rounded-full text-xs font-bold text-white shadow-sm bg-emerald-400">
-            예약완료
-          </span>
-        </div>
+            <div className="border-t border-dashed border-gray-300 mt-5" />
+          </div>
 
-        {/* QR 코드 영역 */}
-        <div className="border-t border-dashed border-gray-300 my-4"></div>
-        <div className="text-center my-4">
-          <p className="text-xs text-gray-400 mb-3">현장 입장을 위한 QR 코드</p>
-          <div className="inline-block p-2 bg-white border border-gray-100 rounded-lg shadow-sm">
-            <div className="w-32 h-32 bg-gray-900 mx-auto flex items-center justify-center text-white text-xs">
-              [QR CODE]
+          {/* ===============================================
+              예약 정보
+          =============================================== */}
+          <div className="px-8">
+            {/* 전시명 */}
+            <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
+              <span className="text-sm text-gray-500">
+                전시명
+              </span>
+
+              <span className="text-sm font-semibold text-gray-800 text-right">
+                {reservation?.exhibitionTitle || "-"}
+              </span>
+            </div>
+
+            {/* 장소 */}
+            <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
+              <span className="text-sm text-gray-500">
+                장소
+              </span>
+
+              <span className="text-sm font-semibold text-gray-800 text-right">
+                {reservation?.exhibitionArea || "-"}
+              </span>
+            </div>
+
+            {/* 관람일 */}
+            <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
+              <span className="text-sm text-gray-500">
+                관람일시
+              </span>
+
+              <span className="text-sm font-semibold text-gray-800 text-right">
+                {reservation?.reservationDay || "-"}
+              </span>
+            </div>
+
+            {/* 예약 인원 */}
+            <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
+              <span className="text-sm text-gray-500">
+                예약인원
+              </span>
+
+              <span className="text-sm font-semibold text-gray-800 text-right">
+                {reservation?.reservationPerson
+                  ? `${reservation.reservationPerson}명`
+                  : "-"}
+              </span>
+            </div>
+
+            {/* 결제 금액 */}
+            <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
+              <span className="text-sm text-gray-500">
+                결제금액
+              </span>
+
+              <span className="text-lg font-bold text-gray-900 text-right">
+                {payment?.totalAmount != null
+                  ? `${payment.totalAmount.toLocaleString()}원`
+                  : "-"}
+              </span>
+            </div>
+
+            {/* 예매일자 */}
+            <div className="flex justify-between items-center gap-6 py-4">
+              <span className="text-sm text-gray-500">
+                예매일자
+              </span>
+
+              <span className="text-sm font-semibold text-gray-800 text-right">
+                {payment?.approvedAt
+                  ? payment.approvedAt.replace("T", " ").slice(0, 16)
+                  : "-"}
+              </span>
             </div>
           </div>
-        </div>
 
-        {/* 하단 점선 및 버튼 */}
-        <div className="border-t border-dashed border-gray-300 my-4"></div>
-        <button 
-          onClick={() => alert('상세 페이지로 이동')}
-          className="w-full mt-2 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-xl shadow-md transition-colors text-sm"
-        >
-          상세 페이지로 이동
-        </button>
+          {/* ===============================================
+              예약 상태
+          =============================================== */}
+          <div className="px-8">
+            <div className="border-t border-dashed border-gray-300 py-5">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-500">
+                  예약상태
+                </span>
+
+                <span className="px-3 py-1.5 rounded-md bg-green-100 text-green-600 text-xs font-semibold">
+                  {reservation?.reservationStatus === "RESERVED"
+                    ? "예약완료"
+                    : reservation?.reservationStatus || "-"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ===============================================
+              QR
+          =============================================== */}
+          <div className="border-t border-dashed border-gray-300 px-8 py-7 text-center">
+            <p className="text-sm text-gray-400 mb-4">
+              현장 입장을 위한 QR 코드
+            </p>
+
+            {/* 임시 QR */}
+            <div className="w-32 h-32 mx-auto border-4 border-black flex items-center justify-center">
+              <div className="w-24 h-24 grid grid-cols-5 grid-rows-5 gap-1">
+                {[
+                  1, 1, 0, 1, 1,
+                  1, 0, 1, 0, 1,
+                  0, 1, 1, 1, 0,
+                  1, 0, 1, 0, 1,
+                  1, 1, 0, 1, 1,
+                ].map((cell, index) => (
+                  <div
+                    key={index}
+                    className={cell ? "bg-black" : "bg-white"}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* ===============================================
+              상세 페이지 버튼
+          =============================================== */}
+          <div className="px-6 pb-6">
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/articket/exhibition/${reservation.exhibitionId}`)
+              }
+              className="w-full h-11 bg-[#e27800] text-white rounded-md text-sm font-semibold hover:bg-[#c96800] transition"
+            >
+              상세 페이지로 이동
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
+    </main>
   );
 };
 

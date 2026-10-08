@@ -29,10 +29,21 @@ export const useAskDetail = (askId) => {
   const [totalReplyCount, setTotalReplyCount] = useState(0);
   const [isReplyLoading, setIsReplyLoading] = useState(false);
 
+  const fetchedAskIdRef = useRef(null); // askId 변경 감지용 ref
+
   // 1. 상세 본문 데이터 조회
   const fetchAskDetail = useCallback(async () => {
     if (!askId) return;
-    
+
+    // 중복 조회 방지
+    if (fetchedAskIdRef.current === askId) {
+      return;
+    }
+
+    // 실행 직후 현재 askId를 ref에 저장하여 중복 조회 방지
+    fetchedAskIdRef.current = askId;
+
+
     setIsLoading(true);
     try {
       const response = await getAskDetail(askId);
@@ -107,12 +118,11 @@ export const useAskDetail = (askId) => {
   const handleAddComment = async (text) => {
     try {
       await createReply(askId, text);
-      showAlert({ message: "댓글이 등록되었습니다." });
       setReplyPage(1);
       fetchReplyList();
     } catch (error) {
       console.error("댓글 등록 실패:", error);
-      showAlert({ message: "댓글 등록에 실패했습니다." });
+      showAlert({ message: "댓글을 등록할 수 없습니다." });
     }
   };
 
@@ -124,7 +134,7 @@ export const useAskDetail = (askId) => {
       fetchReplyList();
     } catch (error) {
       console.error("댓글 수정 실패:", error);
-      showAlert({ message: "댓글 수정에 실패했습니다." });
+      showAlert({ message: "댓글 수정할 수 없습니다." });
     }
   };
 
@@ -140,7 +150,7 @@ export const useAskDetail = (askId) => {
           fetchReplyList();
         } catch (error) {
           console.error("댓글 삭제 실패:", error);
-          showAlert({ message: "댓글 삭제에 실패했습니다." });
+          showAlert({ message: "댓글 삭제할 수 없습니다." });
         }
       },
     });

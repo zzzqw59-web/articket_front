@@ -1,8 +1,15 @@
+
 import { useState, useEffect } from "react";
+
 import PageHeader from "../../../components/common/PageHeader";
+
 import ActionButton from "../../../components/common/ActionButton";
+
 import Badge from "../../../components/common/Badge";
+
 import { AUTH_CONSTANTS } from "../../../constants/authConstants";
+
+import { WITHDRAW_STATUS } from "../../../constants/config";
 
 const ProfileFormStep = ({
   formData,
@@ -13,6 +20,8 @@ const ProfileFormStep = ({
   setAuthCode,
   isPhoneVerified,
   phoneVerifiedUntil,
+  withdrawInfo,
+  onCancelWithdrawal,
   onFormChange,
   onStartEdit,
   onCancelEdit,
@@ -26,7 +35,14 @@ const ProfileFormStep = ({
     useState(false);
 
   const [codeExpiresAt, setCodeExpiresAt] = useState(0);
-  const [now, setNow] = useState(0);
+
+  const [now, setNow] = useState(Date.now());
+
+  // 탈퇴 대기 상태 여부 판단
+  const isPendingWithdrawal =
+    withdrawInfo &&
+    (withdrawInfo.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
+      withdrawInfo.status === WITHDRAW_STATUS.IN_PROGRESS);
 
   useEffect(() => {
     if (!isCodeSent && !isPhoneVerified) {
@@ -40,8 +56,15 @@ const ProfileFormStep = ({
     return () => window.clearInterval(timer);
   }, [isCodeSent, isPhoneVerified]);
 
-  const timeLeft = Math.max(0, Math.ceil((codeExpiresAt - now) / 1000));
-  const verifiedTimeLeft = Math.max(0, Math.ceil((phoneVerifiedUntil - now) / 1000));
+  const timeLeft = Math.max(
+    0,
+    Math.ceil((codeExpiresAt - now) / 1000)
+  );
+
+  const verifiedTimeLeft = Math.max(
+    0,
+    Math.ceil(((phoneVerifiedUntil || 0) - now) / 1000)
+  );
 
   const formatJoinDate = (value) => {
     if (!value) {
@@ -49,6 +72,7 @@ const ProfileFormStep = ({
     }
 
     const date = new Date(value);
+
     if (Number.isNaN(date.getTime())) {
       return "-";
     }
@@ -81,6 +105,7 @@ const ProfileFormStep = ({
     setCodeExpiresAt(0);
 
     const requestStartedAt = Date.now();
+
     const sent =
       await onSendPhoneCode();
 
@@ -89,8 +114,10 @@ const ProfileFormStep = ({
     }
 
     const currentTime = Date.now();
+
     setNow(currentTime);
     setIsCodeSent(true);
+
     setCodeExpiresAt(
       requestStartedAt + AUTH_CONSTANTS.RESEND_TIMER_SECONDS * 1000
     );
@@ -125,6 +152,46 @@ const ProfileFormStep = ({
       />
 
       <div className="w-full max-w-lg bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col gap-6">
+
+        {/* 탈퇴 진행 중 안내 배너 */}
+        {isPendingWithdrawal && (
+          <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <div className="p-1 bg-amber-500 text-white rounded-full mt-0.5">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+
+              <div className="flex flex-col text-xs text-amber-900 gap-1">
+                <span className="font-bold text-sm">현재 회원 탈퇴가 진행 중입니다.</span>
+                <span>
+                  신청일: {formatJoinDate(
+                    withdrawInfo?.withdrawCreatedAt || withdrawInfo?.withdrawRequestAt
+                  )}
+                </span>
+                <span>
+                  삭제 예정일: {formatJoinDate(
+                    withdrawInfo?.withdrawDue || withdrawInfo?.dueData
+                  )}
+                </span>
+                <span className="text-amber-700 mt-1">
+                  유예 기간 동안은 탈퇴 신청을 취소하실 수 있습니다.
+                </span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onCancelWithdrawal}
+              className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-colors shadow-sm"
+            >
+              회원 탈퇴 신청 취소 (계정 복구)
+            </button>
+          </div>
+        )}
+
+        {/* 프로필 요약 카드 */}
         <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
           <div className="w-16 h-16 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-sm shadow-inner">
             회원
@@ -192,7 +259,7 @@ const ProfileFormStep = ({
                 }
                 value={
                   isEditing
-                    ? formData.password
+                    ? formData.password || ""
                     : "••••••••••••"
                 }
                 onChange={onFormChange}
@@ -312,8 +379,7 @@ const ProfileFormStep = ({
                   <input
                     type="text"
                     placeholder={`인증번호 ${
-                      AUTH_CONSTANTS
-                        ?.SMS_CODE_LENGTH ||
+                      AUTH_CONSTANTS?.SMS_CODE_LENGTH ||
                       6
                     }자리`}
                     value={authCode}
@@ -327,8 +393,7 @@ const ProfileFormStep = ({
                       timeLeft === 0
                     }
                     maxLength={
-                      AUTH_CONSTANTS
-                        ?.SMS_CODE_LENGTH ||
+                      AUTH_CONSTANTS?.SMS_CODE_LENGTH ||
                       6
                     }
                     className={`flex-1 px-3 py-2 text-xs border rounded transition-colors placeholder:text-gray-300 ${
@@ -380,27 +445,25 @@ const ProfileFormStep = ({
                 />
               </div>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={
-                    handleStartEdit
-                  }
-                  className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
-                >
-                  회원 정보 수정
-                </button>
+              !isPendingWithdrawal && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleStartEdit}
+                    className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
+                  >
+                    회원 정보 수정
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={
-                    onWithdrawal
-                  }
-                  className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
-                >
-                  회원 탈퇴
-                </button>
-              </>
+                  <button
+                    type="button"
+                    onClick={onWithdrawal}
+                    className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+                  >
+                    회원 탈퇴
+                  </button>
+                </>
+              )
             )}
           </div>
         </form>
