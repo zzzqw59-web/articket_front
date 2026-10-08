@@ -1,31 +1,13 @@
-
-import { useState, useEffect, useRef } from "react";
-
-import {
-  getMyProfile,
-  checkMyPassword,
-  updateMyProfile,
+import { useState, useEffect } from "react";
+import { 
+  getMyProfile, 
+  checkMyPassword, 
+  updateMyProfile, 
   requestWithdraw,
-  cancelWithdraw,
-  getWithdrawStatus,
+  cancelWithdraw, 
+  getWithdrawStatus 
 } from "../../../api/mypageApi";
-
-import {
-  AUTH_CONSTANTS,
-  VERIFICATION_TYPE,
-} from "../../../constants/authConstants";
-
-import {
-  sendPhoneVerification,
-  verifyPhoneVerification,
-} from "../../../api/authApi";
-
-import {
-  getApiErrorMessage,
-  isValidPhone,
-  normalizePhone,
-} from "../../auth/utils/authFormUtils";
-
+import { AUTH_CONSTANTS } from "../../../constants/authConstants";
 import { WITHDRAW_STATUS } from "../../../constants/config";
 
 export const useMemberEdit = () => {
@@ -33,7 +15,7 @@ export const useMemberEdit = () => {
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [checkPassword, setCheckPassword] = useState("");
   const [showCheckPassword, setShowCheckPassword] = useState(false);
-  const [verifyPurpose, setVerifyPurpose] = useState(null);
+  const [verifyPurpose, setVerifyPurpose] = useState(null); // null | "EDIT" | "WITHDRAW"
 
   // 2. 정보 수정 모드 상태
   const [isEditing, setIsEditing] = useState(false);
@@ -49,55 +31,51 @@ export const useMemberEdit = () => {
     memberType: "",
     joinCreatedAt: "",
   });
+  const [initialPhone, setInitialPhone] = useState(""); // 💡 ReferenceError 해결을 위한 state
 
   // 4. SMS 인증 상태
   const [authCode, setAuthCode] = useState("");
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
-  const [phoneVerifiedUntil, setPhoneVerifiedUntil] = useState(0);
-  const savedProfileRef = useRef(null);
 
   // 5. 회원 탈퇴 상태 정보 (WithdrawResponseDTO)
   const [withdrawInfo, setWithdrawInfo] = useState(null);
 
+  // 초기 렌더링 시 회원 정보 & 탈퇴 상태 함께 불러오기
   const fetchMemberData = async () => {
     try {
       const data = await getMyProfile();
-
-      const profile = {
+      setFormData((prev) => ({
+        ...prev,
         email: data.email || "",
-        password: "",
         nickname: data.nickname || "",
         name: data.name || "",
-        phone: normalizePhone(data.phone || ""),
+        phone: data.phone || "",
         memberType: data.memberType || "",
         joinCreatedAt: data.joinCreatedAt || "",
-      };
-
-      savedProfileRef.current = profile;
-      setFormData(profile);
+      }));
+      
+      // 💡 불러온 기존 전화번호 저장
+      setInitialPhone(data.phone || "");
 
       // 탈퇴 상태 조회
       try {
         const withdrawData = await getWithdrawStatus();
-
+        
         // 백엔드 응답의 withdrawStatus가 IN_PROGRESS일 때만 유지
         if (
           withdrawData &&
           (withdrawData.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
-            withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
+           withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
         ) {
           setWithdrawInfo(withdrawData);
         } else {
           setWithdrawInfo(null);
         }
       } catch (withdrawError) {
-        console.warn(
-          "탈퇴 신청 이력이 없거나 조회 실패:",
-          withdrawError
-        );
-
-        setWithdrawInfo(null);
+        console.warn("탈퇴 신청 이력이 없거나 조회 실패:", withdrawError);
+        setWithdrawInfo(null); 
       }
+
     } catch (error) {
       console.error("회원 정보 조회 실패:", error);
     }
@@ -107,23 +85,7 @@ export const useMemberEdit = () => {
     fetchMemberData();
   }, []);
 
-  // 인증 성공 시각부터 5분이 지나면 프론트의 인증 상태도 만료한다.
-  useEffect(() => {
-    if (!isPhoneVerified || !phoneVerifiedUntil) {
-      return undefined;
-    }
-
-    const timer = window.setInterval(() => {
-      if (Date.now() >= phoneVerifiedUntil) {
-        setIsPhoneVerified(false);
-        setPhoneVerifiedUntil(0);
-        setAuthCode("");
-      }
-    }, 1000);
-
-    return () => window.clearInterval(timer);
-  }, [isPhoneVerified, phoneVerifiedUntil]);
-
+  // '회원 정보 수정' 버튼 클릭
   const handleStartEdit = () => {
     setCheckPassword("");
     setShowCheckPassword(false);
@@ -131,6 +93,7 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(true);
   };
 
+  // '회원 탈퇴' 버튼 클릭
   const handleStartWithdrawal = () => {
     setCheckPassword("");
     setShowCheckPassword(false);
@@ -138,27 +101,21 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(true);
   };
 
+  // 비밀번호 입력 제출 핸들러
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
-
     if (!checkPassword.trim()) {
-      alert(
-        AUTH_CONSTANTS.MSG_ENTER_PASSWORD ||
-          "비밀번호를 입력해 주세요."
-      );
-
+      alert(AUTH_CONSTANTS.MSG_ENTER_PASSWORD || "비밀번호를 입력해 주세요.");
       return;
     }
 
     if (verifyPurpose === "EDIT") {
       try {
         const matches = await checkMyPassword(checkPassword);
-
         if (matches) {
           setIsVerifyingPassword(false);
           setIsEditing(true);
           setIsPhoneVerified(false);
-          setPhoneVerifiedUntil(0);
           setAuthCode("");
           setVerifyPurpose(null);
         } else {
@@ -172,82 +129,46 @@ export const useMemberEdit = () => {
       const isConfirmed = window.confirm(
         "정말로 회원 탈퇴를 신청하시겠습니까?\n신청 후 30일간의 유예기간이 부여되며, 유예기간 내에 철회할 수 있습니다."
       );
-
-      if (!isConfirmed) {
-        return;
-      }
+      if (!isConfirmed) return;
 
       try {
         const result = await requestWithdraw(checkPassword);
-
-        alert(
-          result?.message ||
-            "회원 탈퇴 신청이 완료되었습니다."
-        );
-
-        await fetchMemberData();
-
+        alert(result?.message || "회원 탈퇴 신청이 완료되었습니다.");
+        
+        fetchMemberData();
         setIsVerifyingPassword(false);
         setVerifyPurpose(null);
-        setCheckPassword("");
       } catch (error) {
         console.error("회원 탈퇴 신청 실패:", error);
-
-        alert(
-          getApiErrorMessage(
-            error,
-            "회원 탈퇴 신청 중 오류가 발생했습니다."
-          )
-        );
+        const errorMessage = error.response?.data?.message || "회원 탈퇴 신청 중 오류가 발생했습니다.";
+        alert(errorMessage);
       }
     }
   };
 
   // 탈퇴 신청 취소(철회) 처리
   const handleCancelWithdrawal = async () => {
-    if (
-      !window.confirm(
-        "회원 탈퇴 신청을 취소하시겠습니까?\n취소 시 기존 계정을 정상적으로 이용하실 수 있습니다."
-      )
-    ) {
+    if (!window.confirm("회원 탈퇴 신청을 취소하시겠습니까?\n취소 시 기존 계정을 정상적으로 이용하실 수 있습니다.")) {
       return;
     }
 
     try {
       await cancelWithdraw();
-
+      alert("회원 탈퇴 신청이 정상적으로 취소되었습니다.");
+      
       // 상태 즉시 리셋 후 서버 데이터 재조회
       setWithdrawInfo(null);
       await fetchMemberData();
-
-      alert(
-        "회원 탈퇴 신청이 정상적으로 취소되었습니다."
-      );
     } catch (error) {
       console.error("탈퇴 취소 실패:", error);
-
-      alert(
-        getApiErrorMessage(
-          error,
-          "탈퇴 취소 처리 중 오류가 발생했습니다."
-        )
-      );
+      const errorMessage = error.response?.data?.message || "탈퇴 취소 처리 중 오류가 발생했습니다.";
+      alert(errorMessage);
     }
   };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-
-    setFormData((prev) => ({
-      ...prev,
-      [name]: name === "phone" ? normalizePhone(value) : value,
-    }));
-
-    if (name === "phone") {
-      setIsPhoneVerified(false);
-      setPhoneVerifiedUntil(0);
-      setAuthCode("");
-    }
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleCancelEdit = () => {
@@ -255,156 +176,52 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(false);
     setVerifyPurpose(null);
     setIsPhoneVerified(false);
-    setPhoneVerifiedUntil(0);
     setAuthCode("");
-    setShowFormPassword(false);
-
-    if (savedProfileRef.current) {
-      setFormData({ ...savedProfileRef.current });
-    }
+    setFormData((prev) => ({ ...prev, password: "" }));
   };
 
-  const handleSendPhoneCode = async () => {
-    if (!isValidPhone(formData.phone)) {
-      alert("올바른 휴대폰 번호를 입력해 주세요.");
-
-      return false;
-    }
-
-    try {
-      await sendPhoneVerification({
-        phone: normalizePhone(formData.phone),
-        type: VERIFICATION_TYPE.MEMBER_UPDATE,
-      });
-
-      setIsPhoneVerified(false);
-      setPhoneVerifiedUntil(0);
-      setAuthCode("");
-
-      alert("인증번호가 발송되었습니다.");
-
-      return true;
-    } catch (error) {
-      console.error("인증번호 전송 실패:", error);
-
-      alert(
-        getApiErrorMessage(
-          error,
-          "인증번호 전송 중 오류가 발생했습니다."
-        )
-      );
-
-      return false;
-    }
-  };
-
-  const handlePhoneVerify = async () => {
-    const codeLength =
-      AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
-
-    if (!authCode.trim()) {
-      alert(
-        AUTH_CONSTANTS.MSG_ENTER_AUTH_CODE.replace(
-          "{length}",
-          codeLength
-        )
-      );
-
-      return;
-    }
-
-    if (authCode.length !== codeLength) {
-      alert(
-        AUTH_CONSTANTS.MSG_EXACT_AUTH_CODE.replace(
-          "{length}",
-          codeLength
-        )
-      );
-
-      return;
-    }
-
-    try {
-      const verificationStartedAt = Date.now();
-
-      await verifyPhoneVerification({
-        phone: normalizePhone(formData.phone),
-        code: authCode,
-        type: VERIFICATION_TYPE.MEMBER_UPDATE,
-      });
-
-      setIsPhoneVerified(true);
-      setPhoneVerifiedUntil(
-        verificationStartedAt + AUTH_CONSTANTS.VERIFIED_VALID_SECONDS * 1000
-      );
-
-      alert(
-        AUTH_CONSTANTS.MSG_PHONE_VERIFIED_SUCCESS
-      );
-    } catch (error) {
-      console.error("전화번호 인증 실패:", error);
-
-      setIsPhoneVerified(false);
-      setPhoneVerifiedUntil(0);
-
-      alert(
-        getApiErrorMessage(
-          error,
-          "인증번호 확인 중 오류가 발생했습니다."
-        )
-      );
-    }
+  // 💡 SMS 인증 완료 콜백 (ProfileFormStep에서 성공 시 호출)
+  // 알림창 중복 방지를 위해 alert 구문 제거 및 상태 업데이트만 진행
+  const handlePhoneVerify = () => {
+    setIsPhoneVerified(true);
   };
 
   // 프로필 정보 수정 저장 제출 핸들러
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
-    if (!isPhoneVerified || Date.now() >= phoneVerifiedUntil) {
-      setIsPhoneVerified(false);
-      setPhoneVerifiedUntil(0);
+    // 최초 로드된 전화번호와 현재 폼에 입력된 전화번호 비교
+    const isPhoneChanged = formData.phone !== initialPhone;
 
-      alert(AUTH_CONSTANTS.MSG_NEED_PHONE_VERIFY);
-
+    // 전화번호를 실제 변경한 경우에만 SMS 인증 체크
+    if (isPhoneChanged && !isPhoneVerified) {
+      alert("전화번호 변경을 위해 SMS 인증을 완료해 주세요.");
       return;
     }
 
     // 백엔드 MemberUpdateRequestDTO 매핑 (nickname, password, phone)
-    // phone은 백엔드 encryptPhone()을 위해 필수 전달
+    // 💡 phone은 백엔드 encryptPhone()을 위해 필수 전달
     const updateData = {
       nickname: formData.nickname,
-      phone: normalizePhone(formData.phone),
+      phone: formData.phone,
     };
 
-    // 비밀번호를 입력한 경우에만 전달
-    if (
-      formData.password &&
-      formData.password.trim() !== ""
-    ) {
+    // 비밀번호를 입력한 경우에만 전달 (마스킹 문자열 제외)
+    if (formData.password && formData.password !== "••••••••••••" && formData.password.trim() !== "") {
       updateData.password = formData.password;
     }
 
     try {
       await updateMyProfile(updateData);
-
-      alert(AUTH_CONSTANTS.MSG_UPDATE_SUCCESS);
+      alert("회원 정보가 성공적으로 수정되었습니다.");
 
       setIsEditing(false);
       setIsPhoneVerified(false);
-      setPhoneVerifiedUntil(0);
       setAuthCode("");
-      setShowFormPassword(false);
-
-      await fetchMemberData();
+      await fetchMemberData(); // 최신 정보 재조회
     } catch (error) {
       console.error("회원정보 수정 실패:", error);
-
-      alert(
-        getApiErrorMessage(
-          error,
-          "회원 정보 수정 중 오류가 발생했습니다."
-        )
-      );
+      alert(error.response?.data?.message || "회원 정보 수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -416,26 +233,19 @@ export const useMemberEdit = () => {
     setShowCheckPassword,
     verifyPurpose,
     handleVerifySubmit,
-
     isEditing,
     formData,
     showFormPassword,
     setShowFormPassword,
-
     authCode,
     setAuthCode,
     isPhoneVerified,
-    phoneVerifiedUntil,
-
     withdrawInfo,
     handleCancelWithdrawal,
-
     handleFormChange,
     handleStartEdit,
     handleStartWithdrawal,
     handleCancelEdit,
-
-    handleSendPhoneCode,
     handlePhoneVerify,
     handleUpdateSubmit,
   };
