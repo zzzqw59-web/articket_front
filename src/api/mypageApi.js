@@ -89,3 +89,17 @@ export const getReservationDetail = async (reservationId) => {
   const response = await axiosInstance.get(`${RESERVATION_BASE_URL}/${reservationId}`);
   return response.data; // MyReservationDetailResponseDTO
 };
+
+// PMT-004 결제 내역 목록 조회
+export const getMyPaymentList = async (page = 1, size = 10, searchType = "title", keyword = "", sort = "desc") => {
+  const response = await axiosInstance.get(`/api/payments/me`, {
+    params: { page, size, searchType, keyword, sort },
+  });
+  return response.data;
+};
+
+// PMT-002 결제 상세 조회
+export const getPaymentDetail = async (reservationId) => {
+  const response = await axiosInstance.get(`/api/payments/reservation/${reservationId}`);
+  return response.data;
+};
