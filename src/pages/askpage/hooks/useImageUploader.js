@@ -17,13 +17,13 @@ export const useImageUploader = (maxLimit = 3, initialImages = []) => {
     Array(maxLimit).fill(null)
   );
 
-  // 초기 데이터가 변경될 때 기존 이미지 업데이트
+  // 💡 초기 데이터가 전달될 때 최초 1회 또는 값이 명확히 바뀔 때만 반영
   useEffect(() => {
-    if (initialImages) {
+    if (initialImages && initialImages.length > 0) {
       setExistingImages(initialImages);
       setDeletedImageIds([]);
     }
-  }, [initialImages]);
+  }, [JSON.stringify(initialImages)]); // 또는 최초 마운트 시에만 설정하도록 의존성 배열 조정
 
   // 신규 파일 단일 변경
   const handleFileChange = (index, e) => {
