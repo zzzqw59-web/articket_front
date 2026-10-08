@@ -122,18 +122,43 @@ const ReservationPage = () => {
 
       console.log("예약 요청:", reservationData);
 
+      // 1. 서버에 예약 생성
       const response = await createReservation(reservationData);
 
       console.log("예약 생성:", response);
 
-      alert("예약이 생성되었습니다.");
+      // 2. 서버가 만들어준 주문번호와 결제금액 사용
+      const orderId = response.reservationOrderId;
+      const amount = response.reservationAmount;
 
-      // 이후 Toss 결제 연동
-      // TODO: Toss 결제창 호출
+      console.log("Toss orderId:", orderId);
+      console.log("Toss amount:", amount);
+
+      // 3. Toss Payments SDK
+      const tossPayments = await loadTossPayments(
+        import.meta.env.VITE_TOSS_CLIENT_KEY
+      );
+
+      const payment = tossPayments.payment({
+        customerKey: `member-${response.reservationId}`,
+      });
+
+      // 4. 결제창 호출
+      await payment.requestPayment({
+        method: "CARD",
+        amount: {
+          currency: "KRW",
+          value: amount,
+        },
+        orderId: orderId,
+        orderName: exhibition.title,
+        successUrl: `${window.location.origin}/articket/payment/success`,
+        failUrl: `${window.location.origin}/articket/payment/fail`,
+      });
+
     } catch (error) {
-      console.error("예약 생성 실패:", error);
-
-      alert("예약에 실패했습니다.");
+      console.error("결제 요청 실패:", error);
+      alert("결제 요청에 실패했습니다.");
     }
   };
 

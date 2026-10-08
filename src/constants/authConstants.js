@@ -37,6 +37,14 @@ export const ROLE_BADGE_MAP = {
 /**
  * 인증, 회원가입 및 회원정보 관리 관련 상수 정의
  */
+
+export const VERIFICATION_TYPE = {
+  SIGNUP: "SIGNUP",
+  PASSWORD_RESET: "PASSWORD_RESET",
+  PHONE_CHANGE: "MEMBER_UPDATE",
+  MEMBER_UPDATE: "MEMBER_UPDATE",
+};
+
 export const AUTH_CONSTANTS = {
   SMS_CODE_LENGTH: 6,        // SMS 인증번호 자릿수
   RESEND_TIMER_SECONDS: 180, // 인증번호 재발송 대기 시간 (3분)
@@ -55,10 +63,4 @@ export const AUTH_CONSTANTS = {
     "탈퇴 시 회원님의 기존 예약/결제 내역, 위시리스트, 작성 게시글 관리 권한 및 모든 혜택이 30일 후 삭제되며 복구할 수 없습니다.",
   WITHDRAWAL_CHECKBOX_LABEL: "위 안내 사항을 모두 확인하였으며, 동의합니다.",
   MSG_WITHDRAWAL_SUCCESS: "회원 탈퇴 처리가 완료되었습니다.",
-};
-
-export const VERIFICATION_TYPE = {
-  SIGNUP: "SIGNUP",
-  PASSWORD_RESET: "PASSWORD_RESET",
-  PHONE_CHANGE: "PHONE_CHANGE",
 };
