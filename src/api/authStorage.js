@@ -1,6 +1,11 @@
 const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_KEY = "user";
+const AUTH_CHANGE_EVENT = "articket-auth-change";
+
+const notifyAuthChange = () => {
+  window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
+};
 
 export const getStoredAccessToken = () =>
   localStorage.getItem(ACCESS_TOKEN_KEY);
@@ -46,6 +51,8 @@ export const saveAuth = ({
       })
     );
   }
+
+  notifyAuthChange();
 };
 
 export const updateAccessToken = (accessToken) => {
@@ -60,4 +67,8 @@ export const clearAuth = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
   localStorage.removeItem(REFRESH_TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
+
+  notifyAuthChange();
 };
+
+export const AUTH_STORAGE_EVENT = AUTH_CHANGE_EVENT;
