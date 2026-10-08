@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { getExhibitionList } from "../../api/exhibitionApi";
 import StaffAuthPostersComponent from "../../components/staff/StaffAuthPostersComponent";
 import StatisticBoard from "../../components/staff/StatisticBoard";
-import { getProfitList } from "../../api/statisticApi";
+import PieChart from "../../components/staff/PieGraph";
 
 const Staffpage = () => {
   const [page, setPage] = useState(0);
@@ -80,6 +80,10 @@ const Staffpage = () => {
         onPageChange={handlePageChange}
       />
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
+
+      <div>
+        <PieChart />
+      </div>
       <div className="h-96" />
     </>
   );
