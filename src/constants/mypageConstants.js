@@ -99,3 +99,47 @@ export const getMyPostSearchOptions = (activeTab) => {
     { label: "내용", value: "content" },
   ];
 };
+
+// 💡 예약/결제 백엔드 Enum 상태값 상수
+export const RESERVATION_STATUS = {
+  PENDING: "PENDING",
+  RESERVED: "RESERVED",
+  CANCELED: "CANCELED",
+};
+
+export const PAYMENT_STATUS = {
+  READY: "READY",
+  DONE: "DONE",
+  CANCELED: "CANCELED",
+  FAILED: "FAILED",
+};
+
+// 💡 상태별 화면 표기용 라벨/뱃지 및 안내 메시지 맵핑
+export const STATUS_CONFIG = {
+  // 예약 상태 설정
+  RESERVATION: {
+    [RESERVATION_STATUS.RESERVED]: {
+      label: "예약 완료",
+      badgeVariant: "ongoing",
+      message: "정상 예약된 티켓입니다.",
+    },
+    [RESERVATION_STATUS.CANCELED]: {
+      label: "CANCELED",
+      badgeVariant: "ended",
+      message: "예약 취소 완료된 티켓입니다.",
+    },
+  },
+  // 결제 상태 설정
+  PAYMENT: {
+    [PAYMENT_STATUS.DONE]: {
+      label: "DONE",
+      badgeVariant: "ongoing",
+      message: "정상 처리된 결제건입니다.",
+    },
+    [PAYMENT_STATUS.CANCELED]: {
+      label: "CANCELED",
+      badgeVariant: "ended",
+      message: "결제 취소가 완료되었습니다.",
+    },
+  },
+};

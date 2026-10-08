@@ -1,18 +1,32 @@
 import Badge from "../../../components/common/Badge";
-import TicketQRCode from "../../../components/common/TicketQRCode"; // 👈 분리한 QR 컴포넌트 import
+import TicketQRCode from "../../../components/common/TicketQRCode";
+import { RESERVATION_STATUS, PAYMENT_STATUS, STATUS_CONFIG } from "../../../constants/mypageConstants"; // 💡 상수 import
 
 const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
   if (!data) return null;
 
-  const isCanceled = data.status?.includes("취소");
   const isPayment = type === "payment";
+  
+  // 💡 상태값 감지 (백엔드 Enum 직접 비교)
+  const isCanceled = isPayment 
+    ? data.status === PAYMENT_STATUS.CANCELED 
+    : data.status === RESERVATION_STATUS.CANCELED;
+
   const reservationNo = data.bookingId || data.transactionId;
+
+  // 💡 상수의 STATUS_CONFIG 맵핑 객체 활용
+  const currentConfig = isPayment 
+    ? STATUS_CONFIG.PAYMENT[data.status] 
+    : STATUS_CONFIG.RESERVATION[data.status];
+
+  // 안내 메시지 (맵핑된 값이 없으면 기본 문구)
+  const statusMessage = currentConfig?.message || (isPayment ? "결제 처리 중입니다." : "예약 처리 중입니다.");
 
   return (
     <div className="w-[360px] flex flex-col gap-4 sticky top-20 h-fit shrink-0">
       {/* 영수증 카드 */}
       <div className="relative w-full bg-white border border-gray-100 rounded-lg shadow-sm p-6 overflow-hidden">
-        {/* 1. 취소 워터마크 (CANCELED) */}
+        {/* 1. 취소 워터마크 */}
         {isCanceled && (
           <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none rotate-[-15deg]">
             <span className="text-8xl font-black text-red-500 tracking-tight">
@@ -41,7 +55,6 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
         <div className="flex flex-col gap-2.5">
           <DetailItem label="전시명" value={data.title} />
 
-          {/* 예약 전용 항목 */}
           {!isPayment && (
             <>
               <DetailItem label="장소" value={data.place} />
@@ -51,7 +64,6 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             </>
           )}
 
-          {/* 결제 전용 항목 */}
           {isPayment && (
             <>
               <DetailItem label="거래번호" value={data.transactionId} />
@@ -68,7 +80,7 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             </span>
             <div className="flex flex-col items-end gap-1">
               <Badge
-                label={data.status}
+                label={currentConfig?.label || data.status}
                 variant={isCanceled ? "ended" : "ongoing"}
               />
               {isCanceled && data.cancelDate && (
@@ -80,24 +92,16 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
           </div>
         </div>
 
-        {/* 4. 하단 영역 (예약/결제 및 취소 여부에 따른 분기) */}
+        {/* 4. 하단 영역 (QR 및 상수로 정의된 안내 문구 출력) */}
         <div className="border-t border-gray-100 mt-5 pt-5 flex flex-col items-center gap-3">
-          {/* A. 정상 예약 건: 분리된 QR 컴포넌트 표출 */}
           {!isPayment && !isCanceled && (
             <TicketQRCode reservationNo={reservationNo} size={96} />
           )}
 
-          {/* B. 취소된 예약 건 */}
-          {!isPayment && isCanceled && (
-            <span className="text-[11px] text-gray-400 py-2">
-              예약 취소 완료된 티켓입니다.
-            </span>
-          )}
-
-          {/* C. 결제 내역 안내 */}
-          {isPayment && (
+          {/* 💡 하드코딩 문구 대신 상수 맵핑 문구(statusMessage) 사용 */}
+          {(isCanceled || isPayment) && (
             <span className="text-[11px] text-gray-400 py-1">
-              {isCanceled ? "결제 취소가 완료되었습니다." : "정상 처리된 결제건입니다."}
+              {statusMessage}
             </span>
           )}
         </div>

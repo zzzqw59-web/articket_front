@@ -99,7 +99,7 @@ export const getMyPaymentList = async (page = 1, size = 10, searchType = "title"
 };
 
 // PMT-002 결제 상세 조회
-export const getPaymentDetail = async (reservationId) => {
-  const response = await axiosInstance.get(`/api/payments/reservation/${reservationId}`);
+export const getPaymentDetail = async (paymentId) => {
+  const response = await axiosInstance.get(`/api/payments/${paymentId}`);
   return response.data;
 };

@@ -26,13 +26,13 @@ const ReservationListPage = () => {
 
   const [selectedItem, setSelectedItem] = useState(null);
 
-  // 통합 데이터 Fetch (탭에 따라 API 및 데이터 구조 분기)
+  // 통합 데이터 Fetch (목록 조회)
   const fetchData = async () => {
     try {
       setLoading(true);
 
       if (activeTab === "booking") {
-        // 1. 예약 내역 조회
+        // 1. 예약 내역 목록 조회 (Payment/Reservation List API)
         const response = await getMyReservationList(currentPage, 10, searchType, keyword, sort);
         const mappedData = (response.dtoList || []).map((item) => ({
           id: item.reservationId,
@@ -43,26 +43,26 @@ const ReservationListPage = () => {
           place: item.exhibitionArea || "상세 장소 미정",
           personnel: `성인 ${item.reservationPerson}명`,
           viewDate: item.reservationDay ? String(item.reservationDay).replace(/-/g, '.') : "-",
-          bookingDate: item.reservationCreatedAt ? item.reservationCreatedAt.replace('T', ' ') : "-",
-          transactionDate: item.reservationCreatedAt ? item.reservationCreatedAt.replace('T', ' ') : "-",
+          bookingDate: item.reservationCreatedAt ? item.reservationCreatedAt.replace('T', ' ').split('.')[0] : "-",
+          transactionDate: item.reservationCreatedAt ? item.reservationCreatedAt.replace('T', ' ').split('.')[0] : "-",
           amount: item.reservationAmount ? `${item.reservationAmount.toLocaleString()} 원` : "0 원",
-          status: item.reservationStatus || "예약완료",
-          cancelDate: item.reservationCanceledAt ? item.reservationCanceledAt.replace('T', ' ') : null,
+          status: item.reservationStatus || "RESERVED",
+          cancelDate: item.reservationCanceledAt ? item.reservationCanceledAt.replace('T', ' ').split('.')[0] : null,
         }));
         setDataList(mappedData);
         setTotalPages(response.totalPage || 1);
 
       } else {
-        // 2. 결제 내역 조회
+        // 2. 결제 내역 목록 조회 (PaymentListResponseDTO: yyyy-MM-dd 형태만 가짐)
         const response = await getMyPaymentList(currentPage, 10, searchType, keyword, sort);
         const mappedData = (response.dtoList || []).map((item) => ({
-          id: item.paymentId,
+          id: item.paymentId, // paymentId (PK)
           paymentOrderId: item.paymentOrderId,
           transactionId: item.paymentOrderId,
           title: item.exhibitionTitle,
           amount: item.paymentAmount ? `${item.paymentAmount.toLocaleString()} 원` : "0 원",
-          transactionDate: item.paymentCreatedAt ? item.paymentCreatedAt.replace('T', ' ').substring(0, 16) : "-",
-          status: item.paymentStatus || "결제완료",
+          transactionDate: item.paymentCreatedAt || "-", // 백엔드가 'yyyy-MM-dd' 형태로 내려줌
+          status: item.paymentStatus || "DONE",
         }));
         setDataList(mappedData);
         setTotalPages(response.totalPage || 1);
@@ -86,8 +86,11 @@ const ReservationListPage = () => {
   // 행 클릭 시 단건 상세 조회 연동
   const handleRowClick = async (row) => {
     try {
-      if (activeTab === "booking" && row.orderId) {
-        const detailData = await getReservationDetail(row.orderId);
+      if (activeTab === "booking" && row.id) {
+        // 1. 예약 상세 API 호출 (기존 백엔드 API 호환)
+        // orderId 기반 조회가 필요하면 getReservationDetail(row.orderId)를 유지하고 백엔드 컨트롤러 연결 확인
+        const detailData = await getReservationDetail(row.id);
+
         setSelectedItem({
           ...row,
           title: detailData.exhibitionTitle,
@@ -96,25 +99,29 @@ const ReservationListPage = () => {
           viewDate: detailData.reservationDay ? String(detailData.reservationDay).replace(/-/g, '.') : row.viewDate,
           amount: detailData.reservationAmount ? `${detailData.reservationAmount.toLocaleString()} 원` : row.amount,
           status: detailData.reservationStatus || row.status,
-          cancelDate: detailData.reservationCanceledAt ? detailData.reservationCanceledAt.replace('T', ' ') : row.cancelDate,
+          bookingDate: detailData.reservationCreatedAt ? detailData.reservationCreatedAt.replace('T', ' ').split('.')[0] : row.bookingDate,
+          cancelDate: detailData.reservationCanceledAt ? detailData.reservationCanceledAt.replace('T', ' ').split('.')[0] : row.cancelDate,
         });
+
       } else if (activeTab === "payment" && row.id) {
+        // 2. 결제 상세 API 호출 (paymentId로 정확히 조회)
         const detailData = await getPaymentDetail(row.id);
+
         setSelectedItem({
-          ...row,
+          paymentId: detailData.paymentId,
           transactionId: detailData.paymentOrderId,
-          bookingId: `RES${String(detailData.reservationId).padStart(7, '0')}`,
-          amount: detailData.paymentAmount ? `${detailData.paymentAmount.toLocaleString()} 원` : row.amount,
+          bookingId: detailData.reservationId ? `RES${String(detailData.reservationId).padStart(7, '0')}` : "-",
+          title: row.title,
+          amount: detailData.paymentAmount ? `${detailData.paymentAmount.toLocaleString()} 원` : "0 원",
+          paymentMethod: detailData.paymentMethod || "신용카드",
+          refundAmount: detailData.paymentRefundAmount ? `${detailData.paymentRefundAmount.toLocaleString()} 원` : "0 원",
           status: detailData.paymentStatus,
-          transactionDate: detailData.paymentApprovedAt ? detailData.paymentApprovedAt.replace('T', ' ') : row.transactionDate,
-          cancelDate: detailData.paymentCanceledAt ? detailData.paymentCanceledAt.replace('T', ' ') : null,
+          transactionDate: detailData.paymentApprovedAt || detailData.paymentCreatedAt || "-",
+          cancelDate: detailData.paymentCanceledAt || null,
         });
-      } else {
-        setSelectedItem(row);
       }
     } catch (error) {
       console.error("상세 정보 조회 실패:", error);
-      setSelectedItem(row);
     }
   };
 
