@@ -107,12 +107,11 @@ export const useAskDetail = (askId) => {
   const handleAddComment = async (text) => {
     try {
       await createReply(askId, text);
-      showAlert({ message: "댓글이 등록되었습니다." });
       setReplyPage(1);
       fetchReplyList();
     } catch (error) {
       console.error("댓글 등록 실패:", error);
-      showAlert({ message: "댓글 등록에 실패했습니다." });
+      showAlert({ message: "댓글을 등록할 수 없습니다." });
     }
   };
 
@@ -124,7 +123,7 @@ export const useAskDetail = (askId) => {
       fetchReplyList();
     } catch (error) {
       console.error("댓글 수정 실패:", error);
-      showAlert({ message: "댓글 수정에 실패했습니다." });
+      showAlert({ message: "댓글 수정할 수 없습니다." });
     }
   };
 
@@ -140,7 +139,7 @@ export const useAskDetail = (askId) => {
           fetchReplyList();
         } catch (error) {
           console.error("댓글 삭제 실패:", error);
-          showAlert({ message: "댓글 삭제에 실패했습니다." });
+          showAlert({ message: "댓글 삭제할 수 없습니다." });
         }
       },
     });
