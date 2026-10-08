@@ -29,10 +29,21 @@ export const useAskDetail = (askId) => {
   const [totalReplyCount, setTotalReplyCount] = useState(0);
   const [isReplyLoading, setIsReplyLoading] = useState(false);
 
+  const fetchedAskIdRef = useRef(null); // askId 변경 감지용 ref
+
   // 1. 상세 본문 데이터 조회
   const fetchAskDetail = useCallback(async () => {
     if (!askId) return;
-    
+
+    // 중복 조회 방지
+    if (fetchedAskIdRef.current === askId) {
+      return;
+    }
+
+    // 실행 직후 현재 askId를 ref에 저장하여 중복 조회 방지
+    fetchedAskIdRef.current = askId;
+
+
     setIsLoading(true);
     try {
       const response = await getAskDetail(askId);
