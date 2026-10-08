@@ -1,12 +1,15 @@
 import Badge from "../../../components/common/Badge";
-import TicketQRCode from "../../../components/common/TicketQRCode"; // 👈 분리한 QR 컴포넌트 import
+import TicketQRCode from "../../../components/common/TicketQRCode";
 
 const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
   if (!data) return null;
 
   const isCanceled = data.status?.includes("취소");
   const isPayment = type === "payment";
-  const reservationNo = data.bookingId || data.transactionId;
+
+  // 실제 예약 데이터에서는 reservationOrderId를 사용
+  const reservationNo =
+    data.reservationOrderId || data.bookingId || data.transactionId;
 
   return (
     <div className="w-[360px] flex flex-col gap-4 sticky top-20 h-fit shrink-0">
@@ -25,13 +28,15 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
         <div className="flex flex-col items-center gap-1 border-b border-gray-100 pb-4 mb-4 text-center">
           <div className="flex items-center gap-1.5 text-amber-600 font-bold text-base">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" />
+              <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8h-7.6l2.4-7.2-6-4.8h7.6z" />
             </svg>
             <span>ARTICKET</span>
           </div>
+
           <span className="text-[10px] text-gray-400 tracking-wider">
             {isPayment ? "PAYMENT DETAILS" : "RESERVATION RECEIPT"}
           </span>
+
           <span className="text-[11px] text-gray-500">
             NO. {reservationNo}
           </span>
@@ -66,11 +71,13 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             <span className="text-gray-400 pt-1">
               {isPayment ? "결제 상태" : "예약 상태"}
             </span>
+
             <div className="flex flex-col items-end gap-1">
               <Badge
                 label={data.status}
                 variant={isCanceled ? "ended" : "ongoing"}
               />
+
               {isCanceled && data.cancelDate && (
                 <span className="text-[11px] text-red-500">
                   {data.cancelDate}
@@ -80,24 +87,26 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
           </div>
         </div>
 
-        {/* 4. 하단 영역 (예약/결제 및 취소 여부에 따른 분기) */}
+        {/* 4. 하단 영역 */}
         <div className="border-t border-gray-100 mt-5 pt-5 flex flex-col items-center gap-3">
-          {/* A. 정상 예약 건: 분리된 QR 컴포넌트 표출 */}
+          {/* 정상 예약 건 */}
           {!isPayment && !isCanceled && (
             <TicketQRCode reservationNo={reservationNo} size={96} />
           )}
 
-          {/* B. 취소된 예약 건 */}
+          {/* 취소된 예약 건 */}
           {!isPayment && isCanceled && (
             <span className="text-[11px] text-gray-400 py-2">
               예약 취소 완료된 티켓입니다.
             </span>
           )}
 
-          {/* C. 결제 내역 안내 */}
+          {/* 결제 내역 안내 */}
           {isPayment && (
             <span className="text-[11px] text-gray-400 py-1">
-              {isCanceled ? "결제 취소가 완료되었습니다." : "정상 처리된 결제건입니다."}
+              {isCanceled
+                ? "결제 취소가 완료되었습니다."
+                : "정상 처리된 결제건입니다."}
             </span>
           )}
         </div>
@@ -110,6 +119,7 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             {isPayment ? "결제 취소" : "예약 취소"}
           </button>
         )}
+
         <button
           onClick={onClose}
           className="w-full py-2 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors"
@@ -124,7 +134,12 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
 const DetailItem = ({ label, value, isPrice = false }) => (
   <div className="flex justify-between items-baseline gap-2 text-xs">
     <span className="text-gray-400 whitespace-nowrap">{label}</span>
-    <span className={`text-gray-900 ${isPrice ? "font-bold text-sm text-amber-700" : ""}`}>
+
+    <span
+      className={`text-gray-900 ${
+        isPrice ? "font-bold text-sm text-amber-700" : ""
+      }`}
+    >
       {value}
     </span>
   </div>
