@@ -18,33 +18,50 @@ const ReservationPage = () => {
 
   // 전시 상세 정보 조회
   useEffect(() => {
-    const fetchExhibition = async () => {
-      try {
-        setIsLoading(true);
+  const fetchExhibition = async () => {
+    try {
+      setIsLoading(true);
 
-        const data = await getExhibitionDetail(exhibitionId);
+      const data = await getExhibitionDetail(exhibitionId);
 
-        console.log("전시 상세:", data);
+      console.log("전시 상세:", data);
 
-        setExhibition(data);
+      setExhibition(data);
 
-        // 시작일이 존재하면 시작일 기준으로 달력 표시
-        if (data.startDate) {
-          const startDate = new Date(data.startDate);
+      // 오늘 날짜
+      const today = new Date();
+      const todayString =
+        `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-          setSelectedDate(data.startDate);
-          setCurrentYear(startDate.getFullYear());
-          setCurrentMonth(startDate.getMonth());
-        }
-      } catch (error) {
-        console.error("전시 정보 조회 실패:", error);
-      } finally {
-        setIsLoading(false);
+      // 기본 선택 날짜
+      let defaultDate = todayString;
+
+      // 오늘이 전시 시작일보다 이전이면 전시 시작일
+      if (data.startDate && todayString < data.startDate) {
+        defaultDate = data.startDate;
       }
-    };
 
-    fetchExhibition();
-  }, [exhibitionId]);
+      // 오늘이 전시 종료일보다 이후이면 전시 시작일
+      if (data.endDate && todayString > data.endDate) {
+        defaultDate = data.startDate;
+      }
+
+      setSelectedDate(defaultDate);
+
+      // 선택된 날짜 기준으로 달력 표시
+      const selected = new Date(`${defaultDate}T00:00:00`);
+
+      setCurrentYear(selected.getFullYear());
+      setCurrentMonth(selected.getMonth());
+    } catch (error) {
+      console.error("전시 정보 조회 실패:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  fetchExhibition();
+}, [exhibitionId]);
 
   // 총 결제 금액
   const totalPrice = exhibition
@@ -113,7 +130,9 @@ const ReservationPage = () => {
       return;
     }
 
+
     try {
+      console.log("예약 전 선택 날짜:", selectedDate);
       const reservationData = {
         exhibitionId: exhibition.id,
         reservationPerson: count,
@@ -158,7 +177,11 @@ const ReservationPage = () => {
 
     } catch (error) {
       console.error("결제 요청 실패:", error);
-      alert("결제 요청에 실패했습니다.");
+      console.log("에러 전체:", error);
+      console.log("에러 코드:", error?.code);
+      console.log("에러 메시지:", error?.message);
+
+      alert(`결제 요청에 실패했습니다.\n${error?.message || ""}`);
     }
   };
 
