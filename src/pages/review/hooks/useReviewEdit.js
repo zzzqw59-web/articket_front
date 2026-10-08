@@ -24,6 +24,7 @@ export const useReviewEdit = (reviewId) => {
 
     try {
       const data = await getReviewDetail(reviewId);
+      console.log("수정할 리뷰 데이터:", data);
       setInitialData(data);
     } catch (error) {
       console.error("원글 데이터 조회 실패:", error);
@@ -42,7 +43,7 @@ export const useReviewEdit = (reviewId) => {
   }, [fetchOriginalReview]);
 
   // 리뷰 수정 제출
-  const handleSubmit = async ({ requestDto, files }) => {
+  const handleSubmit = async ({ requestDto, files = [], deletedImageIds = [] }) => {
     try {
       const formData = new FormData();
 
@@ -51,6 +52,10 @@ export const useReviewEdit = (reviewId) => {
 
       files.forEach((file) => {
         formData.append("images", file);
+      });
+
+      deletedImageIds.forEach((imageId) => {
+        formData.append("deleteImageIds", imageId);
       });
 
       await updateReview(reviewId, formData);

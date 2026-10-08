@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import ActionButton from "../../../components/common/ActionButton";
 import { useImageUploader } from "../../askpage/hooks/useImageUploader";
 import ImageUploadSection from "../../askpage/components/ImageUploadSection";
-import { getMyReservations } from "../../../api/reservationApi";
+import { getAvailableExhibitionsForReview } from "../../../api/reviewApi";
 
 const REVIEW_IMAGE_LIMIT = 3;
 
@@ -23,41 +23,32 @@ const ReviewForm = ({
     content: initialData?.reviewBody || "",
   });
 
-  const [reservations, setReservations] = useState([]);
+  const [exhibitions, setExhibitions] = useState([]);
 
+  // 작성 모드에서만 리뷰 작성 가능한 전시 조회
   useEffect(() => {
-    const fetchReservations = async () => {
+    if (isEditMode) {
+      return;
+    }
+
+    const fetchExhibitions = async () => {
       try {
-        const data = await getMyReservations();
+        const data = await getAvailableExhibitionsForReview();
 
-        console.log("내 예약 목록:", data);
+        console.log("리뷰 작성 가능한 전시:", data);
 
-        setReservations(data.dtoList || []);
+        setExhibitions(data);
       } catch (error) {
-        console.error("리뷰 등록 실패:", error);
-
-        const message =
-        error.response?.data?.message || "리뷰 등록에 실패했습니다.";
-
-  showAlert({
-    message,
-  });
-}
+        console.error("리뷰 작성 가능한 전시 조회 실패:", error);
+      }
     };
 
-    fetchReservations();
-  }, []);
-
-  // 리뷰 작성 가능한 예약만 필터링
-  const availableReservations = reservations.filter((reservation) => {
-    return (
-      reservation.reservationStatus === "RESERVED" &&
-      reservation.reservationDay <= new Date().toISOString().slice(0, 10)
-    );
-  });
+    fetchExhibitions();
+  }, [isEditMode]);
 
   const {
     existingImages,
+    deletedImageIds,
     files,
     validFiles,
     handleFileChange,
@@ -68,6 +59,7 @@ const ReviewForm = ({
     initialData?.images || []
   );
 
+  // 제목 / 내용 변경
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -77,6 +69,27 @@ const ReviewForm = ({
     }));
   };
 
+  // 작성 모드에서 전시 선택
+  const handleExhibitionChange = (e) => {
+    const exhibitionId = Number(e.target.value);
+
+    const selected = exhibitions.find(
+      (exhibition) =>
+        exhibition.exhibitionId === exhibitionId
+    );
+
+    setFormData((prev) => ({
+      ...prev,
+      selectedExhibition: selected
+        ? {
+            id: selected.exhibitionId,
+            title: selected.exhibitionTitle,
+          }
+        : null,
+    }));
+  };
+
+  // 등록 / 수정
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -104,6 +117,7 @@ const ReviewForm = ({
     onSubmit({
       requestDto,
       files: validFiles,
+      deletedImageIds,
     });
   };
 
@@ -112,38 +126,36 @@ const ReviewForm = ({
       onSubmit={handleSubmit}
       className="w-full flex flex-col gap-4"
     >
-      {/* 관람한 전시 */}
-      <select
-        value={formData.selectedExhibition?.id || ""}
-        onChange={(e) => {
-          const selected = availableReservations.find(
-            (reservation) =>
-              reservation.exhibitionId === Number(e.target.value)
-          );
-
-          setFormData((prev) => ({
-            ...prev,
-            selectedExhibition: selected
-              ? {
-                  id: selected.exhibitionId,
-                  title: selected.exhibitionTitle,
-                }
-              : null,
-          }));
-        }}
-        className="w-full px-3 py-2 text-sm border border-gray-300 rounded bg-white"
-      >
-        <option value="">관람한 전시를 선택해 주세요</option>
-
-        {availableReservations.map((reservation) => (
-          <option
-            key={reservation.reservationId}
-            value={reservation.exhibitionId}
-          >
-            {reservation.exhibitionTitle} ({reservation.reservationDay})
+      {/* 전시 */}
+      {isEditMode ? (
+        // 수정 모드에서는 기존 전시 고정
+        <input
+          type="text"
+          value={formData.selectedExhibition?.title || ""}
+          disabled
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded bg-gray-100 text-gray-700"
+        />
+      ) : (
+        // 작성 모드에서는 관람한 전시 선택
+        <select
+          value={formData.selectedExhibition?.id || ""}
+          onChange={handleExhibitionChange}
+          className="w-full px-3 py-2 text-sm border border-gray-300 rounded bg-white"
+        >
+          <option value="">
+            관람한 전시를 선택해 주세요
           </option>
-        ))}
-      </select>
+
+          {exhibitions.map((exhibition) => (
+            <option
+              key={exhibition.exhibitionId}
+              value={exhibition.exhibitionId}
+            >
+              {exhibition.exhibitionTitle}
+            </option>
+          ))}
+        </select>
+      )}
 
       {/* 제목 */}
       <input
