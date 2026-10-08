@@ -12,6 +12,7 @@ import { getVenueList } from "../../api/venueApi";
 import CustomCarousel from "../../components/intro/IntroCustomCarouselComponent";
 import IntroLayout from "../../layouts/IntroLayout";
 import IntroAskComponent from "../../components/intro/IntroAskComponent";
+import IntroReviewComponent from "../../components/intro/IntroReviewComponent";
 
 gsap.registerPlugin(ScrollTrigger, Observer, useGSAP, ScrollToPlugin);
 if ("scrollRestoration" in history) {
@@ -441,10 +442,9 @@ const IntroPage = () => {
             <div className="text-7xl head-text font-bold ml-40 mt-50">
               관람객 이야기
             </div>
+            <IntroReviewComponent />
             <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
-              <br /> 내가 찾던 전시를
-              <br /> 관람한 이들의
-              <br /> 색다른
+              <br /> 내가 찾던 전시를 관람한 이들의 색다른
               <Link to="/articket/review">
                 <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
                   &nbsp;시선

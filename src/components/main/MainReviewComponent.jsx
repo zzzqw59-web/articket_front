@@ -3,34 +3,34 @@ import { useNavigate } from "react-router-dom";
 import { getReviewListByHits } from "../../api/reviewApi";
 
 const MainReviewComponent = () => {
-  const [asks, setAsks] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const navigate = useNavigate();
 
-  const fetchAsks = async () => {
+  const fetchReviews = async () => {
     try {
       const response = await getReviewListByHits();
-      setAsks(response.dtoList.slice(0, 5));
+      setReviews(response.dtoList.slice(0, 5));
     } catch (e) {
       console.error("fail to load ask", e);
     }
   };
 
   useEffect(() => {
-    fetchAsks();
+    fetchReviews();
   }, []);
 
   return (
     <>
-      <div className="w-[600px] flex justify-between mr-10">
+      <div className="w-[400px] flex justify-between mr-20">
         <div>
-          <span className="block font-bold text-3xl border-b-4 w-[500px] h-12">
+          <span className="block font-bold text-3xl border-b-4 w-[400px] h-12">
             <span className="ml-2 head-text">제목</span>
           </span>
-          {asks.map((review) => (
+          {reviews.map((review) => (
             <div key={review.reviewId}>
               <div
-                className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate  w-[470px]"
-                onClick={() => navigate(`/articket/ask/${review.reviewId}`)}
+                className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate  w-[370px]"
+                onClick={() => navigate(`/articket/review/${review.reviewId}`)}
               >
                 {review.reviewTitle}
               </div>
@@ -41,7 +41,7 @@ const MainReviewComponent = () => {
           <span className="block font-bold text-3xl border-b-4 w-[100px] head-text h-12">
             <span className="ml-3">조회수</span>
           </span>
-          {asks.map((review) => (
+          {reviews.map((review) => (
             <div key={review.reviewId}>
               <div className="text-2xl body-text text-center mt-1">
                 {review.reviewHits}
