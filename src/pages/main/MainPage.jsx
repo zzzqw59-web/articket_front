@@ -11,8 +11,8 @@ const MainPage = () => {
   return (
     <>
       <MainHeadComponent />
-      <div className="w-[1500px] mx-auto">
-        <div className="head-text text-5xl h-30 font-bold translate-y-12 -translate-x-10 mt-20">
+      <div className="w-[1100px] mx-auto">
+        <div className="head-text text-4xl h-30 font-bold translate-y-15 -translate-x-10 mt-20">
           화제의 전시
         </div>
         <MainPostersComponent />
@@ -20,7 +20,7 @@ const MainPage = () => {
       <div className="-translate-y-5">
         <MainBannerComponent />
       </div>
-      <div className="w-[1500px] flex mx-auto justify-between mt-20 mb-30">
+      <div className="w-[1200px] flex mx-auto justify-between mt-20 mb-30">
         <div>
           <div className="head-text text-5xl h-30 font-bold translate-y-12 -translate-x-10">
             <span

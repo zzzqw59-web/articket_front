@@ -21,15 +21,15 @@ const MainReviewComponent = () => {
 
   return (
     <>
-      <div className="w-[600px] flex justify-between mr-10">
+      <div className="w-[400px] flex justify-between mr-20">
         <div>
-          <span className="block font-bold text-3xl border-b-4 w-[500px] h-12">
+          <span className="block font-bold text-3xl border-b-4 w-[400px] h-12">
             <span className="ml-2 head-text">제목</span>
           </span>
           {asks.map((review) => (
             <div key={review.reviewId}>
               <div
-                className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate  w-[470px]"
+                className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate  w-[370px]"
                 onClick={() => navigate(`/articket/ask/${review.reviewId}`)}
               >
                 {review.reviewTitle}
