@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { getReviewList } from "../../api/reviewApi";
+import { getReviewListByHits } from "../../api/reviewApi";
 
 const MainReviewComponent = () => {
   const [asks, setAsks] = useState([]);
@@ -8,7 +8,7 @@ const MainReviewComponent = () => {
 
   const fetchAsks = async () => {
     try {
-      const response = await getReviewList({ sort: "reviewHits" });
+      const response = await getReviewListByHits();
       setAsks(response.dtoList.slice(0, 5));
     } catch (e) {
       console.error("fail to load ask", e);
@@ -27,7 +27,7 @@ const MainReviewComponent = () => {
             <span className="ml-2 head-text">제목</span>
           </span>
           {asks.map((review) => (
-            <div key={review.askId}>
+            <div key={review.reviewId}>
               <div
                 className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate  w-[470px]"
                 onClick={() => navigate(`/articket/ask/${review.reviewId}`)}

@@ -8,7 +8,7 @@ const MainPostersComponent = () => {
 
   const fetchPosters = async () => {
     try {
-      const posters = await getExhibitionList({ page: 5 });
+      const posters = await getExhibitionList({ page: 5, sort: "wishCount" });
       setPosters(posters.content.slice(0, 4));
     } catch (e) {
       console.error("fail to get exhibition list", e);
@@ -20,7 +20,7 @@ const MainPostersComponent = () => {
   }, []);
 
   return (
-    <div className="flex justify-center w-full ml-50">
+    <div className="flex justify-center w-full">
       <div className="grid grid-cols-4 gap-9 w-full">
         {posters.map((poster, index) => (
           <div

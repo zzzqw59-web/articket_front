@@ -11,8 +11,8 @@ const MainPage = () => {
   return (
     <>
       <MainHeadComponent />
-      <div className="w-[1500px]">
-        <div className="head-text text-5xl h-30 mt-30 ml-40 font-bold translate-y-12">
+      <div className="w-[1500px] mx-auto">
+        <div className="head-text text-5xl h-30 font-bold translate-y-12 -translate-x-10 mt-20">
           화제의 전시
         </div>
         <MainPostersComponent />

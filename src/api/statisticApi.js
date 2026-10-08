@@ -2,11 +2,6 @@ import axios from "axios";
 
 const prefix = "http://localhost:8080/api/statistic";
 
-export const getExhibitionListByWish = async () => {
-  const response = await axios.get(`${prefix}/exhibitionList`);
-  return response.data;
-};
-
 export const getTotalProfit = async (exhibitionId, startDate, endDate) => {
   const response = await axios.get(`${prefix}/profit/total`, {
     params: {
