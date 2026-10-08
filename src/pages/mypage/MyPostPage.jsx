@@ -4,20 +4,22 @@ import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import PageHeader from "../../components/common/PageHeader";
 import { getMyAskList, getMyReviewList, getMyReplyList } from "../../api/mypageApi";
+import {
+  MYPOST_TABS,
+  MYPOST_SORT_OPTIONS,
+  MYPOST_COLUMNS_MAP,
+  getMyPostSearchOptions,
+} from "../../constants/mypageConstants";
 
 const MyPostPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("review");
   const [currentPage, setCurrentPage] = useState(1);
 
-  // 💡 검색 상태를 단일 객체 대신 2개의 개별 상태로 분리
   const [searchType, setSearchType] = useState("title");
   const [keyword, setKeyword] = useState("");
-
-  // 정렬 상태 추가 (기본값: 최신순 "latest")
   const [sortOrder, setSortOrder] = useState("latest");
 
-  // 1. 탭별 통합 데이터 상태 관리
   const [postData, setPostData] = useState({
     review: { list: [], totalPages: 1 },
     ask: { list: [], totalPages: 1 },
@@ -26,82 +28,27 @@ const MyPostPage = () => {
 
   const [isLoading, setIsLoading] = useState(false);
 
-  // 탭 목록 설정
-  const tabs = [
-    { id: "review", label: "내 리뷰" },
-    { id: "ask", label: "내 문의" },
-    { id: "reply", label: "내 댓글" },
-  ];
-
-  // 정렬 옵션 설정 (최신순 / 오래된 순)
-  const sortOptions = [
-    { label: "최신순", value: "latest" },
-    { label: "오래된 순", value: "oldest" },
-  ];
-
-  // 2. 탭별 테이블 컬럼 설정
-  const columnsMap = {
-    review: [
-      { key: "id", label: "번호", width: "w-24", align: "center" },
-      { key: "title", label: "게시물 제목", align: "left" },
-      { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
-    ],
-    ask: [
-      { key: "id", label: "번호", width: "w-24", align: "center" },
-      { key: "title", label: "게시물 제목", align: "left" },
-      { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
-    ],
-    reply: [
-      { key: "id", label: "번호", width: "w-24", align: "center" },
-      { key: "replyContent", label: "댓글 내용", align: "left" },
-      { key: "createdAt", label: "작성일", width: "w-32", align: "center" },
-    ],
-  };
-
-  // 탭별 검색 옵션 설정
-  const getSearchOptions = () => {
-    if (activeTab === "reply") {
-      return [{ label: "내용", value: "content" }];
-    }
-    return [
-      { label: "제목", value: "title" },
-      { label: "내용", value: "content" },
-    ];
-  };
-
-  // 탭 변경 처리
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     setCurrentPage(1);
-    // 💡 탭 변경 시 분리된 검색 상태를 각각 초기화
     setSearchType(tabId === "reply" ? "content" : "title");
     setKeyword("");
   };
 
-  // 정렬 변경 처리
   const handleSortChange = (newSort) => {
     setSortOrder(newSort);
     setCurrentPage(1);
   };
 
-  // 3. 통합 데이터 Fetch 함수
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
       let response = null;
       let formattedList = [];
-
-      // API 정렬 파라미터 값 매핑 ("oldest" -> "asc", "latest" -> "desc")
       const apiSortParam = sortOrder === "oldest" ? "asc" : "desc";
 
       if (activeTab === "review") {
-        response = await getMyReviewList(
-          currentPage,
-          10,
-          searchType, // 💡 분리된 searchType 변수 사용
-          keyword,    // 💡 분리된 keyword 변수 사용
-          apiSortParam
-        );
+        response = await getMyReviewList(currentPage, 10, searchType, keyword, apiSortParam);
         formattedList = (response.dtoList || []).map((item) => ({
           id: item.reviewId,
           title: item.reviewTitle,
@@ -109,13 +56,7 @@ const MyPostPage = () => {
           targetUrl: `/articket/review/${item.reviewId}`,
         }));
       } else if (activeTab === "ask") {
-        response = await getMyAskList(
-          currentPage,
-          10,
-          searchType, // 💡 분리된 searchType 변수 사용
-          keyword,    // 💡 분리된 keyword 변수 사용
-          apiSortParam
-        );
+        response = await getMyAskList(currentPage, 10, searchType, keyword, apiSortParam);
         formattedList = (response.dtoList || []).map((item) => ({
           id: item.askId,
           title: item.askTitle,
@@ -123,24 +64,14 @@ const MyPostPage = () => {
           targetUrl: `/articket/ask/${item.askId}`,
         }));
       } else if (activeTab === "reply") {
-        response = await getMyReplyList(
-          currentPage,
-          10,
-          searchType, // 💡 분리된 searchType 변수 사용
-          keyword,    // 💡 분리된 keyword 변수 사용
-          apiSortParam
-        );
+        response = await getMyReplyList(currentPage, 10, searchType, keyword, apiSortParam);
         formattedList = (response.dtoList || []).map((item) => {
           const displayDate = item.displayDate || item.replyModifiedAt || item.replyCreatedAt;
-
           return {
             id: item.replyId,
             replyContent: item.replyContent,
             createdAt: displayDate ? displayDate.substring(0, 10) : "",
-            targetUrl:
-              item.replyType === "REVIEW"
-                ? `/articket/review/${item.targetId}`
-                : `/articket/ask/${item.targetId}`,
+            targetUrl: item.replyType === "REVIEW" ? `/articket/review/${item.targetId}` : `/articket/ask/${item.targetId}`,
           };
         });
       }
@@ -159,7 +90,7 @@ const MyPostPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, currentPage, searchType, keyword, sortOrder]); // 💡 의존성 배열에 searchType, keyword 각각 등록
+  }, [activeTab, currentPage, searchType, keyword, sortOrder]);
 
   useEffect(() => {
     fetchData();
@@ -177,15 +108,15 @@ const MyPostPage = () => {
       />
 
       <DataTableContainer
-        tabs={tabs}
+        tabs={MYPOST_TABS}
         activeTab={activeTab}
         onTabChange={handleTabChange}
-        columns={columnsMap[activeTab] || columnsMap.review}
+        columns={MYPOST_COLUMNS_MAP[activeTab] || MYPOST_COLUMNS_MAP.review}
         data={postData[activeTab]?.list || []}
         currentPage={currentPage}
         totalPages={postData[activeTab]?.totalPages || 1}
         onPageChange={(page) => setCurrentPage(page)}
-        sortOptions={sortOptions}
+        sortOptions={MYPOST_SORT_OPTIONS}
         currentSort={sortOrder}
         onSortChange={handleSortChange}
         onRowClick={handleRowClick}
@@ -194,10 +125,9 @@ const MyPostPage = () => {
       {/* 검색 바 */}
       <div className="w-full max-w-xl mx-auto mt-2">
         <SearchBar
-          key={activeTab} // 💡 탭 변경 시 SearchBar 내부 입력창 및 선택박스 초기화
-          options={getSearchOptions()}
+          key={activeTab}
+          options={getMyPostSearchOptions(activeTab)}
           onSearch={({ type, keyword }) => {
-            // 💡 첫 번째 인자로 전달되는 객체에서 type과 keyword를 구조분해 추출
             setSearchType(type || (activeTab === "reply" ? "content" : "title"));
             setKeyword(keyword || "");
             setCurrentPage(1);

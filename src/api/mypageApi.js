@@ -6,8 +6,10 @@ const ASK_BASE_URL = "/api/asks";
 const MEMBER_BASE_URL = "/api/members/me";
 // 💡 리뷰 관련 기본 URL
 const REVIEW_BASE_URL = "/api/reviews";
-// 💡 마이페이지 관련 기본 URL
+// 💡 기타 마이페이지 관련 기본 URL
 const MYPAGE_BASE_URL = "/api/mypage";
+// 💡 예약 관련 기본 URL
+const RESERVATION_BASE_URL = "/api/reservations";
 
 
 // MEMBER-001: 회원 정보 조회
@@ -72,4 +74,18 @@ export const getMyReplyList = async (page = 1, size = 10, searchType = "", keywo
     params: { page, size, searchType, keyword, sort },
   });
   return response.data; // PageResponseDTO<MyReplyListResponseDTO>
+};
+
+// RSRV-002 예약 목록 조회
+export const getMyReservationList = async (page = 1, size = 10, searchType = "", keyword = "", sort = "") => {
+  const response = await axiosInstance.get(`${RESERVATION_BASE_URL}/me`, {
+    params: { page, size, searchType, keyword, sort },
+  });
+  return response.data; // PageResponseDTO<MyReservationListResponseDTO>
+};
+
+// RSRV-003 예약 상세 조회
+export const getReservationDetail = async (reservationId) => {
+  const response = await axiosInstance.get(`${RESERVATION_BASE_URL}/${reservationId}`);
+  return response.data; // MyReservationDetailResponseDTO
 };
