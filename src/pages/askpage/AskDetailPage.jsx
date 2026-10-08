@@ -56,7 +56,13 @@ const AskDetailPage = () => {
     currentMemberType === MEMBER_ROLE.ADMIN ||
     currentMemberType === `ROLE_${MEMBER_ROLE.ADMIN}`;
 
+  const isStaff = 
+    currentMemberType === MEMBER_ROLE.STAFF ||
+    currentMemberType === `ROLE_${MEMBER_ROLE.STAFF}`
+
   const canModify = Boolean(isOwner || isAdmin);
+
+  const canComment = Boolean(isOwner || isAdmin || isStaff);
 
   return (
     <div>
@@ -163,7 +169,7 @@ const AskDetailPage = () => {
           {/* 댓글 영역 */}
           <CommentSection
             comments={replyList}
-            showInput={true}
+            showInput={canComment}
             onAddComment={handleAddComment}
             onEditComment={handleEditComment}
             onDeleteComment={handleDeleteComment}
