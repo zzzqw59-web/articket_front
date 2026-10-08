@@ -104,7 +104,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
           </div>
 
           {selectedExhibitions.length === 0 ? (
-            <div className="w-[850px] h-[400px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50">
+            <div className="w-[850px] h-[450px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50 ml-7">
               <div className="text-xl font-bold text-gray-700">
                 전시를 선택해주세요
               </div>
@@ -114,7 +114,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
               </div>
             </div>
           ) : !startDate || !endDate ? (
-            <div className="w-[850px] h-[400px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50">
+            <div className="w-[850px] h-[450px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50 ml-7">
               <div className="text-xl font-bold text-gray-700">
                 조회 기간을 선택해주세요
               </div>
@@ -124,7 +124,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
               </div>
             </div>
           ) : endDate < startDate ? (
-            <div className="w-[850px] h-[400px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50">
+            <div className="w-[850px] h-[450px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50 ml-7">
               <div className="text-xl font-bold text-gray-700">
                 조회 마감일이 조회 시작일보다 빠를 수 없습니다.
               </div>

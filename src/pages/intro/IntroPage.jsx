@@ -441,6 +441,16 @@ const IntroPage = () => {
             <div className="text-7xl head-text font-bold ml-40 mt-50">
               관람객 이야기
             </div>
+            <div className="text-5xl head-text font-bold self-end ml-5 mb-6 leading-15 text-center">
+              <br /> 내가 찾던 전시를
+              <br /> 관람한 이들의
+              <br /> 색다른
+              <Link to="/articket/review">
+                <span className="text-[#214d72] hover:text-[#bfd6df] cursor-pointer">
+                  &nbsp;시선
+                </span>
+              </Link>
+            </div>
           </div>
 
           <div className=" bg-white flex flex-col items-center justify-center p-6 mt-50">
