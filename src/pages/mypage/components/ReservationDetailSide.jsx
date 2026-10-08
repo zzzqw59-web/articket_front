@@ -39,13 +39,15 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
         <div className="flex flex-col items-center gap-1 border-b border-gray-100 pb-4 mb-4 text-center">
           <div className="flex items-center gap-1.5 text-amber-600 font-bold text-base">
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8-6 4.8 2.4-7.2-6-4.8h7.6z" />
+              <path d="M12 2l2.4 7.2h7.6l-6 4.8 2.4 7.2-6-4.8h-7.6l2.4-7.2-6-4.8h7.6z" />
             </svg>
             <span>ARTICKET</span>
           </div>
+
           <span className="text-[10px] text-gray-400 tracking-wider">
             {isPayment ? "PAYMENT DETAILS" : "RESERVATION RECEIPT"}
           </span>
+
           <span className="text-[11px] text-gray-500">
             NO. {reservationNo}
           </span>
@@ -78,11 +80,13 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             <span className="text-gray-400 pt-1">
               {isPayment ? "결제 상태" : "예약 상태"}
             </span>
+
             <div className="flex flex-col items-end gap-1">
               <Badge
                 label={currentConfig?.label || data.status}
                 variant={isCanceled ? "ended" : "ongoing"}
               />
+
               {isCanceled && data.cancelDate && (
                 <span className="text-[11px] text-red-500">
                   {data.cancelDate}
@@ -114,6 +118,7 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
             {isPayment ? "결제 취소" : "예약 취소"}
           </button>
         )}
+
         <button
           onClick={onClose}
           className="w-full py-2 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors"
@@ -128,7 +133,12 @@ const ReservationDetailSide = ({ data, type = "booking", onClose }) => {
 const DetailItem = ({ label, value, isPrice = false }) => (
   <div className="flex justify-between items-baseline gap-2 text-xs">
     <span className="text-gray-400 whitespace-nowrap">{label}</span>
-    <span className={`text-gray-900 ${isPrice ? "font-bold text-sm text-amber-700" : ""}`}>
+
+    <span
+      className={`text-gray-900 ${
+        isPrice ? "font-bold text-sm text-amber-700" : ""
+      }`}
+    >
       {value}
     </span>
   </div>

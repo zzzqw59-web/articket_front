@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { confirmPayment } from "../../api/paymentApi";
 import { getReservationDetail } from "../../api/reservationApi";
+import TicketQRCode from "../../components/common/TicketQRCode";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -256,23 +257,10 @@ const PaymentSuccess = () => {
               현장 입장을 위한 QR 코드
             </p>
 
-            {/* 임시 QR */}
-            <div className="w-32 h-32 mx-auto border-4 border-black flex items-center justify-center">
-              <div className="w-24 h-24 grid grid-cols-5 grid-rows-5 gap-1">
-                {[
-                  1, 1, 0, 1, 1,
-                  1, 0, 1, 0, 1,
-                  0, 1, 1, 1, 0,
-                  1, 0, 1, 0, 1,
-                  1, 1, 0, 1, 1,
-                ].map((cell, index) => (
-                  <div
-                    key={index}
-                    className={cell ? "bg-black" : "bg-white"}
-                  />
-                ))}
-              </div>
-            </div>
+            <TicketQRCode
+              reservationNo={payment?.orderId}
+              size={180}
+            />
           </div>
 
           {/* ===============================================
