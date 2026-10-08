@@ -1,12 +1,9 @@
-import MainLayout from "../../layouts/MainLayout";
-import AdminComponent from "./AdminComponent";
+import AdminComponent from "../../components/admin/AdminComponent";
 
 const AdminPage = () => {
   return (
     <>
-      <MainLayout>
-        <AdminComponent />
-      </MainLayout>
+      <AdminComponent />
     </>
   );
 };

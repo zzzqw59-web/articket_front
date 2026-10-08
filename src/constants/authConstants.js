@@ -14,12 +14,12 @@ export const ROLE_BADGE_MAP = {
     label: "전시 관계자",
     style: "bg-amber-100 text-amber-800 border-amber-200",
   },
-  [MEMBER_ROLE.USER]: {
+  [MEMBER_ROLE.MEMBER]: {
     label: "일반 회원",
     style: "bg-gray-100 text-gray-600 border-gray-200",
   },
 
-  // Spring Security prefix 호환 (ROLE_ADMIN, ROLE_STAFF, ROLE_USER)
+  // Spring Security prefix 호환 (ROLE_ADMIN, ROLE_STAFF, ROLE_MEMBER)
   [`ROLE_${MEMBER_ROLE.ADMIN}`]: {
     label: "관리자",
     style: "bg-red-100 text-red-700 border-red-200",
@@ -28,7 +28,7 @@ export const ROLE_BADGE_MAP = {
     label: "전시 관계자",
     style: "bg-amber-100 text-amber-800 border-amber-200",
   },
-  [`ROLE_${MEMBER_ROLE.USER}`]: {
+  [`ROLE_${MEMBER_ROLE.MEMBER}`]: {
     label: "일반 회원",
     style: "bg-gray-100 text-gray-600 border-gray-200",
   },
@@ -37,6 +37,14 @@ export const ROLE_BADGE_MAP = {
 /**
  * 인증, 회원가입 및 회원정보 관리 관련 상수 정의
  */
+
+export const VERIFICATION_TYPE = {
+  SIGNUP: "SIGNUP",
+  PASSWORD_RESET: "PASSWORD_RESET",
+  PHONE_CHANGE: "MEMBER_UPDATE",
+  MEMBER_UPDATE: "MEMBER_UPDATE",
+};
+
 export const AUTH_CONSTANTS = {
   SMS_CODE_LENGTH: 6,        // SMS 인증번호 자릿수
   RESEND_TIMER_SECONDS: 180, // 인증번호 재발송 대기 시간 (3분)

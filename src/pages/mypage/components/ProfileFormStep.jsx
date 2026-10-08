@@ -2,7 +2,9 @@ import { useState, useEffect } from "react";
 import PageHeader from "../../../components/common/PageHeader";
 import ActionButton from "../../../components/common/ActionButton";
 import Badge from "../../../components/common/Badge";
-import { AUTH_CONSTANTS } from "../../../constants/authConstants";
+import { AUTH_CONSTANTS, VERIFICATION_TYPE } from "../../../constants/authConstants";
+import { WITHDRAW_STATUS } from "../../../constants/config";
+import { sendPhoneVerification, verifyPhoneVerification } from "../../../api/authApi";
 
 const ProfileFormStep = ({
   formData,
@@ -12,6 +14,8 @@ const ProfileFormStep = ({
   authCode,
   setAuthCode,
   isPhoneVerified,
+  withdrawInfo, 
+  onCancelWithdrawal,
   onFormChange,
   onStartEdit,
   onCancelEdit,
@@ -21,11 +25,15 @@ const ProfileFormStep = ({
   renderEyeIcon,
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
+  const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS?.RESEND_TIMER_SECONDS || 180);
+  const [isSending, setIsSending] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
 
-  // 회원 탈퇴 동의 관련 모달 상태
-  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
-  const [isAgreed, setIsAgreed] = useState(false);
+  // 탈퇴 대기 상태 여부 판단
+  const isPendingWithdrawal =
+    withdrawInfo &&
+    (withdrawInfo.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
+     withdrawInfo.status === WITHDRAW_STATUS.IN_PROGRESS);
 
   useEffect(() => {
     let timer;
@@ -45,24 +53,68 @@ const ProfileFormStep = ({
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  const handleSendCode = () => {
+  /**
+   * 인증번호 발송 요청
+   * Request DTO: VerificationSendRequestDTO { phone, type }
+   */
+  const handleSendCode = async () => {
     if (!formData.phone) {
       alert("전화번호를 입력해주세요.");
       return;
     }
-    setIsCodeSent(true);
-    setTimeLeft(AUTH_CONSTANTS.RESEND_TIMER_SECONDS || 180);
-    alert("인증번호가 발송되었습니다. (테스트용)");
+
+    try {
+      setIsSending(true);
+
+      // VerificationSendRequestDTO 필드명(phone, type)에 맞춘 객체전송
+      await sendPhoneVerification({
+        phone: formData.phone,
+        type: VERIFICATION_TYPE?.PHONE_CHANGE || "PHONE_CHANGE",
+      });
+
+      setIsCodeSent(true);
+      setTimeLeft(AUTH_CONSTANTS?.RESEND_TIMER_SECONDS || 180);
+      alert("인증번호가 발송되었습니다.");
+    } catch (error) {
+      console.error("인증번호 발송 실패:", error);
+      alert(error.response?.data?.message || "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요.");
+    } finally {
+      setIsSending(false);
+    }
   };
 
-  // 탈퇴 확정 클릭
-  const handleConfirmWithdrawal = () => {
-    if (!isAgreed) {
-      alert("탈퇴 동의 체크박스에 동의해 주세요.");
+  /**
+   * 인증번호 검증 요청
+   * Request DTO: VerificationVerifyRequestDTO { phone, code, type }
+   */
+  const handleVerifyCode = async () => {
+    const codeLength = AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
+    if (!authCode || authCode.length !== codeLength) {
+      alert(`인증번호 ${codeLength}자리를 정확히 입력해 주세요.`);
       return;
     }
-    setShowWithdrawModal(false);
-    onWithdrawal();
+
+    try {
+      setIsVerifying(true);
+
+      // VerificationVerifyRequestDTO 필드명(phone, code, type)에 맞춘 객체전송
+      await verifyPhoneVerification({
+        phone: formData.phone,
+        code: authCode,
+        type: VERIFICATION_TYPE?.PHONE_CHANGE || "PHONE_CHANGE",
+      });
+
+      alert(AUTH_CONSTANTS?.MSG_PHONE_VERIFIED_SUCCESS || "전화번호 인증이 완료되었습니다.");
+      
+      if (onPhoneVerify) {
+        onPhoneVerify(); // 부모 컴포넌트에 전화번호 인증 성공 알림
+      }
+    } catch (error) {
+      console.error("인증번호 검증 실패:", error);
+      alert(error.response?.data?.message || "인증번호가 일치하지 않거나 만료되었습니다.");
+    } finally {
+      setIsVerifying(false);
+    }
   };
 
   return (
@@ -73,6 +125,33 @@ const ProfileFormStep = ({
       />
 
       <div className="w-full max-w-lg bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col gap-6">
+        
+        {/* 탈퇴 진행 중 안내 배너 */}
+        {isPendingWithdrawal && (
+          <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-3">
+            <div className="flex items-start gap-3">
+              <div className="p-1 bg-amber-500 text-white rounded-full mt-0.5">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+              </div>
+              <div className="flex flex-col text-xs text-amber-900 gap-1">
+                <span className="font-bold text-sm">현재 회원 탈퇴가 진행 중입니다.</span>
+                <span>신청일: {withdrawInfo?.withdrawRequestAt || "조회 중"}</span>
+                <span>삭제 예정일: {withdrawInfo?.withdrawDue || withdrawInfo?.dueData || "유예 기간 내"}</span>
+                <span className="text-amber-700 mt-1">유예 기간 동안은 언제든지 탈퇴를 철회하실 수 있습니다.</span>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={onCancelWithdrawal}
+              className="w-full py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded transition-colors shadow-sm"
+            >
+              회원 탈퇴 신청 취소 (계정 복구)
+            </button>
+          </div>
+        )}
+
         {/* 프로필 요약 카드 */}
         <div className="flex items-center gap-4 pb-4 border-b border-gray-100">
           <div className="w-16 h-16 rounded-full bg-amber-600 text-white font-bold flex items-center justify-center text-sm shadow-inner">
@@ -83,11 +162,10 @@ const ProfileFormStep = ({
               <span className="font-bold text-base text-gray-900">
                 {formData.nickname} 님
               </span>
-              {/* 💡 하드코딩 문구 제거 및 권한(Role) 기반 동적 배지 바인딩 */}
               <Badge variant={formData.role || formData.memberRole || "USER"} />
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
-              <span>가입일 : {formData.createdAt || "2026년 9월 17일"}</span>
+              <span>가입일 : {formData.joinCreatedAt || "조회 중..."}</span>
             </div>
           </div>
         </div>
@@ -169,9 +247,10 @@ const ProfileFormStep = ({
                 <button
                   type="button"
                   onClick={handleSendCode}
-                  className="px-4 py-2 text-xs bg-gray-800 text-white rounded font-medium hover:bg-gray-700 whitespace-nowrap transition-colors"
+                  disabled={isSending}
+                  className="px-4 py-2 text-xs bg-gray-800 text-white rounded font-medium hover:bg-gray-700 disabled:bg-gray-400 whitespace-nowrap transition-colors"
                 >
-                  {isCodeSent ? "재전송" : "인증번호 전송"}
+                  {isSending ? "발송 중..." : isCodeSent ? "재전송" : "인증번호 전송"}
                 </button>
               )}
             </div>
@@ -197,21 +276,21 @@ const ProfileFormStep = ({
                   maxLength={AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6}
                   className={`flex-1 px-3 py-2 text-xs border rounded transition-colors placeholder:text-gray-300 ${
                     isPhoneVerified
-                      ? "border-emerald-300 bg-emerald-50 text-emerald-800"
+                      ? "border-emerald-300 bg-emerald-50 text-emerald-800 cursor-not-allowed"
                       : "border-gray-300 bg-white focus:outline-none focus:border-amber-600"
                   }`}
                 />
                 <button
                   type="button"
-                  onClick={onPhoneVerify}
-                  disabled={isPhoneVerified || timeLeft === 0}
+                  onClick={handleVerifyCode}
+                  disabled={isPhoneVerified || timeLeft === 0 || isVerifying}
                   className={`px-4 py-2 text-xs rounded font-medium whitespace-nowrap transition-colors ${
                     isPhoneVerified
                       ? "bg-gray-200 text-gray-500 cursor-not-allowed"
-                      : "bg-amber-600 text-white hover:bg-amber-700"
+                      : "bg-amber-600 text-white hover:bg-amber-700 disabled:bg-amber-400"
                   }`}
                 >
-                  {isPhoneVerified ? "인증완료" : "인증하기"}
+                  {isVerifying ? "확인 중..." : isPhoneVerified ? "인증완료" : "인증하기"}
                 </button>
               </div>
             </div>
@@ -234,79 +313,29 @@ const ProfileFormStep = ({
                 />
               </div>
             ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={onStartEdit}
-                  className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
-                >
-                  회원 정보 수정
-                </button>
+              !isPendingWithdrawal && (
+                <>
+                  <button
+                    type="button"
+                    onClick={onStartEdit}
+                    className="w-full py-2.5 bg-amber-600 text-white rounded-md font-medium text-sm hover:bg-amber-700 transition-colors shadow-sm"
+                  >
+                    회원 정보 수정
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setIsAgreed(false);
-                    setShowWithdrawModal(true);
-                  }}
-                  className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
-                >
-                  회원 탈퇴
-                </button>
-              </>
+                  <button
+                    type="button"
+                    onClick={onWithdrawal}
+                    className="w-full py-2.5 bg-red-600 text-white font-bold rounded-md text-sm hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+                  >
+                    회원 탈퇴
+                  </button>
+                </>
+              )
             )}
           </div>
         </form>
       </div>
-
-      {/* 회원 탈퇴 확인 및 동의 모달 */}
-      {showWithdrawModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <div className="bg-white rounded-xl max-w-md w-full p-6 flex flex-col gap-4 shadow-xl border border-gray-100">
-            <h3 className="text-lg font-bold text-gray-900 border-b pb-2 border-gray-100">
-              {AUTH_CONSTANTS.WITHDRAWAL_CONFIRM_TITLE}
-            </h3>
-
-            <p className="text-xs text-gray-600 leading-relaxed bg-red-50 p-3 rounded-lg border border-red-100 text-red-800 font-medium">
-              {AUTH_CONSTANTS.WITHDRAWAL_WARNING_MESSAGE}
-            </p>
-
-            <label className="flex items-center gap-2 cursor-pointer mt-2 select-none">
-              <input
-                type="checkbox"
-                checked={isAgreed}
-                onChange={(e) => setIsAgreed(e.target.checked)}
-                className="w-4 h-4 text-red-600 border-gray-300 rounded focus:ring-red-500"
-              />
-              <span className="text-xs font-semibold text-gray-800">
-                {AUTH_CONSTANTS.WITHDRAWAL_CHECKBOX_LABEL}
-              </span>
-            </label>
-
-            <div className="flex justify-end gap-2 mt-3 pt-2 border-t border-gray-100">
-              <button
-                type="button"
-                onClick={() => setShowWithdrawModal(false)}
-                className="px-4 py-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded font-medium transition-colors"
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                onClick={handleConfirmWithdrawal}
-                disabled={!isAgreed}
-                className={`px-4 py-2 text-xs rounded font-bold text-white transition-colors ${
-                  isAgreed
-                    ? "bg-red-600 hover:bg-red-700"
-                    : "bg-red-300 cursor-not-allowed"
-                }`}
-              >
-                탈퇴 진행
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

@@ -1,10 +1,19 @@
-import { Link, NavLink } from "react-router-dom";
+import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
+import NotificationBell from "./NotificationBell";
+import { logout } from "../../api/authApi";
+import { AUTH_STORAGE_EVENT, getStoredAuthUser } from "../../api/authStorage";
+import { getMyMember } from "../../api/memberApi";
 
 const IntroHeader = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
+  const [authUser, setAuthUser] = useState(() => getStoredAuthUser());
+
+  const [nickname, setNickname] = useState("");
+
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   useEffect(() => {
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
@@ -30,6 +39,74 @@ const IntroHeader = () => {
     }
   };
 
+  useEffect(() => {
+    const syncAuthUser = () => {
+      setAuthUser(getStoredAuthUser());
+    };
+
+    window.addEventListener(AUTH_STORAGE_EVENT, syncAuthUser);
+    window.addEventListener("storage", syncAuthUser);
+
+    return () => {
+      window.removeEventListener(AUTH_STORAGE_EVENT, syncAuthUser);
+
+      window.removeEventListener("storage", syncAuthUser);
+    };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    if (!authUser) {
+      setNickname("");
+      return undefined;
+    }
+
+    const loadMember = async () => {
+      try {
+        const member = await getMyMember();
+
+        if (!cancelled) {
+          setNickname(member?.nickname || "회원");
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setNickname("회원");
+        }
+
+        console.error("회원 정보를 불러오는 데 실패했습니다.", error);
+      }
+    };
+
+    loadMember();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [authUser?.memberId]);
+
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    try {
+      setIsLoggingOut(true);
+
+      await logout();
+
+      navigate("/articket", {
+        replace: true,
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
+  const isStaff = authUser?.memberType === "STAFF";
+
+  const isAdmin = authUser?.memberType === "ADMIN";
+
   return (
     <div
       onClick={handleScrollClick}
@@ -46,25 +123,51 @@ const IntroHeader = () => {
             Articket
           </div>
         </Link>
+
         <div className="flex flex-col justify-end items-end">
-          <div className="flex flex-row mr-5">
-            <Link to="/articket/login">
-              <div
-                className="head-text font-bold text-sm w-15 h-15 border-2 border-[#0b2342] rounded-full select-none cursor-pointer 
-            flex items-center justify-center hover:bg-[#0b2342] hover:text-white transition-colors duration-300"
-              >
-                로그인
-              </div>
-            </Link>
-            <Link to="/articket/signup">
-              <div
-                className="head-text font-bold text-sm w-15 h-15 border-2 border-[#5c88a8] rounded-full select-none cursor-pointer 
-            flex items-center justify-center ml-2 hover:bg-[#5c88a8] hover:text-white transition-colors duration-300"
-              >
-                회원가입
-              </div>
-            </Link>
+          <div className="flex flex-row mr-5 items-center">
+            {!authUser ? (
+              <>
+                <Link to="/articket/login">
+                  <div
+                    className="head-text font-bold text-sm w-15 h-15 border-2 border-[#0b2342] rounded-full select-none cursor-pointer 
+                    flex items-center justify-center hover:bg-[#0b2342] hover:text-white transition-colors duration-300"
+                  >
+                    로그인
+                  </div>
+                </Link>
+
+                <Link to="/articket/signup">
+                  <div
+                    className="head-text font-bold text-sm w-15 h-15 border-2 border-[#5c88a8] rounded-full select-none cursor-pointer 
+                    flex items-center justify-center ml-2 hover:bg-[#5c88a8] hover:text-white transition-colors duration-300"
+                  >
+                    회원가입
+                  </div>
+                </Link>
+              </>
+            ) : (
+              <>
+                <div className="head-text font-bold text-sm mr-3 select-none">
+                  {nickname} 님 환영합니다!
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  disabled={isLoggingOut}
+                  className="head-text font-bold text-sm w-15 h-15 border-2 border-[#0b2342] rounded-full select-none cursor-pointer
+                  flex items-center justify-center hover:bg-[#0b2342] hover:text-white transition-colors duration-300
+                  disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isLoggingOut ? "처리중" : "로그아웃"}
+                </button>
+              </>
+            )}
+
+            {authUser && <NotificationBell />}
           </div>
+
           <div className="head-text flex flex-row mr-5 mb-5 mt-3 text-2xl cursor-pointer">
             <NavLink
               to="/articket/exhibition"
@@ -76,6 +179,7 @@ const IntroHeader = () => {
             </NavLink>
 
             <div className="text-gray-600">&nbsp;·&nbsp;</div>
+
             <NavLink
               to="/articket/venue"
               className={({ isActive }) =>
@@ -86,6 +190,7 @@ const IntroHeader = () => {
             </NavLink>
 
             <div className="text-gray-600">&nbsp;·&nbsp;</div>
+
             <NavLink
               to="/articket/intro"
               className={({ isActive }) =>
@@ -96,6 +201,7 @@ const IntroHeader = () => {
             </NavLink>
 
             <div className="text-gray-600">&nbsp;·&nbsp;</div>
+
             <NavLink
               to="/articket/review"
               className={({ isActive }) =>
@@ -106,6 +212,7 @@ const IntroHeader = () => {
             </NavLink>
 
             <div className="text-gray-600">&nbsp;·&nbsp;</div>
+
             <NavLink
               to="/articket/ask"
               className={({ isActive }) =>
@@ -115,39 +222,55 @@ const IntroHeader = () => {
               <div>문의</div>
             </NavLink>
 
-            <div className="text-gray-600">&nbsp;·&nbsp;</div>
-            <NavLink
-              to="/articket/wishlist"
-              className={({ isActive }) =>
-                isActive ? "font-bold " : "text-gray-600"
-              }
-            >
-              <div>마이 페이지</div>
-            </NavLink>
+            {authUser && (
+              <>
+                <div className="text-gray-600">&nbsp;·&nbsp;</div>
 
-            <div className="text-gray-600">&nbsp;·&nbsp;</div>
-            <NavLink
-              to="/articket/staffpage"
-              className={({ isActive }) =>
-                isActive ? "font-bold " : "text-gray-600"
-              }
-            >
-              <div>스태프 페이지</div>
-            </NavLink>
+                <NavLink
+                  to="/articket/mypage"
+                  className={({ isActive }) =>
+                    isActive ? "font-bold " : "text-gray-600"
+                  }
+                >
+                  <div>마이 페이지</div>
+                </NavLink>
+              </>
+            )}
 
-            <div className="text-gray-600">&nbsp;·&nbsp;</div>
-            <NavLink
-              to="/articket/adminpage"
-              className={({ isActive }) =>
-                isActive ? "font-bold " : "text-gray-600"
-              }
-            >
-              <div>어드민 페이지</div>
-            </NavLink>
+            {isStaff && (
+              <>
+                <div className="text-gray-600">&nbsp;·&nbsp;</div>
+
+                <NavLink
+                  to="/articket/staffpage"
+                  className={({ isActive }) =>
+                    isActive ? "font-bold " : "text-gray-600"
+                  }
+                >
+                  <div>스태프 페이지</div>
+                </NavLink>
+              </>
+            )}
+
+            {isAdmin && (
+              <>
+                <div className="text-gray-600">&nbsp;·&nbsp;</div>
+
+                <NavLink
+                  to="/articket/adminpage"
+                  className={({ isActive }) =>
+                    isActive ? "font-bold " : "text-gray-600"
+                  }
+                >
+                  <div>어드민 페이지</div>
+                </NavLink>
+              </>
+            )}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
 export default IntroHeader;

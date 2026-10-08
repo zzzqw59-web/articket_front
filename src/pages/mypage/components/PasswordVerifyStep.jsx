@@ -1,12 +1,12 @@
 import ActionButton from "../../../components/common/ActionButton";
 
 const PasswordVerifyStep = ({
-  checkPassword,
-  setCheckPassword,
-  showCheckPassword,
-  setShowCheckPassword,
-  onVerifySubmit,
-  renderEyeIcon,
+  checkPassword = "",
+  setCheckPassword = () => {},
+  showCheckPassword = false,
+  setShowCheckPassword = () => {},
+  onVerifySubmit = () => {},
+  renderEyeIcon = () => null,
 }) => {
   return (
     <div className="w-full max-w-md bg-white border border-gray-100 rounded-xl shadow-sm p-8 mt-10 flex flex-col items-center">
@@ -26,9 +26,10 @@ const PasswordVerifyStep = ({
               onChange={(e) => setCheckPassword(e.target.value)}
               className="w-full px-3 py-2 pr-10 text-sm border border-gray-300 rounded focus:outline-none focus:border-amber-600"
             />
-            {renderEyeIcon(showCheckPassword, () =>
-              setShowCheckPassword(!showCheckPassword)
-            )}
+            {renderEyeIcon &&
+              renderEyeIcon(showCheckPassword, () =>
+                setShowCheckPassword(!showCheckPassword)
+              )}
           </div>
         </div>
 
