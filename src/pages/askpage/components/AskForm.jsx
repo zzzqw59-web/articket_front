@@ -43,6 +43,7 @@ const AskForm = ({
 
   // 초기 데이터 채우기 (수정 모드)
   useEffect(() => {
+    // 💡 수정 모드이고 initialData가 실제로 존재할 때만 딱 한 번 실행
     if (isEditMode && initialData) {
       setFormData({
         category: REVERSE_CATEGORY_MAP[initialData.askType] || "기타",
@@ -55,7 +56,7 @@ const AskForm = ({
         agreePolicy: true,
       });
     }
-  }, [isEditMode, initialData]);
+  }, [isEditMode]); // initialData를 의존성에서 제거하거나 마운트 시점에만 동작하도록 조정
 
   // 카테고리 변경 핸들러
   const handleCategoryChange = (e) => {
