@@ -28,7 +28,7 @@ const MainPostersComponent = () => {
             className="group relative overflow-hidden cursor-pointer"
             onClick={() => navigate(`/articket/exhibition/${poster.id}`)}
           >
-            <div className="w-full h-[500px]">
+            <div className="w-full h-[350px]">
               <img
                 src={poster.imgUrl}
                 alt={poster.title}
