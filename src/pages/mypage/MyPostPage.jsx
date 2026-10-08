@@ -9,9 +9,12 @@ const MyPostPage = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("review");
   const [currentPage, setCurrentPage] = useState(1);
-  const [searchQuery, setSearchQuery] = useState({ searchType: "title", keyword: "" });
-  
-  // 👈 정렬 상태 추가 (기본값: 최신순 "latest")
+
+  // 💡 검색 상태를 단일 객체 대신 2개의 개별 상태로 분리
+  const [searchType, setSearchType] = useState("title");
+  const [keyword, setKeyword] = useState("");
+
+  // 정렬 상태 추가 (기본값: 최신순 "latest")
   const [sortOrder, setSortOrder] = useState("latest");
 
   // 1. 탭별 통합 데이터 상태 관리
@@ -70,10 +73,9 @@ const MyPostPage = () => {
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     setCurrentPage(1);
-    setSearchQuery({
-      searchType: tabId === "reply" ? "content" : "title",
-      keyword: "",
-    });
+    // 💡 탭 변경 시 분리된 검색 상태를 각각 초기화
+    setSearchType(tabId === "reply" ? "content" : "title");
+    setKeyword("");
   };
 
   // 정렬 변경 처리
@@ -96,9 +98,9 @@ const MyPostPage = () => {
         response = await getMyReviewList(
           currentPage,
           10,
-          searchQuery.searchType,
-          searchQuery.keyword,
-          apiSortParam // 👈 sort 전달
+          searchType, // 💡 분리된 searchType 변수 사용
+          keyword,    // 💡 분리된 keyword 변수 사용
+          apiSortParam
         );
         formattedList = (response.dtoList || []).map((item) => ({
           id: item.reviewId,
@@ -110,9 +112,9 @@ const MyPostPage = () => {
         response = await getMyAskList(
           currentPage,
           10,
-          searchQuery.searchType,
-          searchQuery.keyword,
-          apiSortParam // 👈 sort 전달
+          searchType, // 💡 분리된 searchType 변수 사용
+          keyword,    // 💡 분리된 keyword 변수 사용
+          apiSortParam
         );
         formattedList = (response.dtoList || []).map((item) => ({
           id: item.askId,
@@ -124,9 +126,9 @@ const MyPostPage = () => {
         response = await getMyReplyList(
           currentPage,
           10,
-          searchQuery.searchType,
-          searchQuery.keyword,
-          apiSortParam // 👈 sort 전달
+          searchType, // 💡 분리된 searchType 변수 사용
+          keyword,    // 💡 분리된 keyword 변수 사용
+          apiSortParam
         );
         formattedList = (response.dtoList || []).map((item) => {
           const displayDate = item.displayDate || item.replyModifiedAt || item.replyCreatedAt;
@@ -135,9 +137,10 @@ const MyPostPage = () => {
             id: item.replyId,
             replyContent: item.replyContent,
             createdAt: displayDate ? displayDate.substring(0, 10) : "",
-            targetUrl: item.replyType === "REVIEW"
-              ? `/articket/review/${item.targetId}`
-              : `/articket/ask/${item.targetId}`,
+            targetUrl:
+              item.replyType === "REVIEW"
+                ? `/articket/review/${item.targetId}`
+                : `/articket/ask/${item.targetId}`,
           };
         });
       }
@@ -156,7 +159,7 @@ const MyPostPage = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [activeTab, currentPage, searchQuery, sortOrder]); // 👈 sortOrder 의존성 추가
+  }, [activeTab, currentPage, searchType, keyword, sortOrder]); // 💡 의존성 배열에 searchType, keyword 각각 등록
 
   useEffect(() => {
     fetchData();
@@ -184,16 +187,19 @@ const MyPostPage = () => {
         onPageChange={(page) => setCurrentPage(page)}
         sortOptions={sortOptions}
         currentSort={sortOrder}
-        onSortChange={handleSortChange} // 정렬 변경 이벤트 핸들러 전달
+        onSortChange={handleSortChange}
         onRowClick={handleRowClick}
       />
 
       {/* 검색 바 */}
       <div className="w-full max-w-xl mx-auto mt-2">
         <SearchBar
+          key={activeTab} // 💡 탭 변경 시 SearchBar 내부 입력창 및 선택박스 초기화
           options={getSearchOptions()}
-          onSearch={(searchType, keyword) => {
-            setSearchQuery({ searchType, keyword });
+          onSearch={({ type, keyword }) => {
+            // 💡 첫 번째 인자로 전달되는 객체에서 type과 keyword를 구조분해 추출
+            setSearchType(type || (activeTab === "reply" ? "content" : "title"));
+            setKeyword(keyword || "");
             setCurrentPage(1);
           }}
         />
