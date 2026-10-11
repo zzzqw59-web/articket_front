@@ -79,7 +79,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
               {metricTitle[selectedMetric]} 통계 그래프
             </div>
 
-            <div className="flex gap-2 body-text">
+            <div className="flex gap-2 body-text translate-x-6">
               <button
                 onClick={() => setSelectedMetric("profit")}
                 className={`px-3 py-1 ${selectedMetric === "profit" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}

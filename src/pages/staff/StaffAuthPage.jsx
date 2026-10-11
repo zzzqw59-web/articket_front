@@ -53,7 +53,7 @@ const StaffAuthPage = () => {
         {loading ? (
           <div className="text-4xl head-text">불러오는 중입니다...</div>
         ) : exhibitions.length === 0 ? (
-          <div className="text-4xl head-text">
+          <div className="text-4xl head-text mb-30">
             전시를 불러오는데 실패했습니다.
           </div>
         ) : (

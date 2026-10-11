@@ -3,7 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { getExhibitionList } from "../../api/exhibitionApi";
 import StaffAuthPostersComponent from "../../components/staff/StaffAuthPostersComponent";
 import StatisticBoard from "../../components/staff/StatisticBoard";
-import PieChart from "../../components/staff/PieGraph";
+import CancleBoard from "../../components/staff/CancleBoard";
+import ListBoard from "../../components/staff/ListBoard";
 
 const Staffpage = () => {
   const [page, setPage] = useState(0);
@@ -25,6 +26,7 @@ const Staffpage = () => {
       return content;
     } catch (e) {
       console.error("fail to load exhibition posters", e);
+     // alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     }
   };
 
@@ -81,11 +83,14 @@ const Staffpage = () => {
       />
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
 
-      <div>
-        <PieChart />
+      <div className="flex items-center justify-center">
+        <CancleBoard /> 
       </div>
+
+      <ListBoard/>
       <div className="h-96" />
     </>
   );
 };
 export default Staffpage;
+ 
