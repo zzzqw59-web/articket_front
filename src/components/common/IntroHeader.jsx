@@ -2,7 +2,7 @@ import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NotificationBell from "./NotificationBell";
 import { logout } from "../../api/authApi";
-import { AUTH_STORAGE_EVENT, getStoredAuthUser } from "../../api/authStorage";
+import { AUTH_STORAGE_EVENT, MEMBER_PROFILE_UPDATED_EVENT, getStoredAuthUser } from "../../api/authStorage";
 import { getMyMember } from "../../api/memberApi";
 
 const IntroHeader = () => {
@@ -79,9 +79,11 @@ const IntroHeader = () => {
     };
 
     loadMember();
+    window.addEventListener(MEMBER_PROFILE_UPDATED_EVENT, loadMember);
 
     return () => {
       cancelled = true;
+      window.removeEventListener(MEMBER_PROFILE_UPDATED_EVENT, loadMember);
     };
   }, [authUser?.memberId]);
 

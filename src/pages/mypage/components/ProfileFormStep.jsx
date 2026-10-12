@@ -1,10 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import PageHeader from "../../../components/common/PageHeader";
 import ActionButton from "../../../components/common/ActionButton";
 import Badge from "../../../components/common/Badge";
 import { AUTH_CONSTANTS, VERIFICATION_TYPE } from "../../../constants/authConstants";
 import { WITHDRAW_STATUS } from "../../../constants/config";
 import { sendPhoneVerification, verifyPhoneVerification } from "../../../api/authApi";
+import { isValidPhone, normalizePhone } from "../../auth/utils/authFormUtils";
 
 const ProfileFormStep = ({
   formData,
@@ -14,20 +15,32 @@ const ProfileFormStep = ({
   authCode,
   setAuthCode,
   isPhoneVerified,
+  phoneVerifiedUntil,
   withdrawInfo, 
   onCancelWithdrawal,
   onFormChange,
   onStartEdit,
   onCancelEdit,
+  onPhoneReset,
   onPhoneVerify,
   onUpdateSubmit,
   onWithdrawal,
   renderEyeIcon,
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(AUTH_CONSTANTS?.RESEND_TIMER_SECONDS || 180);
+  const [codeExpiresAt, setCodeExpiresAt] = useState(0);
+  const [now, setNow] = useState(0);
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const requestSequenceRef = useRef(0);
+  const currentPhoneRef = useRef("");
+
+  useEffect(() => {
+    currentPhoneRef.current = normalizePhone(formData.phone);
+  }, [formData.phone]);
+
+  const timeLeft = Math.max(0, Math.ceil((codeExpiresAt - now) / 1000));
+  const verifiedTimeLeft = Math.max(0, Math.ceil((phoneVerifiedUntil - now) / 1000));
 
   // 탈퇴 대기 상태 여부 판단
   const isPendingWithdrawal =
@@ -36,16 +49,22 @@ const ProfileFormStep = ({
      withdrawInfo.status === WITHDRAW_STATUS.IN_PROGRESS);
 
   useEffect(() => {
-    let timer;
-    if (isCodeSent && !isPhoneVerified && timeLeft > 0) {
-      timer = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0) {
-      clearInterval(timer);
-    }
-    return () => clearInterval(timer);
-  }, [isCodeSent, isPhoneVerified, timeLeft]);
+    if (!isCodeSent) return undefined;
+
+    const timer = window.setInterval(() => {
+      setNow(Date.now());
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [isCodeSent]);
+
+  const formatJoinDate = (value) => {
+    if (!value) return "조회 중...";
+    const matched = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+    return matched
+      ? `${matched[1]}년 ${Number(matched[2])}월 ${Number(matched[3])}일`
+      : value;
+  };
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
@@ -58,26 +77,38 @@ const ProfileFormStep = ({
    * Request DTO: VerificationSendRequestDTO { phone, type }
    */
   const handleSendCode = async () => {
-    if (!formData.phone) {
-      alert("전화번호를 입력해주세요.");
+    const phone = normalizePhone(formData.phone);
+    if (!isValidPhone(phone)) {
+      alert("올바른 휴대폰 번호를 입력해 주세요.");
       return;
     }
+
+    const sequence = ++requestSequenceRef.current;
+    const requestStartedAt = Date.now();
+    onPhoneReset();
+    setIsCodeSent(false);
+    setCodeExpiresAt(0);
 
     try {
       setIsSending(true);
 
       // VerificationSendRequestDTO 필드명(phone, type)에 맞춘 객체전송
       await sendPhoneVerification({
-        phone: formData.phone,
-        type: VERIFICATION_TYPE?.PHONE_CHANGE || "PHONE_CHANGE",
+        phone,
+        type: VERIFICATION_TYPE.MEMBER_UPDATE,
       });
 
+      if (sequence !== requestSequenceRef.current || phone !== currentPhoneRef.current) return;
+      const currentTime = Date.now();
+      setNow(currentTime);
       setIsCodeSent(true);
-      setTimeLeft(AUTH_CONSTANTS?.RESEND_TIMER_SECONDS || 180);
+      setCodeExpiresAt(requestStartedAt + AUTH_CONSTANTS.RESEND_TIMER_SECONDS * 1000);
       alert("인증번호가 발송되었습니다.");
     } catch (error) {
       console.error("인증번호 발송 실패:", error);
-      alert(error.response?.data?.message || "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요.");
+      if (sequence === requestSequenceRef.current) {
+        alert(error.response?.data?.message || "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요.");
+      }
     } finally {
       setIsSending(false);
     }
@@ -89,32 +120,55 @@ const ProfileFormStep = ({
    */
   const handleVerifyCode = async () => {
     const codeLength = AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
+    if (!isCodeSent || Date.now() >= codeExpiresAt) {
+      alert("인증번호가 만료되었습니다. 다시 전송해 주세요.");
+      return;
+    }
     if (!authCode || authCode.length !== codeLength) {
       alert(`인증번호 ${codeLength}자리를 정확히 입력해 주세요.`);
       return;
     }
+
+    const phone = normalizePhone(formData.phone);
+    const sequence = requestSequenceRef.current;
+    const requestStartedAt = Date.now();
 
     try {
       setIsVerifying(true);
 
       // VerificationVerifyRequestDTO 필드명(phone, code, type)에 맞춘 객체전송
       await verifyPhoneVerification({
-        phone: formData.phone,
+        phone,
         code: authCode,
-        type: VERIFICATION_TYPE?.PHONE_CHANGE || "PHONE_CHANGE",
+        type: VERIFICATION_TYPE.MEMBER_UPDATE,
       });
 
+      if (sequence !== requestSequenceRef.current || phone !== currentPhoneRef.current) return;
+      onPhoneVerify(phone, requestStartedAt);
+      setNow(Date.now());
       alert(AUTH_CONSTANTS?.MSG_PHONE_VERIFIED_SUCCESS || "전화번호 인증이 완료되었습니다.");
-      
-      if (onPhoneVerify) {
-        onPhoneVerify(); // 부모 컴포넌트에 전화번호 인증 성공 알림
-      }
     } catch (error) {
       console.error("인증번호 검증 실패:", error);
-      alert(error.response?.data?.message || "인증번호가 일치하지 않거나 만료되었습니다.");
+      if (sequence === requestSequenceRef.current) {
+        alert(error.response?.data?.message || "인증번호가 일치하지 않거나 만료되었습니다.");
+      }
     } finally {
       setIsVerifying(false);
     }
+  };
+
+  const handlePhoneChange = (e) => {
+    requestSequenceRef.current += 1;
+    setIsCodeSent(false);
+    setCodeExpiresAt(0);
+    onFormChange(e);
+  };
+
+  const handleCancelEdit = () => {
+    requestSequenceRef.current += 1;
+    setIsCodeSent(false);
+    setCodeExpiresAt(0);
+    onCancelEdit();
   };
 
   return (
@@ -125,7 +179,7 @@ const ProfileFormStep = ({
       />
 
       <div className="w-full max-w-lg bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col gap-6">
-        
+
         {/* 탈퇴 진행 중 안내 배너 */}
         {isPendingWithdrawal && (
           <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-3">
@@ -137,7 +191,7 @@ const ProfileFormStep = ({
               </div>
               <div className="flex flex-col text-xs text-amber-900 gap-1">
                 <span className="font-bold text-sm">현재 회원 탈퇴가 진행 중입니다.</span>
-                <span>신청일: {withdrawInfo?.withdrawRequestAt || "조회 중"}</span>
+                <span>신청일: {withdrawInfo?.withdrawCreatedAt || "조회 중"}</span>
                 <span>삭제 예정일: {withdrawInfo?.withdrawDue || withdrawInfo?.dueData || "유예 기간 내"}</span>
                 <span className="text-amber-700 mt-1">유예 기간 동안은 언제든지 탈퇴를 철회하실 수 있습니다.</span>
               </div>
@@ -162,10 +216,10 @@ const ProfileFormStep = ({
               <span className="font-bold text-base text-gray-900">
                 {formData.nickname} 님
               </span>
-              <Badge variant={formData.role || formData.memberRole || "USER"} />
+              <Badge variant={formData.memberType || "MEMBER"} />
             </div>
             <div className="text-xs text-gray-400 flex flex-col gap-0.5">
-              <span>가입일 : {formData.joinCreatedAt || "조회 중..."}</span>
+              <span>가입일 : {formatJoinDate(formData.joinCreatedAt)}</span>
             </div>
           </div>
         </div>
@@ -232,10 +286,12 @@ const ProfileFormStep = ({
             <label className="text-xs font-semibold text-gray-700">전화번호</label>
             <div className="flex gap-2 items-center">
               <input
-                type="text"
+                type="tel"
+                inputMode="numeric"
+                maxLength={11}
                 name="phone"
                 value={formData.phone || ""}
-                onChange={onFormChange}
+                onChange={handlePhoneChange}
                 disabled={!isEditing || isPhoneVerified}
                 className={`flex-1 px-3 py-2 text-sm border rounded transition-colors ${
                   isEditing
@@ -247,7 +303,7 @@ const ProfileFormStep = ({
                 <button
                   type="button"
                   onClick={handleSendCode}
-                  disabled={isSending}
+                  disabled={isSending || isVerifying}
                   className="px-4 py-2 text-xs bg-gray-800 text-white rounded font-medium hover:bg-gray-700 disabled:bg-gray-400 whitespace-nowrap transition-colors"
                 >
                   {isSending ? "발송 중..." : isCodeSent ? "재전송" : "인증번호 전송"}
@@ -260,11 +316,9 @@ const ProfileFormStep = ({
             <div className="flex flex-col gap-1 mt-1">
               <div className="flex justify-between items-center">
                 <label className="text-xs font-semibold text-gray-700">인증번호 입력</label>
-                {!isPhoneVerified && (
-                  <span className="text-[11px] font-bold text-red-500">
-                    유효시간 {formatTime(timeLeft)}
-                  </span>
-                )}
+                <span className="text-[11px] font-bold text-red-500">
+                  {isPhoneVerified ? "수정 가능시간" : "유효시간"} {formatTime(isPhoneVerified ? verifiedTimeLeft : timeLeft)}
+                </span>
               </div>
               <div className="flex gap-2 items-center">
                 <input
@@ -304,7 +358,7 @@ const ProfileFormStep = ({
                   label="취소"
                   variant="secondary"
                   type="button"
-                  onClick={onCancelEdit}
+                  onClick={handleCancelEdit}
                 />
                 <ActionButton
                   label="저장"
@@ -313,7 +367,7 @@ const ProfileFormStep = ({
                 />
               </div>
             ) : (
-              !isPendingWithdrawal && (
+              !isPendingWithdrawal && formData.memberType !== "ADMIN" && (
                 <>
                   <button
                     type="button"
