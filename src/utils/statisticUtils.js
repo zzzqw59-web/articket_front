@@ -3,8 +3,8 @@ export const getStatisticSummary = (data) => {
     return {
       average: 0,
       total: 0,
-      max: null,
-      min: null,
+      max: 0,
+      min: 0,
     };
   }
 
