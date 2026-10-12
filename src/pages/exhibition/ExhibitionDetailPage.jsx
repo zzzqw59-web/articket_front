@@ -206,7 +206,7 @@ const ExhibitionDetailPage = () => {
 
         <p>
           {exhibition.description ||
-            "등록된 설명이 없습니다."}
+            "전시 소개가 아직 등록되지 않았습니다."}
         </p>
 
       </div>
