@@ -41,14 +41,14 @@ export const toggleWish = async (exhibitionId) => {
 
 // 추가 기능: 위시 카운트 조회...
 export const countWish = async (exhibitionId) => {
-  const memberId = getCurrentMemberId();
+  const user = getStoredUser();
   const response = await axiosInstance.get(
     `${BASE_URL}/count/${exhibitionId}`,
     {
-      params: {
-        memberId
-      },
-    },
+      params: user?.memberId
+        ? {memberId: user.memberId}
+        : {},
+      },    
   );
   return response.data;
 };
