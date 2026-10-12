@@ -18,12 +18,14 @@ const MemberEditPage = () => {
     authCode,
     setAuthCode,
     isPhoneVerified,
+    phoneVerifiedUntil,
     withdrawInfo,            
     handleCancelWithdrawal,
     handleFormChange,
     handleStartEdit,
     handleStartWithdrawal,
     handleCancelEdit,
+    resetPhoneVerification,
     handlePhoneVerify,
     handleUpdateSubmit,
   } = useMemberEdit();
@@ -71,11 +73,13 @@ const MemberEditPage = () => {
           authCode={authCode}
           setAuthCode={setAuthCode}
           isPhoneVerified={isPhoneVerified}
+          phoneVerifiedUntil={phoneVerifiedUntil}
           withdrawInfo={withdrawInfo}                     
           onCancelWithdrawal={handleCancelWithdrawal}     
           onFormChange={handleFormChange}
           onStartEdit={handleStartEdit}
           onCancelEdit={handleCancelEdit}
+          onPhoneReset={resetPhoneVerification}
           onPhoneVerify={handlePhoneVerify}
           onUpdateSubmit={handleUpdateSubmit}
           onWithdrawal={handleStartWithdrawal}

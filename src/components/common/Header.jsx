@@ -4,6 +4,7 @@ import NotificationBell from "./NotificationBell";
 import { logout } from "../../api/authApi";
 import {
   AUTH_STORAGE_EVENT,
+  MEMBER_PROFILE_UPDATED_EVENT,
   getStoredAuthUser,
 } from "../../api/authStorage";
 import { getMyMember } from "../../api/memberApi";
@@ -93,9 +94,11 @@ const Header = () => {
     };
 
     loadMember();
+    window.addEventListener(MEMBER_PROFILE_UPDATED_EVENT, loadMember);
 
     return () => {
       cancelled = true;
+      window.removeEventListener(MEMBER_PROFILE_UPDATED_EVENT, loadMember);
     };
   }, [authUser?.memberId]);
 

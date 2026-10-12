@@ -47,7 +47,8 @@ export const VERIFICATION_TYPE = {
 
 export const AUTH_CONSTANTS = {
   SMS_CODE_LENGTH: 6,        // SMS 인증번호 자릿수
-  RESEND_TIMER_SECONDS: 180, // 인증번호 재발송 대기 시간 (3분)
+  RESEND_TIMER_SECONDS: 300, // SMS 인증번호 유효시간 (5분)
+  VERIFIED_VALID_SECONDS: 300, // 인증 완료 후 회원정보 수정 가능시간 (5분)
 
   // 💡 회원 정보 수정 및 인증 관련 메시지
   MSG_ENTER_PASSWORD: "비밀번호를 입력해 주세요.",
@@ -62,5 +63,5 @@ export const AUTH_CONSTANTS = {
   WITHDRAWAL_WARNING_MESSAGE:
     "탈퇴 시 회원님의 기존 예약/결제 내역, 위시리스트, 작성 게시글 관리 권한 및 모든 혜택이 30일 후 삭제되며 복구할 수 없습니다.",
   WITHDRAWAL_CHECKBOX_LABEL: "위 안내 사항을 모두 확인하였으며, 동의합니다.",
-  MSG_WITHDRAWAL_SUCCESS: "회원 탈퇴 처리가 완료되었습니다.",
+  MSG_WITHDRAWAL_SUCCESS: "회원 탈퇴 신청이 완료되었습니다.",
 };
