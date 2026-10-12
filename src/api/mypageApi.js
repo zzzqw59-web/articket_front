@@ -112,3 +112,11 @@ export const cancelReservation = async (reservationId, cancelData) => {
   });
   return response.data;
 };
+
+// HISTORY-001: 관람 내역 조회 (다녀온 전시)
+export const getMyVisitedHistoryList = async (page = 1, size = 10, searchType = "", keyword = "", sort = "") => {
+  const response = await axiosInstance.get(`${MYPAGE_BASE_URL}/history`, {
+    params: { page, size, searchType, keyword, sort },
+  });
+  return response.data; // PageResponseDTO<MyHistoryDTO>
+};
