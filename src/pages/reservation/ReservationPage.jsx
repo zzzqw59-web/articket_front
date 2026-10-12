@@ -3,6 +3,8 @@ import { useParams } from "react-router-dom";
 import { createReservation } from "../../api/reservationApi";
 import { getExhibitionDetail } from "../../api/exhibitionApi";
 import { loadTossPayments } from "@tosspayments/tosspayments-sdk";
+import { useModal } from "../../hooks/useModal";
+import ConfirmModal from "../../components/common/ConfirmModal";
 
 const ReservationPage = () => {
   const { exhibitionId } = useParams();
@@ -15,6 +17,14 @@ const ReservationPage = () => {
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
 
   const [selectedDate, setSelectedDate] = useState(null);
+
+  const {
+    modalState,
+    showAlert,
+    closeModal,
+    handleConfirm,
+    handleCancel,
+  } = useModal();
 
   // 전시 상세 정보 조회
   useEffect(() => {
@@ -176,12 +186,23 @@ const ReservationPage = () => {
       });
 
     } catch (error) {
-      console.error("결제 요청 실패:", error);
-      console.log("에러 전체:", error);
-      console.log("에러 코드:", error?.code);
-      console.log("에러 메시지:", error?.message);
+      console.error("예약 및 결제 요청 실패:", error);
 
-      alert(`결제 요청에 실패했습니다.\n${error?.message || ""}`);
+      const responseData = error.response?.data;
+
+      const message =
+        typeof responseData === "string"
+          ? responseData
+          : responseData?.message ||
+            responseData?.error ||
+            responseData?.detail ||
+            error?.message ||
+            "예약 및 결제 중 오류가 발생했습니다.";
+
+      showAlert({
+        title: "예약 및 결제 안내",
+        message,
+      });
     }
   };
 
@@ -564,6 +585,11 @@ const ReservationPage = () => {
 
       </div>
 
+      <ConfirmModal
+      modalState={modalState}
+      onConfirm={handleConfirm}
+      onCancel={handleCancel}
+    />
     </div>
   );
 };

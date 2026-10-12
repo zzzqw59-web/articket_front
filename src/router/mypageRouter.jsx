@@ -3,9 +3,9 @@ import { Navigate } from "react-router-dom";
 const mypageRouter = () => {
   return [
     {
-      // /articket/mypage 접속 시 기본 페이지로 '예약 내역' 리다이렉트
+      // /articket/mypage 접속 시 기본 페이지로 '회원 정보 관리' 리다이렉트
       index: true,
-      element: <Navigate to="reservations" replace />,
+      element: <Navigate to="edit" replace />,
     },
     {
       // /articket/mypage/edit (회원 정보 수정)

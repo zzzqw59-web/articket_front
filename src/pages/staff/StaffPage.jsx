@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
-import { getExhibitionList } from "../../api/exhibitionApi";
+import { getExhibitionDetail } from "../../api/exhibitionApi";
+import axiosInstance from "../../api/axiosInstance";
 import StaffAuthPostersComponent from "../../components/staff/StaffAuthPostersComponent";
 import StatisticBoard from "../../components/staff/StatisticBoard";
 import { getProfitList } from "../../api/statisticApi";
@@ -12,17 +13,31 @@ const Staffpage = () => {
   const pageCache = useRef({});
   const [selectedExhibitions, setSelectedExhibitions] = useState([]);
 
-  const fetchPosters = async (pageNumber) => {
-    if (pageCache.current[pageNumber]) {
-      return pageCache.current[pageNumber];
-    }
-
+  const fetchPosters = async () => {
     try {
-      const response = await getExhibitionList({ page: pageNumber, size: 5 });
-      const content = response.content || [];
-      pageCache.current[pageNumber] = content;
-      setTotalPages(response.totalPages || 0);
-      return content;
+      const response = await axiosInstance.get("/api/staff/exhibitions");
+      const staffExhibitions = response.data || [];
+      const posters = await Promise.all(
+        staffExhibitions.map(async (item) => {
+          const detail = await getExhibitionDetail(item.exhibitionId);
+          return {
+            id: item.exhibitionId,
+            title: item.exhibitionTitle,
+            imgUrl: detail.imgUrl
+              ? detail.imgUrl.startsWith("http")
+                ? detail.imgUrl
+                : `http://localhost:8080/api/images/${detail.imgUrl}`
+              : "/images/default-exhibition.jpg",
+          };
+        })
+      );
+
+      const nextPageCache = {};
+      for (let i = 0; i < posters.length; i += 5) {
+        nextPageCache[i / 5] = posters.slice(i, i + 5);
+      }
+      pageCache.current = nextPageCache;
+      setTotalPages(Math.ceil(posters.length / 5));
     } catch (e) {
       console.error("fail to load exhibition posters", e);
     }
@@ -30,10 +45,7 @@ const Staffpage = () => {
 
   //첫 로드(0,1페이지)
   useEffect(() => {
-    const init = async () => {
-      const pages = await Promise.all([fetchPosters(0), fetchPosters(1)]);
-    };
-    init();
+    fetchPosters();
   }, []);
 
   const handlePageChange = async (nextPage) => {
@@ -41,7 +53,6 @@ const Staffpage = () => {
       return;
     }
 
-    await fetchPosters(nextPage);
     setPage(nextPage);
   };
 

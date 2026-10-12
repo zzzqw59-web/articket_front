@@ -2,6 +2,8 @@
  * 마이페이지 전체 상수 관리
  */
 
+import { message } from "antd";
+
 // ==========================================
 // 1. 예약/결제 내역 페이지 관련 상수
 // ==========================================
@@ -118,13 +120,18 @@ export const PAYMENT_STATUS = {
 export const STATUS_CONFIG = {
   // 예약 상태 설정
   RESERVATION: {
+    [RESERVATION_STATUS.PENDING]: {
+      label: "예약 대기",
+      badgeVariant: "ongoing",
+      message: "결제 대기중인 예약입니다.",
+    },
     [RESERVATION_STATUS.RESERVED]: {
       label: "예약 완료",
       badgeVariant: "ongoing",
       message: "정상 예약된 티켓입니다.",
     },
     [RESERVATION_STATUS.CANCELED]: {
-      label: "CANCELED",
+      label: "예약 취소",
       badgeVariant: "ended",
       message: "예약 취소 완료된 티켓입니다.",
     },
@@ -132,12 +139,12 @@ export const STATUS_CONFIG = {
   // 결제 상태 설정
   PAYMENT: {
     [PAYMENT_STATUS.DONE]: {
-      label: "DONE",
+      label: "결제 완료",
       badgeVariant: "ongoing",
       message: "정상 처리된 결제건입니다.",
     },
     [PAYMENT_STATUS.CANCELED]: {
-      label: "CANCELED",
+      label: "결제 취소",
       badgeVariant: "ended",
       message: "결제 취소가 완료되었습니다.",
     },
