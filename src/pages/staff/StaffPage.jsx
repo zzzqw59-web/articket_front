@@ -30,7 +30,7 @@ const Staffpage = () => {
                 : `http://localhost:8080/api/images/${detail.imgUrl}`
               : "/images/default-exhibition.jpg",
           };
-        })
+        }),
       );
 
       const nextPageCache = {};
@@ -41,7 +41,7 @@ const Staffpage = () => {
       setTotalPages(Math.ceil(posters.length / 5));
     } catch (e) {
       console.error("fail to load exhibition posters", e);
-      // alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     }
   };
 
@@ -91,6 +91,7 @@ const Staffpage = () => {
         totalPages={totalPages}
         onSelect={handleExhibitionSelect}
         onPageChange={handlePageChange}
+        selectedIds={selectedExhibitions.map((item) => item.id)}
       />
       <div className="mt-5 mb-5"></div>
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
@@ -98,7 +99,7 @@ const Staffpage = () => {
       <div className="flex items-center justify-center">
         <CancleBoard selectedExhibitions={selectedExhibitions} />
       </div>
-
+      <div className="h-10"></div>
       <ListBoard selectedExhibitions={selectedExhibitions} />
       <div className="h-20" />
     </>

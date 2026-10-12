@@ -118,7 +118,7 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
     return (
       <section className="mx-auto mt-12 w-[1100px]">
         <h2 className="mb-6 text-4xl head-text font-bold -translate-x-7">
-          취소 통계
+          예약 취소
         </h2>
 
         <div className="flex h-[400px] items-center justify-center border border-gray-200 p-10 text-center text-gray-500">
@@ -129,9 +129,11 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
   }
 
   return (
-    <section className="mx-auto mt-12 w-[1200px]">
+    <section className="mx-auto mt-12 w-[1100px]">
       <div className="mb-6 flex items-end justify-between">
-        <h2 className="!text-4xl font-bold head-text">취소 통계</h2>
+        <h2 className="text-4xl font-bold head-text -translate-x-7">
+          예약 취소
+        </h2>
 
         <div className="flex items-center gap-4">
           <button

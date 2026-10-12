@@ -1,9 +1,9 @@
-import axios from "axios";
+import axiosInstance from "./axiosInstance";
 
 const prefix = "/api/statistic";
 
 export const getTotalProfit = async (exhibitionId, startDate, endDate) => {
-  const response = await axios.get(`${prefix}/profit/total`, {
+  const response = await axiosInstance.get(`${prefix}/profit/total`, {
     params: {
       exhibitionId,
       startDate,
@@ -14,7 +14,7 @@ export const getTotalProfit = async (exhibitionId, startDate, endDate) => {
 };
 
 export const getProfitList = async (exhibitionId, startDate, endDate) => {
-  const response = await axios.get(`${prefix}/profit/${exhibitionId}`, {
+  const response = await axiosInstance.get(`${prefix}/profit/${exhibitionId}`, {
     params: {
       startDate,
       endDate,
@@ -24,7 +24,7 @@ export const getProfitList = async (exhibitionId, startDate, endDate) => {
 };
 
 export const getTotalVisitor = async (exhibitionId, startDate, endDate) => {
-  const response = await axios.get(`${prefix}/visitor/total`, {
+  const response = await axiosInstance.get(`${prefix}/visitor/total`, {
     params: {
       exhibitionId,
       startDate,
@@ -35,17 +35,20 @@ export const getTotalVisitor = async (exhibitionId, startDate, endDate) => {
 };
 
 export const getVisitorList = async (exhibitionId, startDate, endDate) => {
-  const response = await axios.get(`${prefix}/visitor/${exhibitionId}`, {
-    params: {
-      startDate,
-      endDate,
+  const response = await axiosInstance.get(
+    `${prefix}/visitor/${exhibitionId}`,
+    {
+      params: {
+        startDate,
+        endDate,
+      },
     },
-  });
+  );
   return response.data;
 };
 
 export const getTotalReservation = async (exhibitionId, startDate, endDate) => {
-  const response = await axios.get(`${prefix}/reservation/total`, {
+  const response = await axiosInstance.get(`${prefix}/reservation/total`, {
     params: {
       exhibitionId,
       startDate,
@@ -56,26 +59,31 @@ export const getTotalReservation = async (exhibitionId, startDate, endDate) => {
 };
 
 export const getReservationList = async (exhibitionId, startDate, endDate) => {
-  const response = await axios.get(`${prefix}/reservation/${exhibitionId}`, {
-    params: {
-      startDate,
-      endDate,
+  const response = await axiosInstance.get(
+    `${prefix}/reservation/${exhibitionId}`,
+    {
+      params: {
+        startDate,
+        endDate,
+      },
     },
-  });
+  );
   return response.data;
 };
 
 export const getTotalCancel = async () => {
-  const response = await axios.get(`${prefix}/cancel/total`);
+  const response = await axiosInstance.get(`${prefix}/cancel/total`);
   return response.data;
 };
 
 export const getCancelList = async (exhibitionId) => {
-  const response = await axios.get(`${prefix}/cancel/${exhibitionId}`);
+  const response = await axiosInstance.get(`${prefix}/cancel/${exhibitionId}`);
   return response.data;
 };
 
 export const getCancelDetail = async (exhibitionId) => {
-  const response = await axios.get(`${prefix}/cancel/detail/${exhibitionId}`);
+  const response = await axiosInstance.get(
+    `${prefix}/cancel/detail/${exhibitionId}`,
+  );
   return response.data;
 };
