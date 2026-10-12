@@ -1,10 +1,36 @@
 import { Pie } from "@ant-design/plots";
-import { Tooltip } from "antd";
 import React from "react";
 
+const cancelReasonOrder = [
+  "PERSONAL",
+  "SCHEDULE",
+  "PLAN_CHANGE",
+  "COMPANION",
+  "WRONG_RESERVATION",
+  "OTHER",
+];
+const cancelReasonLabels = {
+  PERSONAL: "개인 사정",
+  SCHEDULE: "일정 문제",
+  PLAN_CHANGE: "계획 변경",
+  COMPANION: "동행인 문제",
+  WRONG_RESERVATION: "예약 실수",
+  OTHER: "기타",
+};
+
 const PieGraph = ({ data = [] }) => {
+  const chartData = [...data]
+    .sort(
+      (a, b) =>
+        cancelReasonOrder.indexOf(a.type) - cancelReasonOrder.indexOf(b.type),
+    )
+    .map((item) => ({
+      ...item,
+      type: cancelReasonLabels[item.type] ?? item.type,
+    }));
+
   const config = {
-    data,
+    data: chartData,
     angleField: "value",
     colorField: "type",
 
@@ -18,7 +44,7 @@ const PieGraph = ({ data = [] }) => {
     },
 
     width: 600,
-    height: 300,
+    height: 350,
 
     label: {
       text: "value",

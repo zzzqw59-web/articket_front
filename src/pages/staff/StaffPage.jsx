@@ -26,7 +26,7 @@ const Staffpage = () => {
       return content;
     } catch (e) {
       console.error("fail to load exhibition posters", e);
-     // alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      // alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
     }
   };
 
@@ -81,16 +81,16 @@ const Staffpage = () => {
         onSelect={handleExhibitionSelect}
         onPageChange={handlePageChange}
       />
+      <div className="mt-5 mb-5"></div>
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
 
       <div className="flex items-center justify-center">
-        <CancleBoard /> 
+        <CancleBoard selectedExhibitions={selectedExhibitions} />
       </div>
 
-      <ListBoard/>
-      <div className="h-96" />
+      <ListBoard selectedExhibitions={selectedExhibitions} />
+      <div className="h-20" />
     </>
   );
 };
 export default Staffpage;
- 

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const prefix = "http://localhost:8080/api/statistic";
+const prefix = "/api/statistic";
 
 export const getTotalProfit = async (exhibitionId, startDate, endDate) => {
   const response = await axios.get(`${prefix}/profit/total`, {
@@ -62,5 +62,20 @@ export const getReservationList = async (exhibitionId, startDate, endDate) => {
       endDate,
     },
   });
+  return response.data;
+};
+
+export const getTotalCancel = async () => {
+  const response = await axios.get(`${prefix}/cancel/total`);
+  return response.data;
+};
+
+export const getCancelList = async (exhibitionId) => {
+  const response = await axios.get(`${prefix}/cancel/${exhibitionId}`);
+  return response.data;
+};
+
+export const getCancelDetail = async (exhibitionId) => {
+  const response = await axios.get(`${prefix}/cancel/detail/${exhibitionId}`);
   return response.data;
 };

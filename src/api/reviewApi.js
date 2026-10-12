@@ -40,3 +40,12 @@ export const deleteReview = async (reviewId) => {
 
   return response.data;
 };
+
+//특정 전시 리뷰 목록 조회
+export const getStaffPageReview = async (exhibitionId, params = {}) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/staffpage/${exhibitionId}`,
+    { params },
+  );
+  return response.data;
+};
