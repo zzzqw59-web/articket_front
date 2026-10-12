@@ -33,7 +33,6 @@ const ExhibitionDetailPage = () => {
             getExhibitionDetail(exhibitionId),
             countWish(exhibitionId),
         ]); 
-        
         setExhibition(data);
         setWishCount(wishData.totalWishCount);
         setIsWished(wishData.wished);
