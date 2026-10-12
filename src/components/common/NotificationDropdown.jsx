@@ -30,15 +30,15 @@ const formatRelativeTime = (dateString) => {
   });
 };
 
-// 2. 새로운 알림 타입 체계(0X, 1X, 2X)에 따른 텍스트 및 이동 경로 매핑 객체
+// 2. 새로운 알림 타입 체계(0X, 1X, 2X) 및 댓글 수정/삭제(X4, X5)에 따른 매핑 객체
 const NOTIFICATION_CONFIG = {
   // 0X: 회원 상태 관련
   0: (targetId) => ({
-    text: "관리자에 의해 계정이 비활성화 되었습니다.",
+    text: "계정이 비활성화 되었습니다.",
     targetUrl: `/articket/mypage/edit`,
   }),
   1: (targetId) => ({
-    text: "관리자에 의해 계정이 활성화 되었습니다.",
+    text: "계정이 활성화 되었습니다.",
     targetUrl: `/articket/mypage/edit`, 
   }),
 
@@ -59,6 +59,14 @@ const NOTIFICATION_CONFIG = {
     text: "관리자에 의해 문의가 삭제되었습니다.",
     targetUrl: `/articket/ask`,
   }),
+  14: (targetId) => ({
+    text: "관리자에 의해 문의 댓글이 수정되었습니다.",
+    targetUrl: `/articket/ask/${targetId}`,
+  }),
+  15: (targetId) => ({
+    text: "관리자에 의해 문의 댓글이 삭제되었습니다.",
+    targetUrl: `/articket/ask/${targetId}`,
+  }),
 
   // 2X: 리뷰 관련
   20: (targetId) => ({
@@ -76,6 +84,14 @@ const NOTIFICATION_CONFIG = {
   23: (targetId) => ({
     text: "관리자에 의해 리뷰가 삭제되었습니다.",
     targetUrl: `/articket/review`,
+  }),
+  24: (targetId) => ({
+    text: "관리자에 의해 리뷰 댓글이 수정되었습니다.",
+    targetUrl: `/articket/review/${targetId}`,
+  }),
+  25: (targetId) => ({
+    text: "관리자에 의해 리뷰 댓글이 삭제되었습니다.",
+    targetUrl: `/articket/review/${targetId}`,
   }),
 };
 
