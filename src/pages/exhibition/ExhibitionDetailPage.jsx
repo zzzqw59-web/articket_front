@@ -33,8 +33,6 @@ const ExhibitionDetailPage = () => {
             getExhibitionDetail(exhibitionId),
             countWish(exhibitionId),
         ]); 
-        console.log("전시 상세 데이터:", data);
-        console.log("찜 조회 데이터:", wishData);
         
         setExhibition(data);
         setWishCount(wishData.totalWishCount);
