@@ -51,6 +51,11 @@ const getNotificationInfo = (item) => {
         text: "내 문의 내역에 답변(댓글)이 등록되었습니다.",
         targetUrl: `/articket/ask/${targetId}`,
       };
+    case 3:
+      return {
+        text: "관리자에 의해 계정이 비활성화 되었습니다.",
+        targetUrl: `/articket/mypage/edit`,
+      };
     default:
       return {
         text: "새로운 알림이 도착했습니다.",
