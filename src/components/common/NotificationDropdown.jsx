@@ -30,38 +30,69 @@ const formatRelativeTime = (dateString) => {
   });
 };
 
-// 2. 알림 타입에 따른 텍스트 및 이동 경로(targetUrl) 생성 헬퍼 함수 (함수 바깥으로 분리)
+// 2. 새로운 알림 타입 체계(0X, 1X, 2X)에 따른 텍스트 및 이동 경로 매핑 객체
+const NOTIFICATION_CONFIG = {
+  // 0X: 회원 상태 관련
+  0: (targetId) => ({
+    text: "관리자에 의해 계정이 비활성화 되었습니다.",
+    targetUrl: `/articket/mypage/edit`,
+  }),
+  1: (targetId) => ({
+    text: "관리자에 의해 계정이 활성화 되었습니다.",
+    targetUrl: `/articket/mypage/edit`, 
+  }),
+
+  // 1X: 문의 관련
+  10: (targetId) => ({
+    text: "관리자: 새로운 문의가 등록되었습니다.",
+    targetUrl: `/articket/ask/${targetId}`,
+  }),
+  11: (targetId) => ({
+    text: "내 문의에 댓글이 등록되었습니다.",
+    targetUrl: `/articket/ask/${targetId}`,
+  }),
+  12: (targetId) => ({
+    text: "관리자에 의해 문의가 수정되었습니다.",
+    targetUrl: `/articket/ask/${targetId}`,
+  }),
+  13: (targetId) => ({
+    text: "관리자에 의해 문의가 삭제되었습니다.",
+    targetUrl: `/articket/ask`,
+  }),
+
+  // 2X: 리뷰 관련
+  20: (targetId) => ({
+    text: "새로운 리뷰가 등록되었습니다.",
+    targetUrl: `/articket/review/${targetId}`,
+  }),
+  21: (targetId) => ({
+    text: "내 리뷰에 새 댓글이 등록되었습니다.",
+    targetUrl: `/articket/review/${targetId}`,
+  }),
+  22: (targetId) => ({
+    text: "관리자에 의해 리뷰가 수정되었습니다.",
+    targetUrl: `/articket/review/${targetId}`,
+  }),
+  23: (targetId) => ({
+    text: "관리자에 의해 리뷰가 삭제되었습니다.",
+    targetUrl: `/articket/review`,
+  }),
+};
+
+// 헬퍼 함수: 정의되지 않은 타입일 경우의 기본값 처리
 const getNotificationInfo = (item) => {
   const type = item.notificationType;
   const targetId = item.notificationTargetId;
 
-  switch (type) {
-    case 0:
-      return {
-        text: "관리자: 새로운 문의 사항이 등록되었습니다.",
-        targetUrl: `/articket/ask/${targetId}`,
-      };
-    case 1:
-      return {
-        text: "내 작성글(리뷰)에 새 댓글이 등록되었습니다.",
-        targetUrl: `/articket/review/${targetId}`,
-      };
-    case 2:
-      return {
-        text: "내 문의 내역에 답변(댓글)이 등록되었습니다.",
-        targetUrl: `/articket/ask/${targetId}`,
-      };
-    case 3:
-      return {
-        text: "관리자에 의해 계정이 비활성화 되었습니다.",
-        targetUrl: `/articket/mypage/edit`,
-      };
-    default:
-      return {
-        text: "새로운 알림이 도착했습니다.",
-        targetUrl: "/articket",
-      };
+  const configFn = NOTIFICATION_CONFIG[type];
+  if (configFn) {
+    return configFn(targetId);
   }
+
+  return {
+    text: "새로운 알림이 도착했습니다.",
+    targetUrl: "/articket",
+  };
 };
 
 const NotificationDropdown = ({
