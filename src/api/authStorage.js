@@ -2,6 +2,7 @@ const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_KEY = "user";
 const AUTH_CHANGE_EVENT = "articket-auth-change";
+const MEMBER_PROFILE_UPDATED_EVENT = "articket-member-profile-updated";
 
 const notifyAuthChange = () => {
   window.dispatchEvent(new Event(AUTH_CHANGE_EVENT));
@@ -72,3 +73,8 @@ export const clearAuth = () => {
 };
 
 export const AUTH_STORAGE_EVENT = AUTH_CHANGE_EVENT;
+export const notifyMemberProfileUpdated = () => {
+  window.dispatchEvent(new Event(MEMBER_PROFILE_UPDATED_EVENT));
+};
+
+export { MEMBER_PROFILE_UPDATED_EVENT };

@@ -12,6 +12,7 @@ import reviewRouter from "./reviewRouter";
 import reservationRouter from "./reservationRouter";
 import paymentRouter from "./paymentRouter";
 import authRouter from "./authRouter";
+import qrCodeRouter from "./qrCodeRouter";
 
 const roots = createBrowserRouter([
   {
@@ -67,6 +68,10 @@ const roots = createBrowserRouter([
         path: "payment",
         children: paymentRouter(),
       },
+      {
+        path: "reservation/check/:orderId",
+        children: qrCodeRouter(),
+      }
     ],
   },
   {
@@ -74,6 +79,7 @@ const roots = createBrowserRouter([
     element: <IntroPage />,
     HydrateFallback: () => <div>Loading...</div>,
   },
+  
 ]);
 
 export default roots;

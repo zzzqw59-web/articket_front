@@ -20,6 +20,15 @@ export const getReviewDetail = async (reviewId) => {
   return response.data;
 };
 
+// 리뷰 작성 가능한 전시 목록 조회
+export const getAvailableExhibitionsForReview = async () => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/my-exhibitions`
+  );
+
+  return response.data;
+};
+
 // 리뷰 작성
 export const createReview = async (formData) => {
   const response = await axiosInstance.post(BASE_URL, formData);
