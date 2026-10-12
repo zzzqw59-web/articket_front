@@ -30,9 +30,15 @@ export const useReviewWrite = () => {
 
       await createReview(formData);
 
+      console.log("✅ 리뷰 등록 API 성공");
+
       showAlert({
         message: "리뷰가 성공적으로 등록되었습니다.",
-        onConfirm: () => navigate("/articket/review"),
+        
+        onConfirm: () => {
+          console.log("✅ 확인 버튼 클릭 → 게시판 이동");
+          navigate("/articket/review");
+        },
       });
     } catch (error) {
       console.error("리뷰 등록 실패:", error);
