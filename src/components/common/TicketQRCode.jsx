@@ -2,12 +2,28 @@ import React, { useState } from "react";
 import { createPortal } from "react-dom";
 import { QRCodeSVG } from "qrcode.react";
 
-const TicketQRCode = ({ reservationNo, size = 96 }) => {
+const TicketQRCode = ({
+  reservationNo,
+  reservationStatus,
+  size = 96,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
 
-  if (!reservationNo) return null;
+  // 예약 정보 확인용 로그
+  console.log("QR 예약 번호:", reservationNo);
+  console.log("QR 예약 상태:", reservationStatus);
 
-  // QR 코드에 예약 확인 페이지 URL을 저장
+  // 예약 번호가 없으면 QR 코드 표시 안 함
+  if (!reservationNo) {
+    return null;
+  }
+
+  // 예약 확정 상태가 아니면 QR 코드 표시 안 함
+  if (reservationStatus !== "RESERVED") {
+    return null;
+  }
+
+  // QR 코드에 예약 확인 페이지 URL 저장
   const qrPayload = `http://192.168.32.20:5173/articket/reservation/check/${reservationNo}`;
 
   return (

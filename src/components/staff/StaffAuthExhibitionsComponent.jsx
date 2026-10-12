@@ -1,14 +1,16 @@
 import { useNavigate } from "react-router-dom";
+import axiosInstance from "../../api/axiosInstance";
 
 const StaffAuthExhibitionsComponent = ({ exhibitions }) => {
   const navigate = useNavigate();
 
-  const handleApply = async (staffId, exhibitionId) => {
+  const handleApply = async (exhibitionId) => {
     try {
-      //await apply(staffId, exhibitionId);
+      await axiosInstance.post("/api/staff/requests", { exhibitionId });
       alert("신청되었습니다.");
     } catch (e) {
       console.error("fail to apply", e);
+      alert(e.response?.data?.message || "신청에 실패했습니다.");
     }
   };
 
