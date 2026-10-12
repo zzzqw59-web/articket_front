@@ -19,7 +19,7 @@ const mypageRouter = () => {
       },
     },
     {
-      // /articket/mypage/reservations (예약 내역)
+      // /articket/mypage/reservations (예약/결제 내역)
       path: "reservations",
       HydrateFallback: () => <div>Loading...</div>,
       lazy: async () => {
@@ -29,17 +29,17 @@ const mypageRouter = () => {
         return { Component };
       },
     },
-    {
-      // /articket/mypage/payments (결제 내역)
-      path: "payments",
-      HydrateFallback: () => <div>Loading...</div>,
-      lazy: async () => {
-        const { default: Component } = await import(
-          "../pages/mypage/PaymentListPage.jsx"
-        );
-        return { Component };
-      },
-    },
+    // {
+    //   // /articket/mypage/payments (결제 내역)
+    //   path: "payments",
+    //   HydrateFallback: () => <div>Loading...</div>,
+    //   lazy: async () => {
+    //     const { default: Component } = await import(
+    //       "../pages/mypage/PaymentListPage.jsx"
+    //     );
+    //     return { Component };
+    //   },
+    // },
     {
       // /articket/mypage/wishlist (위시리스트)
       path: "wishlist",

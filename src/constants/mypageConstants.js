@@ -2,8 +2,6 @@
  * 마이페이지 전체 상수 관리
  */
 
-import { message } from "antd";
-
 // ==========================================
 // 1. 예약/결제 내역 페이지 관련 상수
 // ==========================================
@@ -51,7 +49,34 @@ export const getPaymentColumns = (isCompact) => [
 
 
 // ==========================================
-// 2. 내 게시물(리뷰, 문의, 댓글) 페이지 관련 상수
+// 2. 관람 내역 페이지 관련 상수
+// ==========================================
+
+/** 관람 내역 검색 옵션 (전시명, 전시 장소) */
+export const VISITED_SEARCH_OPTIONS = [
+  { label: "전시명", value: "title" },
+  { label: "전시 장소", value: "place" },
+];
+
+/** 관람 내역 정렬 옵션 (4가지 기준 완벽 대응) */
+export const VISITED_SORT_OPTIONS = [
+  { label: "최신 예약순", value: "latest-reservation" },
+  { label: "오래된 예약순", value: "oldest-reservation" },
+  { label: "최신 관람일순", value: "latest-visited" },
+  { label: "오래된 관람일순", value: "oldest-visited" },
+];
+
+/** 관람 내역 테이블 컬럼 정의 */
+export const VISITED_COLUMNS = [
+  { key: "reservationId", label: "번호", width: "w-20", align: "center" }, // 백엔드 DTO 필드명 매칭
+  { key: "exhibitionTitle", label: "전시명", align: "left" },            // 백엔드 DTO 필드명 매칭
+  { key: "venueTitle", label: "전시 장소", width: "w-50", align: "left" },   // 백엔드 DTO 필드명 매칭
+  { key: "reservationDay", label: "관람일", width: "w-32", align: "center" }, // 백엔드 DTO 필드명 매칭
+];
+
+
+// ==========================================
+// 3. 내 게시물(리뷰, 문의, 댓글) 페이지 관련 상수
 // ==========================================
 
 /** 내 게시물 페이지 상단 탭 목록 (리뷰, 문의, 댓글) */
@@ -91,18 +116,20 @@ export const MYPOST_COLUMNS_MAP = {
  * @param {string} activeTab - 현재 선택된 탭 ID ('review' | 'ask' | 'reply')
  */
 export const getMyPostSearchOptions = (activeTab) => {
-  // 댓글 탭은 내용 검색만 지원
   if (activeTab === "reply") {
     return [{ label: "내용", value: "content" }];
   }
-  // 리뷰 및 문의 탭은 제목/내용 검색 지원
   return [
     { label: "제목", value: "title" },
     { label: "내용", value: "content" },
   ];
 };
 
-// 💡 예약/결제 백엔드 Enum 상태값 상수
+
+// ==========================================
+// 4. 상태 및 취소 관련 상수 (Enum, 맵핑, 사유)
+// ==========================================
+
 export const RESERVATION_STATUS = {
   PENDING: "PENDING",
   RESERVED: "RESERVED",
@@ -116,9 +143,7 @@ export const PAYMENT_STATUS = {
   FAILED: "FAILED",
 };
 
-// 💡 상태별 화면 표기용 라벨/뱃지 및 안내 메시지 맵핑
 export const STATUS_CONFIG = {
-  // 예약 상태 설정
   RESERVATION: {
     [RESERVATION_STATUS.PENDING]: {
       label: "예약 대기",
@@ -136,7 +161,6 @@ export const STATUS_CONFIG = {
       message: "예약 취소 완료된 티켓입니다.",
     },
   },
-  // 결제 상태 설정
   PAYMENT: {
     [PAYMENT_STATUS.DONE]: {
       label: "결제 완료",
@@ -151,7 +175,6 @@ export const STATUS_CONFIG = {
   },
 };
 
-// 💡 예약 취소 사유 Enum 상수
 export const RESERVATION_CANCEL_REASONS = {
   PERSONAL: "PERSONAL",
   SCHEDULE: "SCHEDULE",
@@ -161,7 +184,6 @@ export const RESERVATION_CANCEL_REASONS = {
   OTHER: "OTHER",
 };
 
-// 💡 취소 모달 드롭다운용 옵션 목록
 export const CANCEL_REASON_OPTIONS = [
   { value: RESERVATION_CANCEL_REASONS.PERSONAL, label: "개인 사정" },
   { value: RESERVATION_CANCEL_REASONS.SCHEDULE, label: "일정 변경" },
