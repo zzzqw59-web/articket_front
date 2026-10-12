@@ -191,8 +191,8 @@ const ProfileFormStep = ({
               </div>
               <div className="flex flex-col text-xs text-amber-900 gap-1">
                 <span className="font-bold text-sm">현재 회원 탈퇴가 진행 중입니다.</span>
-                <span>신청일: {withdrawInfo?.withdrawCreatedAt || "조회 중"}</span>
-                <span>삭제 예정일: {withdrawInfo?.withdrawDue || withdrawInfo?.dueData || "유예 기간 내"}</span>
+                <span>신청일: {withdrawInfo?.withdrawCreatedAt?.replace("T", " ") || "조회 중"}</span>
+                <span>삭제 예정일: {withdrawInfo?.withdrawDue?.replace("T", " ") || withdrawInfo?.dueData?.replace("T", " ") || "유예 기간 내"}</span>
                 <span className="text-amber-700 mt-1">유예 기간 동안은 언제든지 탈퇴를 철회하실 수 있습니다.</span>
               </div>
             </div>
