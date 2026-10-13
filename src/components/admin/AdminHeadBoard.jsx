@@ -4,6 +4,7 @@ const METRICS = {
   profit: { label: "수익", unit: "원" },
   visitor: { label: "방문자", unit: "명" },
   reservation: { label: "예약", unit: "건" },
+  canceledreservation: { label: "예약 취소", unit: "건" },
 };
 
 const formatNumber = (value) =>
@@ -12,8 +13,6 @@ const formatNumber = (value) =>
 const SUMMARY_ITEMS = [
   { key: "average", label: "평균" },
   { key: "total", label: "총합" },
-  { key: "max", label: "최고" },
-  { key: "min", label: "최저" },
 ];
 
 const AdminHeadBoard = ({
@@ -30,10 +29,6 @@ const AdminHeadBoard = ({
   const [totalStatistic, setTotalStatistic] = useState(null);
   const [summary, setSummary] = useState({
     average: 0,
-    max: 0,
-    min: 0,
-    maxDate: null,
-    minDate: null,
   });
 
   const [loading, setLoading] = useState(false);
@@ -68,31 +63,51 @@ const AdminHeadBoard = ({
 
     const item = summary?.[key];
 
-    // 기존 유틸 함수가 max/min 객체를 반환하는 경우와
-    // 숫자를 반환하는 경우를 모두 처리합니다.
     if (item && typeof item === "object") {
       return item.value ?? 0;
     }
-
     return item ?? 0;
   };
 
-  const getSummaryDate = (key) => {
-    const item = summary?.[key];
+  useEffect(() => {
+    const loadStatistic = async () => {
+      if (!startDate || !endDate) {
+        setTotalStatistic(null);
+        setSummary({
+          average: 0,
+        });
+        setError("");
+        return;
+      }
 
-    if (item && typeof item === "object") {
-      return item.anchorDate ?? item.date ?? null;
-    }
+      if (startDate > endDate) {
+        setError("조회 종료일은 시작일보다 빠를 수 없습니다.");
+        return;
+      }
 
-    return summary?.[key === "max" ? "maxDate" : "minDate"] ?? null;
-  };
+      try {
+        setLoading(true);
+        setError("");
 
-  const formatDate = (date) => {
-    if (!date) return "";
+        const result = await fetchStatistic({
+          metric: selectedMetric,
+          startDate,
+          endDate,
+        });
 
-    const value = String(date);
-    return value.length >= 10 ? value.slice(0, 10) : value;
-  };
+        setTotalStatistic(result.total ?? 0);
+        setSummary(result.summary ?? { average: 0 });
+      } catch (error) {
+        console.error("통계 조회 실패:", error);
+        setError("통계 데이터를 불러오지 못했습니다.");
+        setTotalStatistic(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadStatistic();
+  }, [selectedMetric, startDate, endDate, fetchStatistic]);
 
   return (
     <section className="mx-auto w-full max-w-[1100px]">
@@ -102,7 +117,7 @@ const AdminHeadBoard = ({
 
       <div className="grid grid-cols-1 items-stretch gap-5 md:grid-cols-2">
         {/* 전시 선택 */}
-        <section className="flex min-h-[400px] min-w-0 flex-col border border-gray-200 bg-white p-5">
+        <section className="flex h-[350px] min-w-0 flex-col border border-gray-200 bg-white p-5">
           <h2 className="mb-4 text-xl font-bold">전시 선택</h2>
 
           <div className="relative mb-4">
@@ -118,7 +133,7 @@ const AdminHeadBoard = ({
             </span>
           </div>
 
-          <div className="h-[250px] shrink-0 overflow-y-auto">
+          <div className="h-[170px] shrink-0 overflow-y-auto">
             {filteredExhibitions.length ? (
               filteredExhibitions.map((exhibition) => (
                 <label
@@ -151,7 +166,7 @@ const AdminHeadBoard = ({
         </section>
 
         {/* 통계 요약 */}
-        <section className="flex min-h-[400px] min-w-0 flex-col border border-gray-200 bg-white p-5">
+        <section className="flex min-h-[350px] min-w-0 flex-col border border-gray-200 bg-white p-5">
           <h2 className="mb-5 text-xl font-bold">통계 요약</h2>
 
           {/* 통계 항목 */}
@@ -195,9 +210,9 @@ const AdminHeadBoard = ({
             />
           </div>
 
-          <div className="flex flex-1 flex-col justify-center">
+          <div className="flex flex-1 flex-col justify-start mt-2">
             {!startDate || !endDate ? (
-              <p className="text-center leading-7 text-gray-400">
+              <p className="text-center leading-7 text-gray-400 mt-5">
                 통계치를 확인하려면
                 <br />
                 조회 기간을 선택해주세요.
@@ -207,7 +222,7 @@ const AdminHeadBoard = ({
                 통계를 불러오는 중입니다...
               </p>
             ) : error ? (
-              <p className="text-center text-sm text-red-500">{error}</p>
+              <p className="text-center text-sm text-gray-500">{error}</p>
             ) : (
               <>
                 <p className="mb-5 text-xs text-gray-400 ml-5">
@@ -217,17 +232,17 @@ const AdminHeadBoard = ({
                 <div className="grid grid-cols-2 gap-x-5 gap-y-7 ml-5">
                   {SUMMARY_ITEMS.map(({ key, label }) => (
                     <div key={key} className="min-w-0">
-                      <p className="mb-1 text-sm text-gray-500">
-                        {label}
-                        {(key === "max" || key === "min") && (
-                          <span className="ml-1 text-xs text-gray-400">
-                            ({formatDate(getSummaryDate(key)) || "-"})
-                          </span>
-                        )}
-                      </p>
+                      <p className="mb-1 text-sm text-gray-500">{label}</p>
 
                       <p className="text-2xl font-bold">
-                        {formatNumber(getSummaryValue(key))}
+                        {key === "average"
+                          ? Number(summary?.average ?? 0).toLocaleString(
+                              "ko-KR",
+                              {
+                                maximumFractionDigits: 1,
+                              },
+                            )
+                          : formatNumber(totalStatistic)}
                         <span className="ml-1 text-sm font-normal text-gray-400">
                           {currentMetric.unit}
                         </span>

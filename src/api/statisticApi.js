@@ -2,10 +2,9 @@ import axiosInstance from "./axiosInstance";
 
 const prefix = "/api/statistic";
 
-export const getTotalProfit = async (exhibitionId, startDate, endDate) => {
+export const getTotalProfit = async (startDate, endDate) => {
   const response = await axiosInstance.get(`${prefix}/profit/total`, {
     params: {
-      exhibitionId,
       startDate,
       endDate,
     },
@@ -23,10 +22,9 @@ export const getProfitList = async (exhibitionId, startDate, endDate) => {
   return response.data;
 };
 
-export const getTotalVisitor = async (exhibitionId, startDate, endDate) => {
+export const getTotalVisitor = async (startDate, endDate) => {
   const response = await axiosInstance.get(`${prefix}/visitor/total`, {
     params: {
-      exhibitionId,
       startDate,
       endDate,
     },
@@ -47,10 +45,9 @@ export const getVisitorList = async (exhibitionId, startDate, endDate) => {
   return response.data;
 };
 
-export const getTotalReservation = async (exhibitionId, startDate, endDate) => {
+export const getTotalReservation = async (startDate, endDate) => {
   const response = await axiosInstance.get(`${prefix}/reservation/total`, {
     params: {
-      exhibitionId,
       startDate,
       endDate,
     },
@@ -71,16 +68,11 @@ export const getReservationList = async (exhibitionId, startDate, endDate) => {
   return response.data;
 };
 
-export const getTotalCanceledReservation = async (
-  exhibitionId,
-  startDate,
-  endDate,
-) => {
+export const getTotalCanceledReservation = async (startDate, endDate) => {
   const response = await axiosInstance.get(
     `${prefix}/reservation/canceled/total`,
     {
       params: {
-        exhibitionId,
         startDate,
         endDate,
       },
