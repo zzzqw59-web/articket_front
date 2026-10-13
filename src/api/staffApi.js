@@ -39,6 +39,13 @@ export const patchActivateMember = async (memberId) => {
   await axiosInstance.patch(`${prefix}/admin/members/${memberId}/activate`);
 };
 
+export const getStaffRequestsAll = async () => {
+  const response = await axiosInstance.get(
+    `${prefix}/admin/staff/requests`,
+  );
+  return response.data;
+};
+
 export const patchApproveStaffRequest = async (requestId) => {
   await axiosInstance.patch(
     `${prefix}/admin/staff/requests/${requestId}/approve`,
@@ -49,4 +56,16 @@ export const patchRejectStaffRequest = async (requestId) => {
   await axiosInstance.patch(
     `${prefix}/admin/staff/requests/${requestId}/reject`,
   );
+};
+
+export const patchCreateStaff = async (data) => {
+  const response = await axiosInstance.post(`${prefix}/admin/staff`, {
+    email: data.email,
+    password: data.password,
+    nickname: data.nickname,
+    name: data.name,
+    phone: data.phone,
+  });
+
+  return response.data;
 };

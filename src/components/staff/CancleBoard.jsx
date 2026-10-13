@@ -176,7 +176,7 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
               취소 통계를 불러오는 중입니다.
             </div>
           ) : error ? (
-            <div className="flex h-[300px] min-w-[600px] items-center justify-center text-red-500">
+            <div className="flex h-[300px] min-w-[600px] items-center justify-center text-gray-500">
               {error}
             </div>
           ) : cancelData.pieData.length > 0 ? (
@@ -202,7 +202,7 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
               취소 사유를 불러오는 중입니다.
             </p>
           ) : error ? (
-            <p className="py-4 text-sm text-red-500">
+            <p className="py-4 text-sm text-gray-500">
               취소 사유를 불러오지 못했습니다.
             </p>
           ) : currentReasons.length > 0 ? (
