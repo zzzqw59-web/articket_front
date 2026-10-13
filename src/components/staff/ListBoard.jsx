@@ -126,21 +126,26 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
 
   return (
     <div className="mx-auto w-[1100px]">
-      <div className="flex items-center">
+      <div className=" items-center">
         <h2 className="head-text mb-5 -translate-x-7 text-4xl font-bold">
           관련 글 조회
         </h2>
 
         {currentExhibition && (
-          <button
-            type="button"
-            onClick={() =>
-              navigate(`/articket/exhibition/${currentExhibition.id}`)
-            }
-            className="mb-5 -translate-y-2 rounded-2xl border-2 border-gray-500 px-3 py-1 text-gray-500 transition hover:bg-gray-600 hover:text-white"
-          >
-            전시 소개 바로가기
-          </button>
+          <div className="flex justify-between">
+            <div className="head-text text-2xl ml-3">
+              {currentExhibition.title}
+            </div>
+            <button
+              type="button"
+              onClick={() =>
+                navigate(`/articket/exhibition/${currentExhibition.id}`)
+              }
+              className="mb-5 rounded-2xl border-2 border-gray-500 px-3 py-1 text-gray-500 transition hover:bg-gray-600 hover:text-white"
+            >
+              전시 소개 바로가기
+            </button>
+          </div>
         )}
       </div>
 

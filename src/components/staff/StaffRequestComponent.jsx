@@ -37,7 +37,7 @@ const StaffRequestComponent = ({ requests = [] }) => {
   };
 
   return (
-    <div className="w-full max-w-[1100px] h-[550px] mx-auto mt-6 flex flex-col">
+    <div className="w-full max-w-[1100px] h-[520px] mx-auto mt-6 flex flex-col">
       <div className="flex-1 min-h-0 border-t-2 border-gray-800">
         <div className="grid grid-cols-[1fr_2fr_1fr_1fr] items-center bg-gray-100 py-4 text-center font-bold text-lg">
           <div>전시 번호</div>
@@ -63,11 +63,11 @@ const StaffRequestComponent = ({ requests = [] }) => {
                 className="grid grid-cols-[1fr_2fr_1fr_1fr] items-center border-b border-gray-200 py-5 text-center"
               >
                 <div>{request.exhibitionId}</div>
-                <div className="px-4 text-left">{request.exhibitionTitle}</div>
+                <div className="px-4 text-left truncate">
+                  {request.exhibitionTitle}
+                </div>
                 <div>
-                  {request.requestedAt
-                    ? request.requestedAt.replace("T", " ").slice(0, 16)
-                    : "-"}
+                  {request.requestedAt ? request.requestedAt.slice(0, 10) : "-"}
                 </div>
                 <div>
                   <span
