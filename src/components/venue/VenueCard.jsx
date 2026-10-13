@@ -33,11 +33,6 @@ const VenueCard = ({ venue }) => {
         <p>
           {venue.tel || "-"}
         </p>
-
-        <p>
-          {venue.description ||
-            "상세 설명이 없습니다."}
-        </p>
       </div>
     </div>
   );

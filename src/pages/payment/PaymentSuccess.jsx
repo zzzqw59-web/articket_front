@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { confirmPayment } from "../../api/paymentApi";
 import { getReservationDetail } from "../../api/reservationApi";
+import TicketQRCode from "../../components/common/TicketQRCode";
 
 const PaymentSuccess = () => {
   const navigate = useNavigate();
@@ -51,6 +52,9 @@ const PaymentSuccess = () => {
         );
 
         console.log("예약 상세 정보:", reservationResponse);
+        console.log("예약 응답 필드:", Object.keys(reservationResponse));
+console.log("예약 상태값:", reservationResponse.reservationStatus);
+console.log("status 값:", reservationResponse.status);
 
         setPayment(response);
         setReservation(reservationResponse);
@@ -72,9 +76,7 @@ const PaymentSuccess = () => {
     handlePaymentConfirm();
   }, [searchParams]);
 
-  // =====================================================
   // 로딩
-  // =====================================================
   if (isLoading) {
     return (
       <main className="min-h-[600px] flex items-center justify-center bg-white">
@@ -85,9 +87,7 @@ const PaymentSuccess = () => {
     );
   }
 
-  // =====================================================
   // 결제 실패
-  // =====================================================
   if (error) {
     return (
       <main className="min-h-[600px] flex items-center justify-center bg-white px-6">
@@ -116,24 +116,17 @@ const PaymentSuccess = () => {
     );
   }
 
-  // =====================================================
   // 결제 완료
-  // =====================================================
   return (
     <main className="min-h-[600px] bg-white flex justify-center px-6 py-12 md:py-16">
       <div className="w-full max-w-[520px]">
         {/* 예약 영수증 */}
         <div className="bg-white border border-gray-200 rounded-md shadow-md overflow-hidden">
-          {/* ===============================================
-              상단
-          =============================================== */}
+          {/* 상단 */}
           <div className="px-8 pt-8 pb-5">
             <div className="text-center">
-              {/* ARTICKET */}
               <div className="flex items-center justify-center gap-2">
-                <span className="text-2xl">
-                  🎟
-                </span>
+                <span className="text-2xl">🎟</span>
 
                 <span className="text-3xl font-bold text-[#e27800]">
                   ARTICKET
@@ -152,15 +145,11 @@ const PaymentSuccess = () => {
             <div className="border-t border-dashed border-gray-300 mt-5" />
           </div>
 
-          {/* ===============================================
-              예약 정보
-          =============================================== */}
+          {/* 예약 정보 */}
           <div className="px-8">
             {/* 전시명 */}
             <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
-              <span className="text-sm text-gray-500">
-                전시명
-              </span>
+              <span className="text-sm text-gray-500">전시명</span>
 
               <span className="text-sm font-semibold text-gray-800 text-right">
                 {reservation?.exhibitionTitle || "-"}
@@ -169,9 +158,7 @@ const PaymentSuccess = () => {
 
             {/* 장소 */}
             <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
-              <span className="text-sm text-gray-500">
-                장소
-              </span>
+              <span className="text-sm text-gray-500">장소</span>
 
               <span className="text-sm font-semibold text-gray-800 text-right">
                 {reservation?.exhibitionArea || "-"}
@@ -180,9 +167,7 @@ const PaymentSuccess = () => {
 
             {/* 관람일 */}
             <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
-              <span className="text-sm text-gray-500">
-                관람일시
-              </span>
+              <span className="text-sm text-gray-500">관람일시</span>
 
               <span className="text-sm font-semibold text-gray-800 text-right">
                 {reservation?.reservationDay || "-"}
@@ -191,9 +176,7 @@ const PaymentSuccess = () => {
 
             {/* 예약 인원 */}
             <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
-              <span className="text-sm text-gray-500">
-                예약인원
-              </span>
+              <span className="text-sm text-gray-500">예약인원</span>
 
               <span className="text-sm font-semibold text-gray-800 text-right">
                 {reservation?.reservationPerson
@@ -204,9 +187,7 @@ const PaymentSuccess = () => {
 
             {/* 결제 금액 */}
             <div className="flex justify-between items-center gap-6 py-4 border-b border-gray-100">
-              <span className="text-sm text-gray-500">
-                결제금액
-              </span>
+              <span className="text-sm text-gray-500">결제금액</span>
 
               <span className="text-lg font-bold text-gray-900 text-right">
                 {payment?.totalAmount != null
@@ -217,9 +198,7 @@ const PaymentSuccess = () => {
 
             {/* 예매일자 */}
             <div className="flex justify-between items-center gap-6 py-4">
-              <span className="text-sm text-gray-500">
-                예매일자
-              </span>
+              <span className="text-sm text-gray-500">예매일자</span>
 
               <span className="text-sm font-semibold text-gray-800 text-right">
                 {payment?.approvedAt
@@ -229,17 +208,19 @@ const PaymentSuccess = () => {
             </div>
           </div>
 
-          {/* ===============================================
-              예약 상태
-          =============================================== */}
+          {/* 예약 상태 */}
           <div className="px-8">
             <div className="border-t border-dashed border-gray-300 py-5">
               <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-500">
-                  예약상태
-                </span>
+                <span className="text-sm text-gray-500">예약상태</span>
 
-                <span className="px-3 py-1.5 rounded-md bg-green-100 text-green-600 text-xs font-semibold">
+                <span
+                  className={`px-3 py-1.5 rounded-md text-xs font-semibold ${
+                    reservation?.reservationStatus === "RESERVED"
+                      ? "bg-green-100 text-green-600"
+                      : "bg-gray-100 text-gray-600"
+                  }`}
+                >
                   {reservation?.reservationStatus === "RESERVED"
                     ? "예약완료"
                     : reservation?.reservationStatus || "-"}
@@ -248,36 +229,22 @@ const PaymentSuccess = () => {
             </div>
           </div>
 
-          {/* ===============================================
-              QR
-          =============================================== */}
+          {/* QR 코드 */}
           <div className="border-t border-dashed border-gray-300 px-8 py-7 text-center">
-            <p className="text-sm text-gray-400 mb-4">
-              현장 입장을 위한 QR 코드
-            </p>
-
-            {/* 임시 QR */}
-            <div className="w-32 h-32 mx-auto border-4 border-black flex items-center justify-center">
-              <div className="w-24 h-24 grid grid-cols-5 grid-rows-5 gap-1">
-                {[
-                  1, 1, 0, 1, 1,
-                  1, 0, 1, 0, 1,
-                  0, 1, 1, 1, 0,
-                  1, 0, 1, 0, 1,
-                  1, 1, 0, 1, 1,
-                ].map((cell, index) => (
-                  <div
-                    key={index}
-                    className={cell ? "bg-black" : "bg-white"}
-                  />
-                ))}
-              </div>
-            </div>
+            {reservation?.reservationStatus === "RESERVED" ? (
+              <TicketQRCode
+                reservationNo={payment?.orderId}
+                reservationStatus={reservation?.reservationStatus}
+                size={180}
+              />
+            ) : (
+              <p className="text-sm text-gray-400">
+                예약이 확정되면 QR 코드가 표시됩니다.
+              </p>
+            )}
           </div>
 
-          {/* ===============================================
-              상세 페이지 버튼
-          =============================================== */}
+          {/* 상세 페이지 버튼 */}
           <div className="px-6 pb-6">
             <button
               type="button"

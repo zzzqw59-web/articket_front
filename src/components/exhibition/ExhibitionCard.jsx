@@ -6,7 +6,7 @@ import { countWish, toggleWish } from "../../api/wishApi";
 const ExhibitionCard = ({exhibition}) => {
   const navigate = useNavigate();
 
-  const [isWished, setIswished] = useState(false);
+  const [isWished, setIsWished] = useState(false);
   const [wishCount, setWishCount] = useState(0);
 
   //해당 전시의 찜 개수 조회 + 현재 회원의 찜 여부 조회
@@ -16,7 +16,7 @@ const ExhibitionCard = ({exhibition}) => {
             const data = await countWish( exhibition.id);
 
             setWishCount(data.totalWishCount);
-            setIswished(data.wished);
+            setIsWished(data.wished);
         } catch(error) {
             console.error("찜 개수 조회 실패",error);
         }
@@ -32,7 +32,7 @@ const ExhibitionCard = ({exhibition}) => {
     try {
         const data = await toggleWish(exhibition.id);
 
-        setIswished(data.wished);
+        setIsWished(data.wished);
         setWishCount(data.totalWishCount);
     }catch (error) {
         console.error("찜 토글 실패:", error);
