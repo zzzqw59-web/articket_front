@@ -125,16 +125,14 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
   };
 
   return (
-    <div className="mx-auto w-[1100px]">
+    <div className="mx-auto w-[1400px]">
       <div className=" items-center">
-        <h2 className="head-text mb-5 -translate-x-7 text-4xl font-bold">
-          관련 글 조회
-        </h2>
+        <h2 className="head-text text-4xl font-bold mt-10">관련 글 조회</h2>
 
         {currentExhibition && (
           <div className="flex justify-between">
-            <div className="head-text text-2xl ml-3">
-              {currentExhibition.title}
+            <div className="head-text text-2xl ml-3 -translate-x-2">
+              현재 전시 : {currentExhibition.title}
             </div>
             <button
               type="button"
@@ -149,7 +147,7 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
         )}
       </div>
 
-      <div className="flex items-start gap-6">
+      <div className="flex items-start gap-15">
         <StaffList
           title="문의글"
           items={askItems}

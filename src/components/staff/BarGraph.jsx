@@ -32,7 +32,7 @@ const BarGraph = ({ data: rawDataGroup }) => {
   };
 
   return (
-    <div className="w-[900px]">
+    <div className="w-[1050px]">
       <Column {...config} />
     </div>
   );

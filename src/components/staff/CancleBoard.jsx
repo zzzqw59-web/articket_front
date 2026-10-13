@@ -116,7 +116,7 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
 
   if (totalExhibitions === 0) {
     return (
-      <section className="mx-auto mt-12 w-[1100px]">
+      <section className="mx-auto mt-12 w-[1400px]">
         <h2 className="mb-6 text-4xl head-text font-bold -translate-x-7">
           예약 취소
         </h2>
@@ -129,11 +129,9 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
   }
 
   return (
-    <section className="mx-auto mt-12 w-[1100px]">
+    <section className="mx-auto mt-12 w-[1400px]">
       <div className="mb-6 flex items-end justify-between">
-        <h2 className="text-4xl font-bold head-text -translate-x-7">
-          예약 취소
-        </h2>
+        <h2 className="text-4xl font-bold head-text">예약 취소</h2>
 
         <div className="flex items-center gap-4">
           <button
@@ -166,25 +164,25 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
         key={exhibitionId}
         className="flex flex-row items-start gap-10 border border-gray-200 bg-white p-8"
       >
-        <div className="w-[55%] shrink-0">
-          <h3 className="mb-4 truncate text-xl font-bold">
+        <div className="shrink-0">
+          <h3 className="mb-4 truncate text-xl font-bold -translate-y-3">
             {currentExhibition.title ??
               currentExhibition.exhibitionTitle ??
               "선택한 전시"}
           </h3>
 
           {loading ? (
-            <div className="flex h-[300px] items-center justify-center text-gray-500">
+            <div className="flex h-[300px] min-w-[600px] items-center justify-center text-gray-500">
               취소 통계를 불러오는 중입니다.
             </div>
           ) : error ? (
-            <div className="flex h-[300px] items-center justify-center text-red-500">
+            <div className="flex h-[300px] min-w-[600px] items-center justify-center text-red-500">
               {error}
             </div>
           ) : cancelData.pieData.length > 0 ? (
             <PieGraph data={cancelData.pieData} />
           ) : (
-            <div className="flex h-[300px] items-center justify-center text-gray-500">
+            <div className="flex h-[300px] min-w-[600px] items-center justify-center text-gray-500">
               표시할 취소 통계가 없습니다.
             </div>
           )}

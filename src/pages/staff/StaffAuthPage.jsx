@@ -73,13 +73,15 @@ const StaffAuthPage = () => {
 
   return (
     <>
-      <div className="mt-15">
-        <PageHeader
-          title={"권한 요청 페이지"}
-          description={"신청 버튼을 눌러 권한을 신청하세요."}
-        />
+      <div className="flex flex-col mt-15">
+        <div className="font-bold head-text text-4xl mx-auto">
+          권한 요청 페이지
+        </div>
+        <div className="head-text text-xl mx-auto mt-1 text-gray-500">
+          전시를 검색하고 신청 버튼을 눌러 권한을 신청하세요.
+        </div>
       </div>
-      <div className="mt-10 translate-y-5">
+      <div className="mt-7">
         <ExhibitionSearch onSearch={handleSearch} />
       </div>
       <div className="flex justify-center mt-30">
@@ -104,7 +106,9 @@ const StaffAuthPage = () => {
         onChange={handlePageChange}
       />
       <div className="w-[1200px] mx-auto">
-        <div className="mt-10 text-4xl head-text font-bold">신청 현황</div>
+        <div className="mt-10 text-4xl head-text font-bold translate-x-11">
+          신청 현황
+        </div>
         <StaffRequestComponent requests={requests} />
       </div>
       <div className="h-20"></div>
