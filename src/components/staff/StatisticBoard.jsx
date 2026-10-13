@@ -140,6 +140,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
               <input
                 type="date"
                 value={startDate}
+                max={endDate || undefined}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="text-[#0b2342] border-gray-400 border-2 rounded-2xl p-2 head-text"
               />
@@ -151,6 +152,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
               <input
                 type="date"
                 value={endDate}
+                min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
                 className="ml-1 text-[#0b2342] border-gray-400 border-2 rounded-2xl p-2 head-text"
               />
