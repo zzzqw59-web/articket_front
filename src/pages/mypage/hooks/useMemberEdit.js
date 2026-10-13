@@ -153,7 +153,15 @@ export const useMemberEdit = () => {
         }
       } catch (error) {
         console.error("비밀번호 검증 오류:", error);
-        alert("비밀번호 확인 중 오류가 발생했습니다.");
+        const errorMessage = error.response?.data?.message || "";
+        if (error.response?.status === 403 &&
+            (errorMessage.includes("비활성화된 회원") ||
+             errorMessage.includes("탈퇴 진행 중") ||
+             errorMessage.includes("탈퇴 완료된 회원"))) {
+          alert("제재/탈퇴 상태에서는 회원정보 변경이 불가능합니다.");
+        } else {
+          alert("비밀번호 확인 중 오류가 발생했습니다.");
+        }
       }
     } else if (verifyPurpose === "WITHDRAW") {
       const isConfirmed = window.confirm(
