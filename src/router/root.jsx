@@ -11,6 +11,8 @@ import MainLayout from "../layouts/MainLayout";
 import reviewRouter from "./reviewRouter";
 import reservationRouter from "./reservationRouter";
 import paymentRouter from "./paymentRouter";
+import authRouter from "./authRouter";
+import qrCodeRouter from "./qrCodeRouter";
 
 const roots = createBrowserRouter([
   {
@@ -25,10 +27,10 @@ const roots = createBrowserRouter([
           return { Component };
         },
       },
-      {
-        path: "intro",
-        element: <IntroPage />,
-      },
+
+      // 로그인 / 회원가입 / 비밀번호 찾기
+      ...authRouter(),
+
       {
         path: "adminpage",
         children: adminRouter(),
@@ -37,7 +39,7 @@ const roots = createBrowserRouter([
         path: "staffpage",
         children: staffRouter(),
       },
-      
+
       // 마이페이지
       {
         path: "mypage",
@@ -50,8 +52,10 @@ const roots = createBrowserRouter([
         path: "ask",
         children: askpageRouter(),
       },
+
       ...exhibitionRouter(),
       ...venueRouter(),
+
       {
         path: "review",
         children: reviewRouter(),
@@ -63,9 +67,19 @@ const roots = createBrowserRouter([
       {
         path: "payment",
         children: paymentRouter(),
+      },
+      {
+        path: "reservation/check/:orderId",
+        children: qrCodeRouter(),
       }
     ],
   },
+  {
+    path: "/articket/intro",
+    element: <IntroPage />,
+    HydrateFallback: () => <div>Loading...</div>,
+  },
+  
 ]);
 
 export default roots;

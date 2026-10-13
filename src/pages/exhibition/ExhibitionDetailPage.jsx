@@ -3,10 +3,12 @@ import { useNavigate, useParams } from "react-router-dom";
 import "../../styles/ExhibitionAndVenue.css";
 import { getExhibitionDetail, deleteExhibition,} from "../../api/exhibitionApi";
 import { toggleWish, countWish } from "../../api/wishApi";
-import { MEMBER_ROLE } from "../../constants/config";
+import { MEMBER_ROLE, getStoredUser } from "../../constants/config";
 
 
-const ExhibitionDetailPage = ({ user }) => {
+const ExhibitionDetailPage = () => {
+  const user = getStoredUser();  
+
   const { exhibitionId } = useParams();
 
   const navigate = useNavigate();
@@ -31,7 +33,6 @@ const ExhibitionDetailPage = ({ user }) => {
             getExhibitionDetail(exhibitionId),
             countWish(exhibitionId),
         ]); 
-        
         setExhibition(data);
         setWishCount(wishData.totalWishCount);
         setIsWished(wishData.wished);
@@ -103,17 +104,17 @@ const ExhibitionDetailPage = ({ user }) => {
     );
   }
 
-  const isAdmin = user?.role === MEMBER_ROLE.ADMIN;
+  const isAdmin = user?.memberType === MEMBER_ROLE.ADMIN;
 
-  const isStaff = user?.role === MEMBER_ROLE.STAFF;
+  const isStaff = user?.memberType === MEMBER_ROLE.STAFF;
 
 //   관리자 + 전시관계자만 수정 가능
-//   const canEdit = isAdmin || isStaff;
-     const canEdit = true;
+   const canEdit = isAdmin || isStaff;
+     //const canEdit = true;
 
   // 관리자 삭제 가능
-//   const canDelete = isAdmin;
-     const canDelete = true;
+   const canDelete = isAdmin;
+     
 
   return (
     <div className="exhibition-detail-page">
@@ -204,7 +205,7 @@ const ExhibitionDetailPage = ({ user }) => {
 
         <p>
           {exhibition.description ||
-            "등록된 설명이 없습니다."}
+            "전시 소개가 아직 등록되지 않았습니다."}
         </p>
 
       </div>

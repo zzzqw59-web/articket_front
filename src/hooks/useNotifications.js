@@ -18,34 +18,37 @@ export const useNotifications = () => {
 
   // 1. 알림 목록 불러오기 (비로그인 시 실행 안 함)
   const fetchNotifications = useCallback(async () => {
-    if (!isAuthenticated) {
+  if (!isAuthenticated) return;
+  try {
+    setLoading(true);
+    const data = await getMyNotifications(1, 10);
+    setNotifications(data.dtoList || data.content || []);
+  } catch (error) {
+    // 403 에러(탈퇴 진행 중 등)가 오면 콘솔 에러 대신 빈 배열로 처리
+    if (error.response?.status === 403) {
       setNotifications([]);
-      return;
+    } else {
+      console.error("알림 목록 조회 실패:", error);
     }
-    try {
-      setLoading(true);
-      const data = await getMyNotifications(1, 10);
-      setNotifications(data.dtoList || data.content || []);
-    } catch (error) {
-      console.error("알림 목록을 불러오는 데 실패했습니다.", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+  } finally {
+    setLoading(false);
+  }
+}, [isAuthenticated]);
 
-  // 2. 안 읽은 알림 개수 갱신 (비로그인 시 실행 안 함)
-  const fetchUnreadCount = useCallback(async () => {
-    if (!isAuthenticated) {
+const fetchUnreadCount = useCallback(async () => {
+  if (!isAuthenticated) return;
+  try {
+    const count = await getUnreadCount();
+    setUnreadCount(count);
+  } catch (error) {
+    // 403 에러 시 뱃지 개수 0으로 유지
+    if (error.response?.status === 403) {
       setUnreadCount(0);
-      return;
+    } else {
+      console.error("안 읽은 알림 개수 조회 실패:", error);
     }
-    try {
-      const count = await getUnreadCount();
-      setUnreadCount(count);
-    } catch (error) {
-      console.error("안 읽은 알림 개수를 불러오는 데 실패했습니다.", error);
-    }
-  }, [isAuthenticated]);
+  }
+}, [isAuthenticated]);
 
   // 목록과 뱃지 개수 동시에 갱신
   const refetchAll = useCallback(() => {
