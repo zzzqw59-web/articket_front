@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../api/axiosInstance";
 
-const StaffAuthExhibitionsComponent = ({ exhibitions }) => {
+const StaffAuthExhibitionsComponent = ({ exhibitions, onRequestSuccess }) => {
   const navigate = useNavigate();
 
   const handleApply = async (exhibitionId) => {
@@ -11,12 +11,14 @@ const StaffAuthExhibitionsComponent = ({ exhibitions }) => {
     } catch (e) {
       console.error("fail to apply", e);
       alert(e.response?.data?.message || "신청에 실패했습니다.");
+    } finally {
+      onRequestSuccess?.();
     }
   };
 
   return (
     <>
-      <div className="grid grid-cols-3 grid-rows-3 gap-4 w-[1200px] h-[1600px]">
+      <div className="grid grid-cols-3 grid-rows-2 gap-4 w-[1200px] h-[1100px]">
         {Array.isArray(exhibitions) &&
           exhibitions.map((item) => (
             <div key={item.id} className="w-[300px] h-[400px]">

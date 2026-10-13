@@ -5,6 +5,7 @@ import {
   getProfitList,
   getReservationList,
   getVisitorList,
+  getCanceledReservationList,
 } from "../../api/statisticApi";
 import { getStatisticSummary } from "../../utils/statisticUtils";
 
@@ -34,11 +35,13 @@ const StatisticBoard = ({ selectedExhibitions }) => {
     profit: getProfitList,
     visitor: getVisitorList,
     reservation: getReservationList,
+    canceledReservation: getCanceledReservationList,
   };
   const metricUnit = {
     profit: "원",
     visitor: "명",
     reservation: "건",
+    canceledReservation: "건",
   };
 
   useEffect(() => {
@@ -68,6 +71,7 @@ const StatisticBoard = ({ selectedExhibitions }) => {
     profit: "수익",
     visitor: "방문자",
     reservation: "예약",
+    canceledReservation: "예약 취소",
   };
 
   return (
@@ -99,6 +103,12 @@ const StatisticBoard = ({ selectedExhibitions }) => {
                 className={`px-3 py-1 ${selectedMetric === "reservation" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}
               >
                 예약
+              </button>
+              <button
+                onClick={() => setSelectedMetric("canceledReservation")}
+                className={`px-3 py-1 ${selectedMetric === "canceledReservation" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}
+              >
+                예약 취소
               </button>
             </div>
           </div>

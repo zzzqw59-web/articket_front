@@ -71,6 +71,41 @@ export const getReservationList = async (exhibitionId, startDate, endDate) => {
   return response.data;
 };
 
+export const getTotalCanceledReservation = async (
+  exhibitionId,
+  startDate,
+  endDate,
+) => {
+  const response = await axiosInstance.get(
+    `${prefix}/reservation/canceled/total`,
+    {
+      params: {
+        exhibitionId,
+        startDate,
+        endDate,
+      },
+    },
+  );
+  return response.data;
+};
+
+export const getCanceledReservationList = async (
+  exhibitionId,
+  startDate,
+  endDate,
+) => {
+  const response = await axiosInstance.get(
+    `${prefix}/reservation/canceled/${exhibitionId}`,
+    {
+      params: {
+        startDate,
+        endDate,
+      },
+    },
+  );
+  return response.data;
+};
+
 export const getTotalCancel = async () => {
   const response = await axiosInstance.get(`${prefix}/cancel/total`);
   return response.data;

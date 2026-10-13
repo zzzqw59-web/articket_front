@@ -42,6 +42,7 @@ const Staffpage = () => {
     } catch (e) {
       console.error("fail to load exhibition posters", e);
       alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      window.location.href = "/articket";
     }
   };
 
@@ -85,15 +86,17 @@ const Staffpage = () => {
           전시 권한 신청하러 가기
         </div>
       </div>
-      <StaffAuthPostersComponent
-        pageCache={pageCache.current}
-        page={page}
-        totalPages={totalPages}
-        onSelect={handleExhibitionSelect}
-        onPageChange={handlePageChange}
-        selectedIds={selectedExhibitions.map((item) => item.id)}
-      />
-      <div className="mt-5 mb-5"></div>
+      <div className="h-80">
+        <StaffAuthPostersComponent
+          pageCache={pageCache.current}
+          page={page}
+          totalPages={totalPages}
+          onSelect={handleExhibitionSelect}
+          onPageChange={handlePageChange}
+          selectedIds={selectedExhibitions.map((item) => item.id)}
+        />
+      </div>
+      <div className="mt-10 mb-5"></div>
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
 
       <div className="flex items-center justify-center">
