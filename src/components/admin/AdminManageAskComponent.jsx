@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { getAdminPageAsk } from "../../api/askApi";
 
 const PAGE_SIZE = 5;
@@ -8,6 +9,8 @@ const AdminManageAskComponent = () => {
   const [page, setPage] = useState(1);
   const [totalPage, setTotalPage] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchAsks = async () => {
@@ -33,6 +36,14 @@ const AdminManageAskComponent = () => {
     fetchAsks();
   }, [page]);
 
+  // 문의 상세 페이지 이동
+  const handleAskClick = (askId) => {
+    if (!askId || loading) return;
+
+    navigate(`/articket/ask/${askId}`);
+  };
+
+  // 항상 5개 행 유지
   const displayList = Array.from(
     { length: PAGE_SIZE },
     (_, index) => askList[index] ?? null,
@@ -41,8 +52,10 @@ const AdminManageAskComponent = () => {
   return (
     <div className="mx-auto w-[1400px]">
       <div className="head-text mb-5 text-4xl font-bold">문의 관리</div>
+
       <div className="overflow-hidden border border-gray-300">
-        <div className="grid grid-cols-[150px_1fr_200px_300px_150px] h-[60px] items-center border-b-2 border-gray-300 bg-gray-100 text-center font-bold">
+        {/* 테이블 헤더 */}
+        <div className="grid h-[60px] grid-cols-[150px_1fr_200px_300px_150px] items-center border-b-2 border-gray-300 bg-gray-100 text-center font-bold">
           <div>번호</div>
           <div>제목</div>
           <div>닉네임</div>
@@ -54,7 +67,20 @@ const AdminManageAskComponent = () => {
         {displayList.map((ask, index) => (
           <div
             key={ask?.askId ?? `empty-${index}`}
-            className="grid grid-cols-[150px_1fr_200px_300px_150px] h-[60px] items-center border-b border-gray-200 text-center"
+            onClick={() => ask && handleAskClick(ask.askId)}
+            onKeyDown={(e) => {
+              if (ask && (e.key === "Enter" || e.key === " ")) {
+                e.preventDefault();
+                handleAskClick(ask.askId);
+              }
+            }}
+            role={ask ? "button" : undefined}
+            tabIndex={ask ? 0 : undefined}
+            className={`grid h-[60px] grid-cols-[150px_1fr_200px_300px_150px] items-center border-b border-gray-200 text-center ${
+              ask && !loading
+                ? "cursor-pointer transition-colors hover:bg-gray-50"
+                : ""
+            }`}
           >
             {loading ? (
               <div className="col-span-5 text-gray-400">조회 중...</div>
@@ -70,6 +96,7 @@ const AdminManageAskComponent = () => {
           </div>
         ))}
       </div>
+
       {/* 페이징 */}
       <div className="mt-6 flex items-center justify-center gap-2">
         <button

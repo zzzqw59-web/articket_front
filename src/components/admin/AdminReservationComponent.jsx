@@ -4,6 +4,8 @@ import {
   cancelReservation,
 } from "../../api/reservationApi";
 
+const PAGE_SIZE = 7;
+
 const AdminReservationComponent = () => {
   const [reservations, setReservations] = useState([]);
   const [pageData, setPageData] = useState({});
@@ -11,28 +13,26 @@ const AdminReservationComponent = () => {
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
   const [cancelingId, setCancelingId] = useState(null);
 
   // 예약 목록 조회
   const fetchReservations = useCallback(async () => {
     setLoading(true);
-    setError("");
 
     try {
-      const response = await getReservationList(page, 7, keyword);
-
+      const response = await getReservationList(page, PAGE_SIZE, keyword);
       const data = response.data;
 
       setReservations(data.dtoList ?? []);
       setPageData(data);
     } catch (err) {
       console.error("예약 목록 조회 실패:", err);
-      setError("예약 목록을 불러오지 못했습니다.");
+      setReservations([]);
+      setPageData({});
     } finally {
       setLoading(false);
     }
-  }, [keyword, page]);
+  }, [page, keyword]);
 
   useEffect(() => {
     fetchReservations();
@@ -41,8 +41,9 @@ const AdminReservationComponent = () => {
   // 검색
   const handleSearch = (e) => {
     e.preventDefault();
-    setKeyword(searchInput.trim());
+
     setPage(1);
+    setKeyword(searchInput.trim());
   };
 
   // 예약 취소
@@ -54,7 +55,6 @@ const AdminReservationComponent = () => {
     if (!confirmed) return;
 
     setCancelingId(reservation.reservationId);
-    setError("");
 
     try {
       await cancelReservation(reservation.reservationId, {
@@ -65,7 +65,6 @@ const AdminReservationComponent = () => {
       await fetchReservations();
     } catch (err) {
       console.error("예약 취소 실패:", err);
-      setError(err.response?.data?.message || "예약 취소에 실패했습니다.");
     } finally {
       setCancelingId(null);
     }
@@ -74,12 +73,10 @@ const AdminReservationComponent = () => {
   return (
     <div className="w-full min-w-0 py-8">
       <div className="mx-auto w-[1400px] max-w-full px-4">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2 className="text-4xl head-text font-bold text-gray-900 -translate-x-5">
-              예약 관리
-            </h2>
-          </div>
+        <div className="mb-6">
+          <h2 className="head-text -translate-x-5 text-4xl font-bold text-gray-900">
+            예약 관리
+          </h2>
         </div>
 
         {/* 예약 목록 카드 */}
@@ -90,15 +87,13 @@ const AdminReservationComponent = () => {
             className="flex flex-wrap items-center justify-between gap-3 border-b border-gray-200 bg-gray-50/70 px-5 py-4"
           >
             <div className="flex flex-wrap items-center gap-2">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchInput}
-                  onChange={(e) => setSearchInput(e.target.value)}
-                  placeholder="전시명 검색"
-                  className="h-9 w-60 rounded-lg border border-gray-300 bg-white pl-3 pr-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-100"
-                />
-              </div>
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="전시명 검색"
+                className="h-9 w-60 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-800 outline-none transition placeholder:text-gray-400 focus:border-gray-500 focus:ring-2 focus:ring-gray-100"
+              />
 
               <button
                 type="submit"
@@ -109,6 +104,7 @@ const AdminReservationComponent = () => {
             </div>
           </form>
 
+          {/* 예약 테이블 */}
           <div className="min-h-[460px] w-full overflow-auto">
             <table className="w-full min-w-[1050px] table-fixed border-collapse text-center text-sm">
               <colgroup>
@@ -139,7 +135,6 @@ const AdminReservationComponent = () => {
                     "인원",
                     "결제 금액",
                     "결제일",
-
                     "취소일",
                     "관리",
                   ].map((label) => (
@@ -177,6 +172,16 @@ const AdminReservationComponent = () => {
                     const isCanceling =
                       cancelingId === reservation.reservationId;
 
+                    const memberName = reservation.memberName;
+
+                    const maskedName = memberName
+                      ? memberName.length <= 2
+                        ? `${memberName[0]}*`
+                        : `${memberName[0]}${"*".repeat(
+                            memberName.length - 2,
+                          )}${memberName.slice(-1)}`
+                      : "-";
+
                     return (
                       <tr
                         key={reservation.reservationId}
@@ -185,7 +190,7 @@ const AdminReservationComponent = () => {
                         <td className="px-2">
                           <span
                             className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-semibold ${
-                              reservation.reservationStatus === "CANCELED"
+                              isCanceled
                                 ? "bg-red-50 text-red-600"
                                 : reservation.reservationStatus === "PENDING"
                                   ? "bg-amber-50 text-amber-700"
@@ -194,14 +199,14 @@ const AdminReservationComponent = () => {
                           >
                             <span
                               className={`h-1.5 w-1.5 rounded-full ${
-                                reservation.reservationStatus === "CANCELED"
+                                isCanceled
                                   ? "bg-red-500"
                                   : reservation.reservationStatus === "PENDING"
                                     ? "bg-amber-500"
                                     : "bg-emerald-500"
                               }`}
                             />
-                            {reservation.reservationStatus === "CANCELED"
+                            {isCanceled
                               ? "취소 완료"
                               : reservation.reservationStatus === "PENDING"
                                 ? "예약 대기"
@@ -227,13 +232,7 @@ const AdminReservationComponent = () => {
                         </td>
 
                         <td className="truncate px-2 text-gray-700">
-                          {reservation.memberName
-                            ? reservation.memberName.length <= 2
-                              ? reservation.memberName[0] + "*"
-                              : reservation.memberName[0] +
-                                "*".repeat(reservation.memberName.length - 2) +
-                                reservation.memberName.slice(-1)
-                            : "-"}
+                          {maskedName}
                         </td>
 
                         <td className="whitespace-nowrap px-2 text-gray-500">
@@ -259,11 +258,12 @@ const AdminReservationComponent = () => {
                         </td>
 
                         <td className="whitespace-nowrap px-2 text-xs text-gray-500">
-                          {reservation.reservationCreatedAt.slice(0, 10)}
+                          {reservation.reservationCreatedAt?.slice(0, 10) ??
+                            "-"}
                         </td>
 
                         <td className="whitespace-nowrap px-2 text-xs text-gray-500">
-                          {reservation.reservationCanceledAt?.slice(0, 10) ||
+                          {reservation.reservationCanceledAt?.slice(0, 10) ??
                             "-"}
                         </td>
 
@@ -291,7 +291,8 @@ const AdminReservationComponent = () => {
             </table>
           </div>
         </section>
-        {/* 하단 페이지네이션 */}
+
+        {/* 페이지네이션 */}
         <div className="flex min-h-[64px] flex-wrap items-center justify-center gap-3 border-t border-gray-200 bg-white px-5 py-3">
           <div className="flex items-center gap-1.5">
             <button

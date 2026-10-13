@@ -76,18 +76,14 @@ const AdminManageStaffRequestComponent = () => {
 
       setRequests(list);
 
-      const lastPage = Math.max(
-        1,
-        Math.ceil(list.length / PAGE_SIZE),
-      );
+      const lastPage = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
 
       setCurrentPage((page) => Math.min(page, lastPage));
     } catch (error) {
       console.error("전시 권한 신청 목록 조회 실패:", error);
 
       alert(
-        error.response?.data?.message ||
-          "신청 목록을 불러오지 못했습니다.",
+        error.response?.data?.message || "신청 목록을 불러오지 못했습니다.",
       );
     } finally {
       setIsLoading(false);
@@ -128,8 +124,7 @@ const AdminManageStaffRequestComponent = () => {
       console.error("신청 처리 실패:", error);
 
       alert(
-        error.response?.data?.message ||
-          "신청 처리 중 오류가 발생했습니다.",
+        error.response?.data?.message || "신청 처리 중 오류가 발생했습니다.",
       );
     } finally {
       setProcessingId(null);
@@ -137,10 +132,7 @@ const AdminManageStaffRequestComponent = () => {
   };
 
   // 페이지네이션
-  const totalPages = Math.max(
-    1,
-    Math.ceil(requests.length / PAGE_SIZE),
-  );
+  const totalPages = Math.max(1, Math.ceil(requests.length / PAGE_SIZE));
 
   const pageRequests = requests.slice(
     (currentPage - 1) * PAGE_SIZE,
@@ -195,15 +187,11 @@ const AdminManageStaffRequestComponent = () => {
 
   // 신청 데이터 행 렌더링
   const renderRequestRow = (request, index) => {
-
     if (!request) {
       return (
         <tr key={`empty-${currentPage}-${index}`} aria-hidden="true">
           {TABLE_HEADERS.map((header) => (
-            <td
-              key={header}
-              className="h-[65px] px-5 py-4"
-            >
+            <td key={header} className="h-[65px] px-5 py-4">
               &nbsp;
             </td>
           ))}
@@ -254,9 +242,7 @@ const AdminManageStaffRequestComponent = () => {
     <div className="mx-auto w-full max-w-6xl px-5 py-8">
       {/* 제목 */}
       <div className="mb-6 flex items-start justify-between">
-        <h2 className="head-text text-4xl font-bold">
-          전시 권한 신청 관리
-        </h2>
+        <h2 className="head-text text-4xl font-bold">전시 권한 신청 관리</h2>
 
         <div className="text-right text-sm text-gray-500 translate-y-6">
           총 {requests.length}건
@@ -312,23 +298,22 @@ const AdminManageStaffRequestComponent = () => {
             이전
           </button>
 
-          {Array.from(
-            { length: totalPages },
-            (_, index) => index + 1,
-          ).map((page) => (
-            <button
-              key={page}
-              type="button"
-              onClick={() => changePage(page)}
-              className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium ${
-                currentPage === page
-                  ? "bg-gray-900 text-white"
-                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-              }`}
-            >
-              {page}
-            </button>
-          ))}
+          {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+            (page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() => changePage(page)}
+                className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium ${
+                  currentPage === page
+                    ? "bg-gray-900 text-white"
+                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {page}
+              </button>
+            ),
+          )}
 
           <button
             type="button"
