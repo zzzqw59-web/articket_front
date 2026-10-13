@@ -18,7 +18,7 @@ const MainHeadComponent = () => {
   }, [image.length]);
 
   return (
-    <div className="relative overflow-hidden w-full h-150 ">
+    <div className="relative overflow-hidden w-full min-w-[1100px] h-150 ">
       {image.map((imgSrc, index) => (
         <img
           key={index}
