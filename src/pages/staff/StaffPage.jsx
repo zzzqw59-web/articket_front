@@ -78,7 +78,7 @@ const Staffpage = () => {
   return (
     <>
       <div className="flex items-end justify-between mx-auto w-[1200px]">
-        <div className="mt-10 text-4xl head-text font-bold">내 담당 전시</div>
+        <div className="mt-20 text-4xl head-text font-bold">내 담당 전시</div>
         <div
           className="text-2xl head-text font-bold hover:text-gray-400 cursor-pointer -translate-x-17"
           onClick={() => navigate("/articket/staffpage/auth")}
@@ -96,10 +96,10 @@ const Staffpage = () => {
           selectedIds={selectedExhibitions.map((item) => item.id)}
         />
       </div>
-      <div className="mt-10 mb-5"></div>
+      <div className="mt-30 mb-5"></div>
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
 
-      <div className="flex items-center justify-center">
+      <div className="flex items-center justify-center mt-10">
         <CancleBoard selectedExhibitions={selectedExhibitions} />
       </div>
       <div className="h-10"></div>

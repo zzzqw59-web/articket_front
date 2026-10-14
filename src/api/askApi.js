@@ -114,3 +114,14 @@ export const getStaffPageAsk = async (exhibitionId, params = {}) => {
   );
   return response.data;
 };
+
+/**
+ * 7. 댓글 안 달린 문의글 목록 조회
+ */
+export const getAdminPageAsk = async (params = {}) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/adminpage`,
+    { params },
+  );
+  return response.data;
+};

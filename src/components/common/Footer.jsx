@@ -4,6 +4,7 @@ import logo from "../../asset/cat-favicon.svg";
 
 const Footer = () => {
   return (
+<<<<<<< HEAD
     <footer className="border-t border-[#DED8CE] bg-[#F3EEE4]">
       <div className="mx-auto w-full max-w-[1440px] px-6 pt-8 pb-5 md:px-10 lg:px-16">
 
@@ -116,6 +117,16 @@ const Footer = () => {
             </div>
 
           </div>
+=======
+    <div
+      className="bg-[#ede6d6] h-50 flex flex-row justify-between"
+      id="site-footer"
+    >
+      <div className="flex flex-col mt-2 select-none ">
+        <div className="flex flex-row">
+          <img src={logo} alt="고양이 아이콘" className="w-5 h-5 mt-8 ml-9" />
+          <div className="logo text-5xl mt-4 ml-2 flex">Articket</div>
+>>>>>>> 2b3648d6cbe8ae090df1fb07292e141eb7e4a468
         </div>
 
         {/* 하단 영역 */}
