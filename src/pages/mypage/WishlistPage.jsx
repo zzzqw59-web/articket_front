@@ -127,7 +127,7 @@ const MyWishlistPage = () => {
                 place: item.venueTitle,
                 startDate: item.exhibitionPeriod?.split(" ~ ")[0] || "",
                 endDate: item.exhibitionPeriod?.split(" ~ ")[1] || "",
-                imageUrl: item.posterUrl,
+                imageUrl: item.posterUrl  ? item.posterUrl.startsWith("http") ? item.posterUrl : `http://localhost:8080/api/images/${item.posterUrl}`  : "/images/default-exhibition.jpg",
               }}
               onRemove={handleRemoveWish}
               onClick={handleCardClick}
