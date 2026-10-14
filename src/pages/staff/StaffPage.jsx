@@ -4,7 +4,8 @@ import { getExhibitionDetail } from "../../api/exhibitionApi";
 import axiosInstance from "../../api/axiosInstance";
 import StaffAuthPostersComponent from "../../components/staff/StaffAuthPostersComponent";
 import StatisticBoard from "../../components/staff/StatisticBoard";
-import { getProfitList } from "../../api/statisticApi";
+import CancleBoard from "../../components/staff/CancleBoard";
+import ListBoard from "../../components/staff/ListBoard";
 
 const Staffpage = () => {
   const [page, setPage] = useState(0);
@@ -29,7 +30,7 @@ const Staffpage = () => {
                 : `http://localhost:8080/api/images/${detail.imgUrl}`
               : "/images/default-exhibition.jpg",
           };
-        })
+        }),
       );
 
       const nextPageCache = {};
@@ -40,6 +41,8 @@ const Staffpage = () => {
       setTotalPages(Math.ceil(posters.length / 5));
     } catch (e) {
       console.error("fail to load exhibition posters", e);
+      alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
+      window.location.href = "/articket";
     }
   };
 
@@ -75,7 +78,7 @@ const Staffpage = () => {
   return (
     <>
       <div className="flex items-end justify-between mx-auto w-[1200px]">
-        <div className="mt-10 text-4xl head-text font-bold">내 담당 전시</div>
+        <div className="mt-20 text-4xl head-text font-bold">내 담당 전시</div>
         <div
           className="text-2xl head-text font-bold hover:text-gray-400 cursor-pointer -translate-x-17"
           onClick={() => navigate("/articket/staffpage/auth")}
@@ -83,15 +86,25 @@ const Staffpage = () => {
           전시 권한 신청하러 가기
         </div>
       </div>
-      <StaffAuthPostersComponent
-        pageCache={pageCache.current}
-        page={page}
-        totalPages={totalPages}
-        onSelect={handleExhibitionSelect}
-        onPageChange={handlePageChange}
-      />
+      <div className="h-80">
+        <StaffAuthPostersComponent
+          pageCache={pageCache.current}
+          page={page}
+          totalPages={totalPages}
+          onSelect={handleExhibitionSelect}
+          onPageChange={handlePageChange}
+          selectedIds={selectedExhibitions.map((item) => item.id)}
+        />
+      </div>
+      <div className="mt-30 mb-5"></div>
       <StatisticBoard selectedExhibitions={selectedExhibitions} />
-      <div className="h-96" />
+
+      <div className="flex items-center justify-center mt-10">
+        <CancleBoard selectedExhibitions={selectedExhibitions} />
+      </div>
+      <div className="h-10"></div>
+      <ListBoard selectedExhibitions={selectedExhibitions} />
+      <div className="h-20" />
     </>
   );
 };
