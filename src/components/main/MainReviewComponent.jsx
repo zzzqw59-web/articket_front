@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getReviewListByHits } from "../../api/reviewApi";
@@ -9,73 +10,120 @@ const MainReviewComponent = () => {
 
   const navigate = useNavigate();
 
-  const fetchReviews = async () => {
-    try {
-      setLoading(true);
-      setError(false);
-
-      const response = await getReviewListByHits();
-      setReviews(response.dtoList.slice(0, 5));
-    } catch (e) {
-      console.error("fail to load reviews", e);
-      setError(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
+    let cancelled = false;
+
+    const fetchReviews = async () => {
+      try {
+        setLoading(true);
+        setError(false);
+
+        const response = await getReviewListByHits();
+
+        if (!cancelled) {
+          setReviews((response?.dtoList ?? []).slice(0, 5));
+        }
+      } catch (e) {
+        console.error("fail to load reviews", e);
+
+        if (!cancelled) {
+          setError(true);
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
     fetchReviews();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const renderMessage = (message) => (
-    <p className="ml-2 mt-4 text-lg body-text text-gray-500">{message}</p>
+    <div className="flex min-h-[220px] items-center justify-center text-sm text-[#938B81]">
+      {message}
+    </div>
   );
 
   return (
-    <div className="w-[400px] flex justify-between mr-20">
-      {/* 제목 영역 */}
-      <div>
-        <span className="block font-bold text-3xl border-b-4 w-[400px] h-12">
-          <span className="ml-2 head-text">제목</span>
+    <div className="w-full">
+      {/* 테이블 헤더 */}
+      <div
+        className="
+          flex items-center justify-between
+          border-b border-[#3A352F]
+          pb-4
+        "
+      >
+        <span className="text-[12px] font-medium text-[#514B44]">
+          제목
         </span>
 
-        {loading
-          ? renderMessage("리뷰를 불러오는 중입니다.")
-          : error
-            ? renderMessage("리뷰를 불러오지 못했습니다.")
-            : reviews.length === 0
-              ? renderMessage("표시할 리뷰가 없습니다.")
-              : reviews.map((review) => (
-                  <div key={review.reviewId}>
-                    <div
-                      className="text-2xl body-text ml-2 mt-1 cursor-pointer truncate w-[370px]"
-                      onClick={() =>
-                        navigate(`/articket/review/${review.reviewId}`)
-                      }
-                    >
-                      {review.reviewTitle}
-                    </div>
-                  </div>
-                ))}
+        <span className="w-[64px] text-center text-[12px] font-medium text-[#514B44]">
+          조회수
+        </span>
       </div>
 
-      {/* 조회수 영역 */}
-      <div>
-        <span className="block font-bold text-3xl border-b-4 w-[100px] head-text h-12">
-          <span className="ml-3">조회수</span>
-        </span>
+      {/* 리뷰 목록 */}
+      {loading ? (
+        renderMessage("리뷰를 불러오는 중입니다.")
+      ) : error ? (
+        renderMessage("리뷰를 불러오지 못했습니다.")
+      ) : reviews.length === 0 ? (
+        renderMessage("표시할 리뷰가 없습니다.")
+      ) : (
+        <div>
+          {reviews.map((review, index) => (
+            <button
+              type="button"
+              key={review.reviewId}
+              onClick={() =>
+                navigate(`/articket/review/${review.reviewId}`)
+              }
+              className="
+                group flex w-full
+                items-center justify-between
+                gap-4 border-b
+                border-[#E5DFD5]
+                py-5 text-left
+                transition-colors duration-200
+                hover:bg-[#F3F0EA]
+              "
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-4">
+                <span className="w-5 shrink-0 text-[11px] text-[#A29A8F]">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
 
-        {!loading &&
-          !error &&
-          reviews.map((review) => (
-            <div key={review.reviewId}>
-              <div className="text-2xl body-text text-center mt-1">
-                {review.reviewHits}
+                <span
+                  className="
+                    truncate text-[14px]
+                    text-[#3A352F]
+                    transition-colors
+                    group-hover:text-black
+                  "
+                >
+                  {review.reviewTitle}
+                </span>
               </div>
-            </div>
+
+              <span
+                className="
+                  w-[64px] shrink-0
+                  text-center text-[12px]
+                  text-[#938B81]
+                "
+              >
+                {review.reviewHits ?? 0}
+              </span>
+            </button>
           ))}
-      </div>
+        </div>
+      )}
     </div>
   );
 };
