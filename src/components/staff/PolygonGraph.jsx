@@ -155,7 +155,7 @@ const PolygonGraph = ({ data: rawDataGroup }) => {
 
   return (
     <>
-      <div className="w-[900px]">
+      <div className="w-[1050px]">
         <Line {...config} />
       </div>
     </>

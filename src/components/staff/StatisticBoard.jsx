@@ -9,27 +9,18 @@ import {
 } from "../../api/statisticApi";
 import { getStatisticSummary } from "../../utils/statisticUtils";
 
-const StatisticBoard = ({ selectedExhibitions }) => {
+const StatisticBoard = ({ selectedExhibitions = [] }) => {
   const [isPolygon, setIsPolygon] = useState(true);
   const [selectedMetric, setSelectedMetric] = useState("profit");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [data, setData] = useState([]);
   const [statIndex, setStatIndex] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const currentStatData = data[statIndex];
   const summary = getStatisticSummary(currentStatData?.data);
-
-  useEffect(() => {
-    setStatIndex(0);
-  }, [selectedExhibitions]);
-
-  const formatDate = (date) => {
-    if (!date) return "";
-
-    const [, month, day] = date.split("-");
-
-    return `${Number(month)}월 ${Number(day)}일`;
-  };
 
   const statisticApi = {
     profit: getProfitList,
@@ -37,35 +28,13 @@ const StatisticBoard = ({ selectedExhibitions }) => {
     reservation: getReservationList,
     canceledReservation: getCanceledReservationList,
   };
+
   const metricUnit = {
     profit: "원",
     visitor: "명",
     reservation: "건",
     canceledReservation: "건",
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (selectedExhibitions.length === 0 || !startDate || !endDate) {
-        setData([]);
-        return;
-      }
-
-      const api = statisticApi[selectedMetric];
-
-      const result = await Promise.all(
-        selectedExhibitions.map(async (exhibition) => {
-          const response = await api(exhibition.id, startDate, endDate);
-          return {
-            groupName: exhibition.title,
-            data: response,
-          };
-        }),
-      );
-      setData(result);
-    };
-    fetchData();
-  }, [selectedExhibitions, selectedMetric, startDate, endDate]);
 
   const metricTitle = {
     profit: "수익",
@@ -74,113 +43,193 @@ const StatisticBoard = ({ selectedExhibitions }) => {
     canceledReservation: "예약 취소",
   };
 
+  const formatDate = (date) => {
+    if (!date) return "-";
+
+    const [, month, day] = date.split("-");
+    return `${Number(month)}월 ${Number(day)}일`;
+  };
+
+  const formatNumber = (value) => Number(value ?? 0).toLocaleString("ko-KR");
+
+  useEffect(() => {
+    setStatIndex(0);
+  }, [selectedExhibitions]);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const fetchData = async () => {
+      if (
+        selectedExhibitions.length === 0 ||
+        !startDate ||
+        !endDate ||
+        endDate < startDate
+      ) {
+        setData([]);
+        setError("");
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError("");
+
+      try {
+        const api = statisticApi[selectedMetric];
+
+        const result = await Promise.all(
+          selectedExhibitions.map(async (exhibition) => {
+            const response = await api(exhibition.id, startDate, endDate);
+
+            return {
+              groupName: exhibition.title,
+              data: response,
+            };
+          }),
+        );
+
+        if (!cancelled) {
+          setData(result);
+          setStatIndex(0);
+        }
+      } catch (err) {
+        console.error("통계 조회 실패:", err);
+
+        if (!cancelled) {
+          setData([]);
+          setError("통계 데이터를 불러오지 못했습니다.");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedExhibitions, selectedMetric, startDate, endDate]);
+
+  const changeMetric = (metric) => {
+    setSelectedMetric(metric);
+    setStatIndex(0);
+  };
+
+  const renderEmptyState = (title, description) => (
+    <div className="flex h-[450px] w-full flex-col items-center justify-center border border-gray-200 bg-gray-50">
+      <div className="text-xl font-bold text-gray-700">{title}</div>
+      {description && (
+        <div className="mt-2 text-sm text-gray-400">{description}</div>
+      )}
+    </div>
+  );
+
   return (
-    <>
-      <div className="flex justify-center gap-5">
-        <div className="w-[850px]">
-          <div className="flex justify-between items-end">
-            <div className="head-text font-bold text-4xl">
+    <section className="mx-auto w-[1400px] shrink-0">
+      <div className="flex w-full items-start gap-[50px]">
+        <div className="w-[1050px] min-w-0 shrink-0">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <h2 className="head-text text-4xl font-bold">
               {metricTitle[selectedMetric]} 통계 그래프
-            </div>
+            </h2>
 
-            <div className="flex gap-2 body-text translate-x-6">
-              <button
-                onClick={() => setSelectedMetric("profit")}
-                className={`px-3 py-1 ${selectedMetric === "profit" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}
-              >
-                수익
-              </button>
-
-              <button
-                onClick={() => setSelectedMetric("visitor")}
-                className={`px-3 py-1 ${selectedMetric === "visitor" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}
-              >
-                방문자
-              </button>
-
-              <button
-                onClick={() => setSelectedMetric("reservation")}
-                className={`px-3 py-1 ${selectedMetric === "reservation" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}
-              >
-                예약
-              </button>
-              <button
-                onClick={() => setSelectedMetric("canceledReservation")}
-                className={`px-3 py-1 ${selectedMetric === "canceledReservation" ? "bg-[#ede6d6]" : "hover:-translate-y-1 hover:bg-gray-100"}`}
-              >
-                예약 취소
-              </button>
+            <div className="body-text flex shrink-0 gap-2">
+              {Object.entries(metricTitle).map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => changeMetric(key)}
+                  className={`px-3 py-1 transition ${
+                    selectedMetric === key
+                      ? "bg-[#ede6d6] font-bold"
+                      : "hover:bg-gray-100"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
+          {/* 그래프 표시 영역 */}
           {selectedExhibitions.length === 0 ? (
-            <div className="w-[850px] h-[450px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50 ml-7">
-              <div className="text-xl font-bold text-gray-700">
-                전시를 선택해주세요
-              </div>
-
-              <div className="text-sm text-gray-400 mt-2">
-                전시와 조회 기간을 선택하면 통계가 그래프로 표시됩니다.
-              </div>
-            </div>
+            renderEmptyState(
+              "전시를 선택해주세요",
+              "전시와 조회 기간을 선택하면 통계가 그래프로 표시됩니다.",
+            )
           ) : !startDate || !endDate ? (
-            <div className="w-[850px] h-[450px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50 ml-7">
-              <div className="text-xl font-bold text-gray-700">
-                조회 기간을 선택해주세요
-              </div>
-
-              <div className="text-sm text-gray-400 mt-2">
-                조회할 기간을 선택하면 통계가 그래프로 표시됩니다.
-              </div>
-            </div>
+            renderEmptyState(
+              "조회 기간을 선택해주세요",
+              "조회할 기간을 선택하면 통계가 그래프로 표시됩니다.",
+            )
           ) : endDate < startDate ? (
-            <div className="w-[850px] h-[450px] m-2 flex flex-col items-center justify-center border border-gray-200  bg-gray-50 ml-7">
-              <div className="text-xl font-bold text-gray-700">
-                조회 마감일이 조회 시작일보다 빠를 수 없습니다.
-              </div>
-            </div>
-          ) : isPolygon ? (
-            <PolygonGraph data={data} />
+            renderEmptyState(
+              "조회 마감일이 조회 시작일보다 빠를 수 없습니다.",
+              "",
+            )
+          ) : loading ? (
+            renderEmptyState("통계를 불러오는 중입니다...", "")
+          ) : error ? (
+            renderEmptyState(error, "")
           ) : (
-            <BarGraph data={data} />
+            <div className="w-full min-w-0">
+              {isPolygon ? (
+                <PolygonGraph data={data} />
+              ) : (
+                <BarGraph data={data} />
+              )}
+            </div>
           )}
 
-          <div className="flex justify-between w-full ml-8">
-            <div>
+          {/* 조회 기간 및 그래프 유형 */}
+          <div className="mt-5 flex w-full items-center justify-between gap-4">
+            <div className="flex min-w-0 items-center gap-2">
               <input
                 type="date"
                 value={startDate}
                 max={endDate || undefined}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="text-[#0b2342] border-gray-400 border-2 rounded-2xl p-2 head-text"
+                className="min-w-0 rounded-2xl border-2 border-gray-400 p-2 text-[#0b2342] head-text"
+                aria-label="조회 시작일"
               />
 
-              <span className="text-[#5c88a8] head-text text-2xl p-1">
-                &nbsp;~
-              </span>
+              <span className="head-text px-1 text-2xl text-[#5c88a8]">~</span>
 
               <input
                 type="date"
                 value={endDate}
                 min={startDate || undefined}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="ml-1 text-[#0b2342] border-gray-400 border-2 rounded-2xl p-2 head-text"
+                className="min-w-0 rounded-2xl border-2 border-gray-400 p-2 text-[#0b2342] head-text"
+                aria-label="조회 종료일"
               />
             </div>
 
-            <div>
+            <div className="flex shrink-0 gap-2">
               <button
+                type="button"
                 onClick={() => setIsPolygon(true)}
-                className={`body-text font-bold px-3 py-2 mr-2 
-            ${isPolygon ? "bg-[#0b2342] text-white" : "bg-gray-300 hover:bg-[#bfd6df]"}`}
+                className={`body-text px-3 py-2 font-bold ${
+                  isPolygon
+                    ? "bg-[#0b2342] text-white"
+                    : "bg-gray-300 hover:bg-[#bfd6df]"
+                }`}
               >
                 꺾은선
               </button>
 
               <button
+                type="button"
                 onClick={() => setIsPolygon(false)}
-                className={`body-text font-bold px-3 py-2 
-            ${!isPolygon ? "bg-[#0b2342] text-white" : "bg-gray-300 hover:bg-[#bfd6df]"}`}
+                className={`body-text px-3 py-2 font-bold ${
+                  !isPolygon
+                    ? "bg-[#0b2342] text-white"
+                    : "bg-gray-300 hover:bg-[#bfd6df]"
+                }`}
               >
                 막대
               </button>
@@ -188,98 +237,111 @@ const StatisticBoard = ({ selectedExhibitions }) => {
           </div>
         </div>
 
-        <div className="w-[300px] h-[400px] flex flex-col justify-end">
+        {/* 통계 요약 영역: 300px */}
+        <aside className="flex w-[300px] min-w-0 shrink-0 flex-col pt-10">
           {currentStatData ? (
             <>
-              <div className="text-xl font-bold mb-5">
+              <div className="mb-5 text-xl font-bold leading-8">
                 {currentStatData.groupName}
-                <br /> {metricTitle[selectedMetric]} 통계치 요약
+                <br />
+                {metricTitle[selectedMetric]} 통계치 요약
               </div>
 
-              <div className="grid grid-cols-2 gap-5">
-                <div>
+              <div className="grid grid-cols-2 gap-x-4 gap-y-7">
+                {/* 평균 */}
+                <div className="min-w-0">
                   <div className="text-sm text-gray-500">평균</div>
-                  <div className="text-2xl font-bold">
-                    {Math.round(summary.average).toLocaleString()}
-                    <span className="text-sm font-normal text-gray-400 ml-1">
+                  <div className="mt-1 text-2xl font-bold">
+                    {formatNumber(Math.round(summary?.average ?? 0))}
+                    <span className="ml-1 text-sm font-normal text-gray-400">
                       {metricUnit[selectedMetric]}
                     </span>
                   </div>
                 </div>
 
-                <div>
+                {/* 총합 */}
+                <div className="min-w-0">
                   <div className="text-sm text-gray-500">총합</div>
-                  <div className="text-2xl font-bold">
-                    {summary.total.toLocaleString()}
-                    <span className="text-sm font-normal text-gray-400 ml-1">
+                  <div className="mt-1 text-2xl font-bold">
+                    {formatNumber(summary?.total)}
+                    <span className="ml-1 text-sm font-normal text-gray-400">
                       {metricUnit[selectedMetric]}
                     </span>
                   </div>
                 </div>
-                <div>
+
+                {/* 최다 */}
+                <div className="min-w-0">
                   <div className="text-sm text-gray-500">
                     최다
-                    <span className="text-xs text-gray-400 ml-1">
-                      ({formatDate(summary.max?.anchorDate)})
+                    <span className="ml-1 text-xs text-gray-400">
+                      ({formatDate(summary?.max?.anchorDate)})
                     </span>
                   </div>
-
-                  <div className="text-2xl font-bold">
-                    {summary.max?.value.toLocaleString()}
-                    <span className="text-sm font-normal text-gray-400 ml-1">
+                  <div className="mt-1 text-2xl font-bold">
+                    {formatNumber(summary?.max?.value)}
+                    <span className="ml-1 text-sm font-normal text-gray-400">
                       {metricUnit[selectedMetric]}
                     </span>
                   </div>
                 </div>
 
-                <div>
+                {/* 최소 */}
+                <div className="min-w-0">
                   <div className="text-sm text-gray-500">
                     최소
-                    <span className="text-xs text-gray-400 ml-1">
-                      ({formatDate(summary.min?.anchorDate)})
+                    <span className="ml-1 text-xs text-gray-400">
+                      ({formatDate(summary?.min?.anchorDate)})
                     </span>
                   </div>
-
-                  <div className="text-2xl font-bold">
-                    {summary.min?.value.toLocaleString()}
-                    <span className="text-sm font-normal text-gray-400 ml-1">
+                  <div className="mt-1 text-2xl font-bold">
+                    {formatNumber(summary?.min?.value)}
+                    <span className="ml-1 text-sm font-normal text-gray-400">
                       {metricUnit[selectedMetric]}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex justify-center items-center self-end gap-5 mt-8">
-                <button
-                  onClick={() =>
-                    setStatIndex((statIndex - 1 + data.length) % data.length)
-                  }
-                  className="text-xl"
-                >
-                  &lt;
-                </button>
+              {/* 선택한 전시 간 이동 */}
+              {data.length > 1 && (
+                <div className="mt-8 flex items-center justify-center gap-5">
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setStatIndex((statIndex - 1 + data.length) % data.length)
+                    }
+                    className="text-xl"
+                    aria-label="이전 전시 통계"
+                  >
+                    &lt;
+                  </button>
 
-                <span>
-                  {statIndex + 1} / {data.length}
-                </span>
+                  <span className="text-sm">
+                    {statIndex + 1} / {data.length}
+                  </span>
 
-                <button
-                  onClick={() => setStatIndex((statIndex + 1) % data.length)}
-                  className="text-xl"
-                >
-                  &gt;
-                </button>
-              </div>
+                  <button
+                    type="button"
+                    onClick={() => setStatIndex((statIndex + 1) % data.length)}
+                    className="text-xl"
+                    aria-label="다음 전시 통계"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              )}
             </>
           ) : (
-            <div className="text-gray-400 text-center flex flex-col mb-30">
+            <div className="flex mt-50 flex-col items-center text-center text-sm leading-7 text-gray-400">
               통계치를 확인하려면
-              <br /> 전시와 조회 기간을 선택해주세요.
+              <br />
+              전시와 조회 기간을 선택해주세요.
             </div>
           )}
-        </div>
+        </aside>
       </div>
-    </>
+    </section>
   );
 };
 

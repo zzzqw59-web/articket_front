@@ -2,7 +2,10 @@ import logo from "../../asset/cat-favicon.svg";
 
 const Footer = () => {
   return (
-    <div className="bg-[#ede6d6] h-50 flex flex-row justify-between">
+    <div
+      className="bg-[#ede6d6] h-50 flex flex-row justify-between"
+      id="site-footer"
+    >
       <div className="flex flex-col mt-2 select-none ">
         <div className="flex flex-row">
           <img src={logo} alt="고양이 아이콘" className="w-5 h-5 mt-8 ml-9" />
