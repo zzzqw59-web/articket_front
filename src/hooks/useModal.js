@@ -60,11 +60,6 @@ export const useModal = () => {
 
   // 확인 버튼 클릭 핸들러
   const handleConfirm = useCallback(() => {
-    console.log("✅ 모달 확인 클릭");
-    console.log("✅ 현재 onConfirm:", modalState.onConfirm);
-
-    console.log("✅ handleConfirm 실행");
-    console.log("✅ onConfirm:", modalState.onConfirm);
     if (modalState.onConfirm) {
       modalState.onConfirm();
     }

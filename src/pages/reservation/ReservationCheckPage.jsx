@@ -16,7 +16,13 @@ const ReservationCheckPage = () => {
         setReservation(data);
       } catch (error) {
         console.error("예약 조회 실패:", error);
-        setError("예약 정보를 불러올 수 없습니다.");
+  console.error("HTTP 상태:", error.response?.status);
+  console.error("서버 응답:", error.response?.data);
+  console.error("요청 URL:", error.config?.url);
+
+  setError(
+    `예약 조회 실패 (HTTP ${error.response?.status ?? "네트워크 오류"})`
+  );
       } finally {
         setLoading(false);
       }
