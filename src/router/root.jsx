@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import RoleGuard from "./RoleGuard";
 import adminRouter from "./adminRouter";
 import staffRouter from "./staffRouter";
@@ -16,15 +16,25 @@ import authRouter from "./authRouter";
 import qrCodeRouter from "./qrCodeRouter";
 
 const roots = createBrowserRouter([
+  // 루트 주소 접속 시 메인페이지로 이동
+  {
+    path: "/",
+    element: <Navigate to="/articket" replace />,
+  },
+
   {
     path: "/articket",
     element: <MainLayout />,
     HydrateFallback: () => <div>Loading...</div>,
     children: [
+      // 메인페이지
       {
         index: true,
         lazy: async () => {
-          const { default: Component } = await import("../pages/main/MainPage");
+          const { default: Component } = await import(
+            "../pages/main/MainPage"
+          );
+
           return { Component };
         },
       },
@@ -32,11 +42,14 @@ const roots = createBrowserRouter([
       // 로그인 / 회원가입 / 비밀번호 찾기
       ...authRouter(),
 
+      // 관리자
       {
         path: "adminpage",
         element: <RoleGuard allowedRole="ADMIN" />,
         children: adminRouter(),
       },
+
+      // 스태프
       {
         path: "staffpage",
         element: <RoleGuard allowedRole="STAFF" />,
@@ -50,39 +63,48 @@ const roots = createBrowserRouter([
         children: mypageRouter(),
       },
 
-      // 문의페이지
+      // 문의
       {
         path: "ask",
         children: askpageRouter(),
       },
 
+      // 전시 / 전시장
       ...exhibitionRouter(),
       ...venueRouter(),
 
+      // 리뷰
       {
         path: "review",
         children: reviewRouter(),
       },
+
+      // 예약
       {
         path: "exhibition/:exhibitionId/reservation",
         children: reservationRouter(),
       },
+
+      // 결제
       {
         path: "payment",
         children: paymentRouter(),
       },
+
+      // QR 예약 확인
       {
         path: "reservation/check/:orderId",
         children: qrCodeRouter(),
-      }
+      },
     ],
   },
+
+  // 아티켓 소개
   {
     path: "/articket/intro",
     element: <IntroPage />,
     HydrateFallback: () => <div>Loading...</div>,
   },
-  
 ]);
 
 export default roots;

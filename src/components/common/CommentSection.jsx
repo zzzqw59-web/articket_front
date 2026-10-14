@@ -24,6 +24,10 @@ const CommentSection = ({
 
   const menuRef = useRef(null);
 
+  useEffect(() => {
+  console.log("댓글 데이터:", comments);
+}, [comments]);
+
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
     const handleClickOutside = (e) => {
