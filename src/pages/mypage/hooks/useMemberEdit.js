@@ -19,6 +19,7 @@ export const useMemberEdit = () => {
   // 1. 비밀번호 확인 모드 상태
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [checkPassword, setCheckPassword] = useState("");
+  const verifiedPasswordRef = useRef("");
   const [showCheckPassword, setShowCheckPassword] = useState(false);
   const [verifyPurpose, setVerifyPurpose] = useState(null); // null | "EDIT" | "WITHDRAW"
 
@@ -117,6 +118,7 @@ export const useMemberEdit = () => {
 
   // '회원 정보 수정' 버튼 클릭
   const handleStartEdit = () => {
+    verifiedPasswordRef.current = "";
     setCheckPassword("");
     setShowCheckPassword(false);
     setVerifyPurpose("EDIT");
@@ -125,6 +127,7 @@ export const useMemberEdit = () => {
 
   // '회원 탈퇴' 버튼 클릭
   const handleStartWithdrawal = () => {
+    verifiedPasswordRef.current = "";
     setCheckPassword("");
     setShowCheckPassword(false);
     setVerifyPurpose("WITHDRAW");
@@ -143,6 +146,7 @@ export const useMemberEdit = () => {
       try {
         const matches = await checkMyPassword(checkPassword);
         if (matches) {
+          verifiedPasswordRef.current = checkPassword;
           setIsVerifyingPassword(false);
           setIsEditing(true);
           resetPhoneVerification();
@@ -152,8 +156,16 @@ export const useMemberEdit = () => {
           alert("비밀번호가 일치하지 않습니다.");
         }
       } catch (error) {
-        console.error("비밀번호 검증 오류:", error);
-        alert("비밀번호 확인 중 오류가 발생했습니다.");
+        console.error("비밀번호 검증 오류:", error.response?.status || error.message);
+        const errorMessage = error.response?.data?.message || "";
+        if (error.response?.status === 403 &&
+            (errorMessage.includes("비활성화된 회원") ||
+             errorMessage.includes("탈퇴 진행 중") ||
+             errorMessage.includes("탈퇴 완료된 회원"))) {
+          alert("제재/탈퇴 상태에서는 회원정보 변경이 불가능합니다.");
+        } else {
+          alert("비밀번호 확인 중 오류가 발생했습니다.");
+        }
       }
     } else if (verifyPurpose === "WITHDRAW") {
       const isConfirmed = window.confirm(
@@ -210,6 +222,7 @@ export const useMemberEdit = () => {
   };
 
   const handleCancelEdit = () => {
+    verifiedPasswordRef.current = "";
     setIsEditing(false);
     setIsVerifyingPassword(false);
     setVerifyPurpose(null);
@@ -255,9 +268,10 @@ export const useMemberEdit = () => {
       return;
     }
 
-    // 백엔드 MemberUpdateRequestDTO 매핑 (nickname, password, phone)
+    // 백엔드 MemberUpdateRequestDTO 매핑 (nickname, password, currentPassword, phone)
     const updateData = {
       nickname: formData.nickname,
+      currentPassword: verifiedPasswordRef.current,
       phone,
     };
 
@@ -269,6 +283,7 @@ export const useMemberEdit = () => {
     try {
       await updateMyProfile(updateData);
 
+      verifiedPasswordRef.current = "";
       resetPhoneVerification();
       setIsEditing(false);
       setShowFormPassword(false);
@@ -288,8 +303,8 @@ export const useMemberEdit = () => {
       await fetchMemberData();
       alert(AUTH_CONSTANTS.MSG_UPDATE_SUCCESS);
     } catch (error) {
-      console.error("회원정보 수정 실패:", error);
-      alert(error.response?.data?.message || "회원 정보 수정 중 오류가 발생했습니다.");
+      console.error("회원정보 수정 실패:", error.response?.status || error.message);
+      alert(error.response?.data?.message || error.response?.data?.detail || "회원 정보 수정 중 오류가 발생했습니다.");
     }
   };
 

@@ -1,6 +1,5 @@
-
 import { createBrowserRouter, Navigate } from "react-router-dom";
-
+import RoleGuard from "./RoleGuard";
 import adminRouter from "./adminRouter";
 import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
@@ -46,12 +45,14 @@ const roots = createBrowserRouter([
       // 관리자
       {
         path: "adminpage",
+        element: <RoleGuard allowedRole="ADMIN" />,
         children: adminRouter(),
       },
 
       // 스태프
       {
         path: "staffpage",
+        element: <RoleGuard allowedRole="STAFF" />,
         children: staffRouter(),
       },
 
