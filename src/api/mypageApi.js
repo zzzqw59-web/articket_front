@@ -103,3 +103,20 @@ export const getPaymentDetail = async (paymentId) => {
   const response = await axiosInstance.get(`/api/payments/${paymentId}`);
   return response.data;
 };
+
+// PMT-003: 예약 취소 신청 (자동 환불 연동)
+export const cancelReservation = async (reservationId, cancelData) => {
+  // cancelData: { cancelReason: "PERSONAL" | "SCHEDULE" | ... , cancelDetail: "상세 사유" }
+  const response = await axiosInstance.delete(`${RESERVATION_BASE_URL}/${reservationId}/cancel`, {
+    data: cancelData, // 💡 Axios DELETE 요청 시 Request Body는 data 필드에 전달
+  });
+  return response.data;
+};
+
+// HISTORY-001: 관람 내역 조회 (다녀온 전시)
+export const getMyVisitedHistoryList = async (page = 1, size = 10, searchType = "", keyword = "", sort = "") => {
+  const response = await axiosInstance.get(`${MYPAGE_BASE_URL}/history`, {
+    params: { page, size, searchType, keyword, sort },
+  });
+  return response.data; // PageResponseDTO<MyHistoryDTO>
+};

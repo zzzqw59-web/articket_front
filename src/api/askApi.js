@@ -59,8 +59,10 @@ export const getExhibitionSearchListForAsk = async ({
     ]);
 
     // Page<ExhibitionListItemDTO> 응답 구조 (content) 또는 dtoList 호환 처리
-    const freeItems = freeRes.data?.content || freeRes.data?.dtoList || freeRes.data || [];
-    const paidItems = paidRes.data?.content || paidRes.data?.dtoList || paidRes.data || [];
+    const freeItems =
+      freeRes.data?.content || freeRes.data?.dtoList || freeRes.data || [];
+    const paidItems =
+      paidRes.data?.content || paidRes.data?.dtoList || paidRes.data || [];
 
     const combined = [...freeItems, ...paidItems];
     return combined.slice(0, size);
@@ -99,5 +101,27 @@ export const updateAsk = async (askId, data, files = []) => {
  */
 export const deleteAsk = async (askId) => {
   const response = await axiosInstance.delete(`${BASE_URL}/${askId}`);
+  return response.data;
+};
+
+/**
+ * 6. 특정 전시 문의글 목록 조회
+ */
+export const getStaffPageAsk = async (exhibitionId, params = {}) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/staffpage/${exhibitionId}`,
+    { params },
+  );
+  return response.data;
+};
+
+/**
+ * 7. 댓글 안 달린 문의글 목록 조회
+ */
+export const getAdminPageAsk = async (params = {}) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/adminpage`,
+    { params },
+  );
   return response.data;
 };

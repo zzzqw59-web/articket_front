@@ -20,6 +20,15 @@ export const getReviewDetail = async (reviewId) => {
   return response.data;
 };
 
+// 리뷰 작성 가능한 전시 목록 조회
+export const getAvailableExhibitionsForReview = async () => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/my-exhibitions`
+  );
+
+  return response.data;
+};
+
 // 리뷰 작성
 export const createReview = async (formData) => {
   const response = await axiosInstance.post(BASE_URL, formData);
@@ -38,5 +47,14 @@ export const updateReview = async (reviewId, formData) => {
 export const deleteReview = async (reviewId) => {
   const response = await axiosInstance.delete(`${BASE_URL}/${reviewId}`);
 
+  return response.data;
+};
+
+//특정 전시 리뷰 목록 조회
+export const getStaffPageReview = async (exhibitionId, params = {}) => {
+  const response = await axiosInstance.get(
+    `${BASE_URL}/staffpage/${exhibitionId}`,
+    { params },
+  );
   return response.data;
 };

@@ -12,8 +12,18 @@ import {
   deleteReviewReply,
 } from "../../../api/reviewReplyApi";
 
+import { useModal } from "../../../hooks/useModal";
+
 export const useReviewDetail = (reviewId) => {
   const navigate = useNavigate();
+
+  const {
+    modalState,
+    showAlert,
+    showConfirm,
+    handleConfirm,
+    handleCancel,
+  } = useModal();
 
   const [reviewData, setReviewData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,6 +45,10 @@ export const useReviewDetail = (reviewId) => {
         setReviewData(data);
       } catch (error) {
         console.error("리뷰 상세 조회 실패:", error);
+
+        showAlert({
+          message: "리뷰 정보를 불러오지 못했습니다.",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -43,30 +57,35 @@ export const useReviewDetail = (reviewId) => {
     if (reviewId) {
       fetchReviewDetail();
     }
-  }, [reviewId]);
+  }, [reviewId, showAlert]);
 
   // 리뷰 삭제
-  const handleDeleteReview = async () => {
-    const confirmed = window.confirm(
-      "리뷰를 삭제하시겠습니까?\n삭제한 리뷰는 복구할 수 없습니다."
-    );
+  const handleDeleteReview = () => {
+    showConfirm({
+      message:
+        "리뷰를 삭제하시겠습니까?\n삭제한 리뷰는 복구할 수 없습니다.",
 
-    if (!confirmed) return;
+      onConfirm: async () => {
+        try {
+          await deleteReview(reviewId);
 
-    try {
-      await deleteReview(reviewId);
+          showAlert({
+            message: "리뷰가 성공적으로 삭제되었습니다.",
+            onConfirm: () => navigate("/articket/review"),
+          });
+        } catch (error) {
+          console.error("리뷰 삭제 실패:", error);
 
-      alert("리뷰가 성공적으로 삭제되었습니다.");
-      navigate("/articket/review");
-    } catch (error) {
-      console.error("리뷰 삭제 실패:", error);
+          const message =
+            error.response?.data?.message ||
+            "리뷰 삭제 처리에 실패했습니다.";
 
-      const message =
-        error.response?.data?.message ||
-        "리뷰 삭제 처리에 실패했습니다.";
-
-      alert(message);
-    }
+          showAlert({
+            message,
+          });
+        }
+      },
+    });
   };
 
   // 댓글 목록 조회
@@ -90,11 +109,15 @@ export const useReviewDetail = (reviewId) => {
           content: item.reviewReplyBody,
 
           createdAt: item.reviewReplyCreatedAt
-            ? item.reviewReplyCreatedAt.replace("T", " ").slice(0, 16)
+            ? item.reviewReplyCreatedAt
+                .replace("T", " ")
+                .slice(0, 16)
             : "",
 
           modifiedAt: item.reviewReplyModifiedAt
-            ? item.reviewReplyModifiedAt.replace("T", " ").slice(0, 16)
+            ? item.reviewReplyModifiedAt
+                .replace("T", " ")
+                .slice(0, 16)
             : "",
 
           rawItem: item,
@@ -106,11 +129,16 @@ export const useReviewDetail = (reviewId) => {
       }
     } catch (error) {
       console.error("리뷰 댓글 목록 로딩 실패:", error);
+
+      showAlert({
+        message: "댓글 목록을 불러오지 못했습니다.",
+      });
     } finally {
       setIsReplyLoading(false);
     }
-  }, [reviewId, replyPage]);
+  }, [reviewId, replyPage, showAlert]);
 
+  // 댓글 등록
   const handleAddComment = async (commentText) => {
     if (!commentText.trim()) return;
 
@@ -119,11 +147,18 @@ export const useReviewDetail = (reviewId) => {
       await fetchReplyList();
     } catch (error) {
       console.error("리뷰 댓글 등록 실패:", error);
-      alert("댓글 등록에 실패했습니다.");
+
+      showAlert({
+        message: "댓글 등록에 실패했습니다.",
+      });
     }
   };
 
-  const handleEditComment = async (reviewReplyId, commentText) => {
+  // 댓글 수정
+  const handleEditComment = async (
+    reviewReplyId,
+    commentText
+  ) => {
     if (!commentText.trim()) return;
 
     try {
@@ -136,18 +171,35 @@ export const useReviewDetail = (reviewId) => {
       await fetchReplyList();
     } catch (error) {
       console.error("리뷰 댓글 수정 실패:", error);
-      alert("댓글 수정에 실패했습니다.");
+
+      showAlert({
+        message: "댓글 수정에 실패했습니다.",
+      });
     }
   };
 
-  const handleDeleteComment = async (reviewReplyId) => {
-    try {
-      await deleteReviewReply(reviewId, reviewReplyId);
-      await fetchReplyList();
-    } catch (error) {
-      console.error("리뷰 댓글 삭제 실패:", error);
-      alert("댓글 삭제에 실패했습니다.");
-    }
+  // 댓글 삭제
+  const handleDeleteComment = (reviewReplyId) => {
+    showConfirm({
+      message: "댓글을 삭제하시겠습니까?",
+
+      onConfirm: async () => {
+        try {
+          await deleteReviewReply(
+            reviewId,
+            reviewReplyId
+          );
+
+          await fetchReplyList();
+        } catch (error) {
+          console.error("리뷰 댓글 삭제 실패:", error);
+
+          showAlert({
+            message: "댓글 삭제에 실패했습니다.",
+          });
+        }
+      },
+    });
   };
 
   // 댓글 페이지가 바뀌면 다시 조회
@@ -158,15 +210,23 @@ export const useReviewDetail = (reviewId) => {
   return {
     reviewData,
     isLoading,
+
     replyList,
     replyPage,
     totalReplyPages,
     totalReplyCount,
     isReplyLoading,
+
     setReplyPage,
+
     handleAddComment,
     handleEditComment,
     handleDeleteComment,
     handleDeleteReview,
+
+    // 모달
+    modalState,
+    handleConfirm,
+    handleCancel,
   };
 };
