@@ -2,6 +2,7 @@ import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import ActionButton from "../../components/common/ActionButton";
+import ConfirmModal from "../../components/common/ConfirmModal";
 import { useAskList } from "./hooks/useAskList";
 
 import {
@@ -12,7 +13,6 @@ import {
 } from "../../constants/askConstants";
 
 const AskListPage = () => {
-  // 🚀 비즈니스 로직 및 페이징/검색/탭 상태 캡슐화 훅 연동
   const {
     activeTab,
     currentPage,
@@ -26,6 +26,9 @@ const AskListPage = () => {
     handleSearch,
     handleRowClick,
     handleWriteClick,
+    modalState,
+    handleConfirm,
+    handleCancel,
   } = useAskList();
 
   return (
@@ -46,7 +49,7 @@ const AskListPage = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={(page) => setCurrentPage(page)}
-        sortOptions={ASK_SORT_OPTIONS} // 👈 상수로 주입
+        sortOptions={ASK_SORT_OPTIONS}
         selectedSort={selectedSort}
         onSortChange={(sort) => setSelectedSort(sort)}
         onRowClick={handleRowClick}
@@ -69,6 +72,12 @@ const AskListPage = () => {
           />
         </div>
       </div>
+
+      <ConfirmModal
+        modalState={modalState}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </div>
   );
 };
