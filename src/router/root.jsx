@@ -14,6 +14,7 @@ import reservationRouter from "./reservationRouter";
 import paymentRouter from "./paymentRouter";
 import authRouter from "./authRouter";
 import qrCodeRouter from "./qrCodeRouter";
+import PrivateRoute from "./PrivateRoute";
 
 const roots = createBrowserRouter([
   // 루트 주소 접속 시 메인페이지로 이동
@@ -59,8 +60,13 @@ const roots = createBrowserRouter([
       // 마이페이지
       {
         path: "mypage",
-        element: <MypageLayout />,
-        children: mypageRouter(),
+        element: <PrivateRoute />, // 👈 마이페이지 전체를 로그인 가드로 보호
+        children: [
+          {
+            element: <MypageLayout />,
+            children: mypageRouter(),
+          }
+        ],
       },
 
       // 문의
@@ -82,18 +88,21 @@ const roots = createBrowserRouter([
       // 예약
       {
         path: "exhibition/:exhibitionId/reservation",
+        element: <PrivateRoute />,
         children: reservationRouter(),
       },
 
       // 결제
       {
         path: "payment",
+        element: <PrivateRoute />,
         children: paymentRouter(),
       },
 
       // QR 예약 확인
       {
         path: "reservation/check/:orderId",
+        element: <PrivateRoute />,
         children: qrCodeRouter(),
       },
     ],
