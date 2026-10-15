@@ -101,6 +101,8 @@ export const useReviewDetail = (reviewId) => {
         10
       );
 
+      console.log("댓글 API 원본 응답:", response);
+
       if (response && response.dtoList) {
         const formattedReplies = response.dtoList.map((item) => ({
           id: item.reviewReplyId || item.id,

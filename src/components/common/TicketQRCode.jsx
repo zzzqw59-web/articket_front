@@ -23,8 +23,14 @@ const TicketQRCode = ({
     return null;
   }
 
+  // 환경변수에 설정된 공개 주소를 우선 사용
+  const baseUrl =
+    import.meta.env.VITE_PUBLIC_BASE_URL?.replace(/\/$/, "") ||
+    window.location.origin;
+
   // QR 코드에 예약 확인 페이지 URL 저장
-  const qrPayload = `http://192.168.32.20:5173/articket/reservation/check/${reservationNo}`;
+  const qrPayload = `${baseUrl}/articket/reservation/check/${encodeURIComponent(reservationNo)}`;
+  console.log("QR 생성 URL:", qrPayload);
 
   return (
     <>
