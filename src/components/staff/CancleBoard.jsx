@@ -117,9 +117,7 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
   if (totalExhibitions === 0) {
     return (
       <section className="mx-auto mt-12 w-[1400px]">
-        <h2 className="mb-6 text-4xl head-text font-bold -translate-x-7">
-          예약 취소
-        </h2>
+        <h2 className="mb-6 text-4xl head-text font-bold">예약 취소</h2>
 
         <div className="flex h-[400px] items-center justify-center border border-gray-200 p-10 text-center text-gray-500">
           위에서 전시를 선택하면 취소 통계를 확인할 수 있습니다.

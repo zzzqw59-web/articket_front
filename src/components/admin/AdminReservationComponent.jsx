@@ -74,7 +74,7 @@ const AdminReservationComponent = () => {
     <div className="w-full min-w-0 py-8">
       <div className="mx-auto w-[1400px] max-w-full px-4">
         <div className="mb-6">
-          <h2 className="head-text -translate-x-5 text-4xl font-bold text-gray-900">
+          <h2 className="head-text text-4xl font-bold text-gray-900">
             예약 관리
           </h2>
         </div>
