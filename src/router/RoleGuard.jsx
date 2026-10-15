@@ -1,6 +1,6 @@
-
 import { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
+import ForbiddenPage from "../pages/error/ForbiddenPage.jsx";
 import {
   AUTH_STORAGE_EVENT,
   getStoredAccessToken,
@@ -32,7 +32,7 @@ const RoleGuard = ({ allowedRole }) => {
   }
 
   if (authUser.memberType !== allowedRole) {
-    return <Navigate to="/articket" replace />;
+    return <ForbiddenPage />;
   }
 
   return <Outlet />;
