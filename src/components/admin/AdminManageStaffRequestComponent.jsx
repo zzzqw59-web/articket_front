@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   patchApproveStaffRequest,
   patchRejectStaffRequest,
@@ -6,6 +6,26 @@ import {
 } from "../../api/staffApi";
 
 const PAGE_SIZE = 7;
+
+const COLUMN_WIDTHS = {
+  status: "100px",
+  memberId: "90px",
+  nickname: "120px",
+  exhibitionTitle: "200px",
+  requestedAt: "120px",
+  processedAt: "120px",
+  action: "150px",
+};
+
+const COLUMNS = [
+  { key: "status", label: "신청 상태" },
+  { key: "memberId", label: "멤버 ID" },
+  { key: "nickname", label: "닉네임" },
+  { key: "exhibitionTitle", label: "전시 제목" },
+  { key: "requestedAt", label: "신청 일시" },
+  { key: "processedAt", label: "처리 일시" },
+  { key: "action", label: "관리" },
+];
 
 const STATUS = {
   PENDING: {
@@ -22,16 +42,7 @@ const STATUS = {
   },
 };
 
-const TABLE_HEADERS = [
-  "신청 상태",
-  "멤버 ID",
-  "닉네임",
-  "전시 제목",
-  "신청 일시",
-  "처리 일시",
-  "관리",
-];
-
+// 날짜 포맷
 const formatDate = (date) => {
   if (!date) return "-";
 
@@ -49,6 +60,7 @@ const formatDate = (date) => {
   });
 };
 
+// API 응답 형태에 맞춰 신청 목록 추출
 const getRequestList = (response) => {
   if (Array.isArray(response)) return response;
   if (Array.isArray(response?.data)) return response.data;
@@ -60,14 +72,30 @@ const getRequestList = (response) => {
   return [];
 };
 
+// 페이지 번호 배열 생성
+const getPageNumbers = (totalPages) =>
+  Array.from({ length: totalPages }, (_, index) => index + 1);
+
 const AdminManageStaffRequestComponent = () => {
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [processingId, setProcessingId] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
 
+  const totalPages = Math.max(1, Math.ceil(requests.length / PAGE_SIZE));
+
+  const pageRequests = requests.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
+
+  const displayRows = Array.from(
+    { length: PAGE_SIZE },
+    (_, index) => pageRequests[index] ?? null,
+  );
+
   // 신청 목록 조회
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     try {
       setIsLoading(true);
 
@@ -88,13 +116,18 @@ const AdminManageStaffRequestComponent = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+  }, [fetchRequests]);
 
-  // 신청 허가 또는 거절
+  // 페이지 이동
+  const changePage = (page) => {
+    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
+  };
+
+  // 허가 또는 거절 처리
   const handleProcess = async (requestId, action) => {
     const isApprove = action === "approve";
 
@@ -131,25 +164,7 @@ const AdminManageStaffRequestComponent = () => {
     }
   };
 
-  // 페이지네이션
-  const totalPages = Math.max(1, Math.ceil(requests.length / PAGE_SIZE));
-
-  const pageRequests = requests.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-
-  // 데이터 개수와 관계없이 항상 7개 행을 렌더링
-  const displayRows = Array.from(
-    { length: PAGE_SIZE },
-    (_, index) => pageRequests[index] ?? null,
-  );
-
-  const changePage = (page) => {
-    setCurrentPage(Math.max(1, Math.min(page, totalPages)));
-  };
-
-  // 허가 및 거절 버튼
+  // 관리 버튼
   const renderActionButtons = (request) => {
     const { staffRequestId, requestStatus } = request;
     const isProcessing = processingId === staffRequestId;
@@ -168,7 +183,7 @@ const AdminManageStaffRequestComponent = () => {
           type="button"
           disabled={isProcessing}
           onClick={() => handleProcess(staffRequestId, "approve")}
-          className="rounded-md bg-gray-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="whitespace-nowrap rounded-md bg-gray-900 px-3 py-2 text-xs font-semibold text-white transition hover:bg-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isProcessing ? "처리 중..." : "허가"}
         </button>
@@ -177,7 +192,7 @@ const AdminManageStaffRequestComponent = () => {
           type="button"
           disabled={isProcessing}
           onClick={() => handleProcess(staffRequestId, "reject")}
-          className="rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="whitespace-nowrap rounded-md border border-gray-300 px-3 py-2 text-xs font-semibold text-gray-700 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           거절
         </button>
@@ -185,13 +200,34 @@ const AdminManageStaffRequestComponent = () => {
     );
   };
 
-  // 신청 데이터 행 렌더링
+  // 셀 데이터 생성
+  const getRowCells = (request) => [
+    <span
+      className={`inline-flex whitespace-nowrap rounded-full px-3 py-1 text-xs font-semibold ${
+        STATUS[request.requestStatus]?.style ?? "bg-gray-100 text-gray-600"
+      }`}
+    >
+      {STATUS[request.requestStatus]?.label ?? request.requestStatus ?? "-"}
+    </span>,
+    request.memberId ?? "-",
+    request.memberNickname || "-",
+    request.exhibitionTitle || "-",
+    formatDate(request.requestedAt),
+    formatDate(request.processedAt),
+    renderActionButtons(request),
+  ];
+
+  // 테이블 행
   const renderRequestRow = (request, index) => {
     if (!request) {
       return (
-        <tr key={`empty-${currentPage}-${index}`} aria-hidden="true">
-          {TABLE_HEADERS.map((header) => (
-            <td key={header} className="h-[65px] px-5 py-4">
+        <tr
+          key={`empty-${currentPage}-${index}`}
+          aria-hidden="true"
+          className="h-[60px]"
+        >
+          {COLUMNS.map((column) => (
+            <td key={column.key} className="px-5 py-4">
               &nbsp;
             </td>
           ))}
@@ -199,23 +235,7 @@ const AdminManageStaffRequestComponent = () => {
       );
     }
 
-    const status = STATUS[request.requestStatus];
-
-    const cells = [
-      <span
-        className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${
-          status?.style ?? "bg-gray-100 text-gray-600"
-        }`}
-      >
-        {status?.label ?? request.requestStatus ?? "-"}
-      </span>,
-      request.memberId ?? "-",
-      request.memberNickname || "-",
-      request.exhibitionTitle || "-",
-      formatDate(request.requestedAt),
-      formatDate(request.processedAt),
-      renderActionButtons(request),
-    ];
+    const cells = getRowCells(request);
 
     return (
       <tr
@@ -224,8 +244,8 @@ const AdminManageStaffRequestComponent = () => {
       >
         {cells.map((cell, index) => (
           <td
-            key={TABLE_HEADERS[index]}
-            className={`px-5 py-4 text-gray-600 ${
+            key={COLUMNS[index].key}
+            className={`overflow-hidden px-5 py-4 text-gray-600 ${
               index === 2 ? "font-medium text-gray-900" : ""
             } ${
               index === 4 || index === 5 ? "whitespace-nowrap" : ""
@@ -244,24 +264,36 @@ const AdminManageStaffRequestComponent = () => {
       <div className="mb-6 flex items-start justify-between">
         <h2 className="head-text text-4xl font-bold">전시 권한 신청 관리</h2>
 
-        <div className="text-right text-sm text-gray-500 translate-y-6">
+        <div className="translate-y-6 text-right text-sm text-gray-500">
           총 {requests.length}건
         </div>
       </div>
 
       {/* 신청 목록 테이블 */}
       <div className="overflow-x-auto border border-gray-200 bg-white">
-        <table className="w-full min-w-[850px] text-left text-sm">
+        <table
+          className="w-full min-w-[1000px] text-left text-sm"
+          style={{ tableLayout: "fixed" }}
+        >
+          <colgroup>
+            {COLUMNS.map((column) => (
+              <col
+                key={column.key}
+                style={{ width: COLUMN_WIDTHS[column.key] }}
+              />
+            ))}
+          </colgroup>
+
           <thead className="bg-gray-50 text-gray-600">
             <tr>
-              {TABLE_HEADERS.map((header) => (
+              {COLUMNS.map((column) => (
                 <th
-                  key={header}
+                  key={column.key}
                   className={`h-[53px] px-5 py-4 font-semibold ${
-                    header === "관리" ? "text-center" : ""
+                    column.key === "action" ? "text-center" : ""
                   }`}
                 >
-                  {header}
+                  {column.label}
                 </th>
               ))}
             </tr>
@@ -271,10 +303,19 @@ const AdminManageStaffRequestComponent = () => {
             {isLoading ? (
               <tr>
                 <td
-                  colSpan={TABLE_HEADERS.length}
+                  colSpan={COLUMNS.length}
                   className="h-[455px] px-5 text-center text-gray-500"
                 >
                   신청 목록을 불러오는 중입니다.
+                </td>
+              </tr>
+            ) : requests.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={COLUMNS.length}
+                  className="h-[455px] px-5 text-center text-gray-500"
+                >
+                  신청 내역이 없습니다.
                 </td>
               </tr>
             ) : (
@@ -298,22 +339,21 @@ const AdminManageStaffRequestComponent = () => {
             이전
           </button>
 
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-            (page) => (
-              <button
-                key={page}
-                type="button"
-                onClick={() => changePage(page)}
-                className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium ${
-                  currentPage === page
-                    ? "bg-gray-900 text-white"
-                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {page}
-              </button>
-            ),
-          )}
+          {getPageNumbers(totalPages).map((page) => (
+            <button
+              key={page}
+              type="button"
+              aria-current={currentPage === page ? "page" : undefined}
+              onClick={() => changePage(page)}
+              className={`h-9 min-w-9 rounded-lg px-3 text-sm font-medium ${
+                currentPage === page
+                  ? "bg-gray-900 text-white"
+                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {page}
+            </button>
+          ))}
 
           <button
             type="button"
