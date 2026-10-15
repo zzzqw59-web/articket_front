@@ -10,7 +10,7 @@ const IntroAskComponent = () => {
 
   const fetchAsks = async () => {
     try {
-      const response = await getAskList({ sort: "hits" });
+      const response = await getAskList({ sort: "views" });
       setAsks(response.dtoList.slice(0, 3));
     } catch (e) {
       console.error("fail to load ask", e);

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { getAskList } from "../../api/askApi";
 import { useNavigate } from "react-router-dom";
@@ -61,9 +60,7 @@ const MainAskComponent = () => {
           pb-4
         "
       >
-        <span className="text-[12px] font-medium text-[#514B44]">
-          제목
-        </span>
+        <span className="text-[12px] font-medium text-[#514B44]">제목</span>
 
         <span className="w-[64px] text-center text-[12px] font-medium text-[#514B44]">
           조회수
@@ -83,9 +80,7 @@ const MainAskComponent = () => {
             <button
               type="button"
               key={ask.askId}
-              onClick={() =>
-                navigate(`/articket/ask/${ask.askId}`)
-              }
+              onClick={() => navigate(`/articket/ask/${ask.askId}`)}
               className="
                 group flex w-full
                 items-center justify-between
