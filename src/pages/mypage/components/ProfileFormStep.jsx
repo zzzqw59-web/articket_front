@@ -26,7 +26,8 @@ const ProfileFormStep = ({
   onUpdateSubmit,
   onWithdrawal,
   renderEyeIcon,
-  showAlert, // 💡 추가됨
+  showAlert,
+  passwordValidationStatus,
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [codeExpiresAt, setCodeExpiresAt] = useState(0);
@@ -239,10 +240,15 @@ const ProfileFormStep = ({
               />
               {isEditing && renderEyeIcon(showFormPassword, () => setShowFormPassword(!showFormPassword))}
             </div>
-            {/* 💡 유효성 규칙 안내 텍스트 */}
-            {isEditing && (
-              <span className="text-[11px] text-gray-400 mt-0.5">
-                영문, 숫자, 특수문자를 포함하여 8자 이상 입력해 주세요. (변경하지 않으려면 비워두세요)
+            
+            {/* 💡 실시간 비밀번호 유효성 피드백 텍스트 */}
+            {isEditing && formData.password && formData.password.trim() !== "" && (
+              <span className={`text-[11px] mt-0.5 font-medium ${
+                passwordValidationStatus ? "text-emerald-600" : "text-red-500"
+              }`}>
+                {passwordValidationStatus
+                  ? "사용할 수 있는 비밀번호입니다."
+                  : "유효하지 않은 비밀번호입니다. 영문, 숫자, 특수문자 포함 8자 이상 비밀번호를 입력해주세요."}
               </span>
             )}
           </div>

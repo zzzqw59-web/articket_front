@@ -29,6 +29,7 @@ const MemberEditPage = () => {
     resetPhoneVerification,
     handlePhoneVerify,
     handleUpdateSubmit,
+    passwordValidationStatus,
     modalState,
     showAlert,
     handleConfirm,
@@ -90,6 +91,7 @@ const MemberEditPage = () => {
           onWithdrawal={handleStartWithdrawal}
           renderEyeIcon={renderEyeIcon}
           showAlert={showAlert} // 💡 폼 내부에 모달 함수 전달
+          passwordValidationStatus = {passwordValidationStatus} // 💡 비밀번호 유효성 상태 전달,
         />
       )}
 
