@@ -14,7 +14,7 @@ const MainAskComponent = () => {
       setLoading(true);
       setError(false);
 
-      const response = await getAskList({ sort: "askHits" });
+      const response = await getAskList({ sort: "views" });
       setAsks(response.dtoList.slice(0, 5));
     } catch (e) {
       console.error("fail to load ask", e);
