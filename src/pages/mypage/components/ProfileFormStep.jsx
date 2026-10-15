@@ -26,6 +26,7 @@ const ProfileFormStep = ({
   onUpdateSubmit,
   onWithdrawal,
   renderEyeIcon,
+  showAlert, // 💡 추가됨
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [codeExpiresAt, setCodeExpiresAt] = useState(0);
@@ -42,7 +43,6 @@ const ProfileFormStep = ({
   const timeLeft = Math.max(0, Math.ceil((codeExpiresAt - now) / 1000));
   const verifiedTimeLeft = Math.max(0, Math.ceil((phoneVerifiedUntil - now) / 1000));
 
-  // 탈퇴 대기 상태 여부 판단
   const isPendingWithdrawal =
     withdrawInfo &&
     (withdrawInfo.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
@@ -50,11 +50,9 @@ const ProfileFormStep = ({
 
   useEffect(() => {
     if (!isCodeSent) return undefined;
-
     const timer = window.setInterval(() => {
       setNow(Date.now());
     }, 1000);
-
     return () => window.clearInterval(timer);
   }, [isCodeSent]);
 
@@ -72,14 +70,10 @@ const ProfileFormStep = ({
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  /**
-   * 인증번호 발송 요청
-   * Request DTO: VerificationSendRequestDTO { phone, type }
-   */
   const handleSendCode = async () => {
     const phone = normalizePhone(formData.phone);
     if (!isValidPhone(phone)) {
-      alert("올바른 휴대폰 번호를 입력해 주세요.");
+      showAlert({ message: "올바른 휴대폰 번호를 입력해 주세요." });
       return;
     }
 
@@ -91,8 +85,6 @@ const ProfileFormStep = ({
 
     try {
       setIsSending(true);
-
-      // VerificationSendRequestDTO 필드명(phone, type)에 맞춘 객체전송
       await sendPhoneVerification({
         phone,
         type: VERIFICATION_TYPE.MEMBER_UPDATE,
@@ -103,29 +95,25 @@ const ProfileFormStep = ({
       setNow(currentTime);
       setIsCodeSent(true);
       setCodeExpiresAt(requestStartedAt + AUTH_CONSTANTS.RESEND_TIMER_SECONDS * 1000);
-      alert("인증번호가 발송되었습니다.");
+      showAlert({ message: "인증번호가 발송되었습니다." });
     } catch (error) {
       console.error("인증번호 발송 실패:", error);
       if (sequence === requestSequenceRef.current) {
-        alert(error.response?.data?.message || "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요.");
+        showAlert({ message: error.response?.data?.message || "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요." });
       }
     } finally {
       setIsSending(false);
     }
   };
 
-  /**
-   * 인증번호 검증 요청
-   * Request DTO: VerificationVerifyRequestDTO { phone, code, type }
-   */
   const handleVerifyCode = async () => {
     const codeLength = AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
     if (!isCodeSent || Date.now() >= codeExpiresAt) {
-      alert("인증번호가 만료되었습니다. 다시 전송해 주세요.");
+      showAlert({ message: "인증번호가 만료되었습니다. 다시 전송해 주세요." });
       return;
     }
     if (!authCode || authCode.length !== codeLength) {
-      alert(`인증번호 ${codeLength}자리를 정확히 입력해 주세요.`);
+      showAlert({ message: `인증번호 ${codeLength}자리를 정확히 입력해 주세요.` });
       return;
     }
 
@@ -135,8 +123,6 @@ const ProfileFormStep = ({
 
     try {
       setIsVerifying(true);
-
-      // VerificationVerifyRequestDTO 필드명(phone, code, type)에 맞춘 객체전송
       await verifyPhoneVerification({
         phone,
         code: authCode,
@@ -146,11 +132,11 @@ const ProfileFormStep = ({
       if (sequence !== requestSequenceRef.current || phone !== currentPhoneRef.current) return;
       onPhoneVerify(phone, requestStartedAt);
       setNow(Date.now());
-      alert(AUTH_CONSTANTS?.MSG_PHONE_VERIFIED_SUCCESS || "전화번호 인증이 완료되었습니다.");
+      showAlert({ message: AUTH_CONSTANTS?.MSG_PHONE_VERIFIED_SUCCESS || "전화번호 인증이 완료되었습니다." });
     } catch (error) {
       console.error("인증번호 검증 실패:", error);
       if (sequence === requestSequenceRef.current) {
-        alert(error.response?.data?.message || "인증번호가 일치하지 않거나 만료되었습니다.");
+        showAlert({ message: error.response?.data?.message || "인증번호가 일치하지 않거나 만료되었습니다." });
       }
     } finally {
       setIsVerifying(false);
@@ -179,7 +165,6 @@ const ProfileFormStep = ({
       />
 
       <div className="w-full max-w-lg bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col gap-6">
-
         {/* 탈퇴 진행 중 안내 배너 */}
         {isPendingWithdrawal && (
           <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-3">

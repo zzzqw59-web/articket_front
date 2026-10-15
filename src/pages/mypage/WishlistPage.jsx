@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import PageHeader from "../../components/common/PageHeader";
 import WishlistCard from "./components/WishlistCard";
+import ConfirmModal from "../../components/common/ConfirmModal"; // 💡 ConfirmModal 임포트 경로 확인
+import { useModal } from "../../hooks/useModal"; // 💡 useModal 훅 임포트 경로 확인
 import { 
   getMyWishList, 
   toggleWish, 
@@ -15,6 +17,9 @@ const MyWishlistPage = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+
+  // 💡 커스텀 모달 훅 선언
+  const { modalState, showAlert, showConfirm, handleConfirm, handleCancel } = useModal();
 
   // 위시리스트 데이터 로드
   const fetchWishlist = async (targetPage = 1, isAppend = false) => {
@@ -44,37 +49,48 @@ const MyWishlistPage = () => {
     }
   };
 
-  // 💡 [신규] 만료된 위시 일괄 삭제
-  const handleDeleteExpired = async () => {
-    if (!window.confirm("종료된 전시 위시리스트를 모두 삭제하시겠습니까?")) return;
-
-    try {
-      const deletedCount = await deleteExpiredWishes();
-      if (deletedCount > 0) {
-        alert(`${deletedCount}개의 만료된 위시가 삭제되었습니다.`);
-        // 목록 새로고침
-        fetchWishlist(1, false);
-      } else {
-        alert("삭제할 만료된 전시가 없습니다.");
+  // 💡 만료된 위시 일괄 삭제 (window.confirm / alert -> 커스텀 모달 교체)
+  const handleDeleteExpired = () => {
+    showConfirm({
+      title: "만료된 위시 삭제",
+      message: "종료된 전시 위시리스트를 모두 삭제하시겠습니까?",
+      confirmLabel: "삭제하기",
+      onConfirm: async () => {
+        try {
+          const deletedCount = await deleteExpiredWishes();
+          if (deletedCount > 0) {
+            showAlert({
+              message: `${deletedCount}개의 만료된 위시가 삭제되었습니다.`,
+              onConfirm: () => fetchWishlist(1, false)
+            });
+          } else {
+            showAlert({ message: "삭제할 만료된 전시가 없습니다." });
+          }
+        } catch (error) {
+          console.error("만료된 위시 삭제 실패:", error);
+          showAlert({ message: "삭제 처리 중 오류가 발생했습니다." });
+        }
       }
-    } catch (error) {
-      console.error("만료된 위시 삭제 실패:", error);
-      alert("삭제 처리 중 오류가 발생했습니다.");
-    }
+    });
   };
 
-  // 💡 [신규] 전체 위시 일괄 삭제
-  const handleDeleteAll = async () => {
-    if (!window.confirm("위시리스트를 전체 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.")) return;
-
-    try {
-      await deleteAllWishes();
-      setWishlist([]); // UI 즉시 비우기
-      alert("모든 위시리스트가 삭제되었습니다.");
-    } catch (error) {
-      console.error("전체 위시 삭제 실패:", error);
-      alert("삭제 처리 중 오류가 발생했습니다.");
-    }
+  // 💡 전체 위시 일괄 삭제 (window.confirm / alert -> 커스텀 모달 교체)
+  const handleDeleteAll = () => {
+    showConfirm({
+      title: "위시리스트 전체 삭제",
+      message: "위시리스트를 전체 삭제하시겠습니까?\n이 작업은 복구할 수 없습니다.",
+      confirmLabel: "전체 삭제",
+      onConfirm: async () => {
+        try {
+          await deleteAllWishes();
+          setWishlist([]); // UI 즉시 비우기
+          showAlert({ message: "모든 위시리스트가 삭제되었습니다." });
+        } catch (error) {
+          console.error("전체 위시 삭제 실패:", error);
+          showAlert({ message: "삭제 처리 중 오류가 발생했습니다." });
+        }
+      }
+    });
   };
 
   const handleCardClick = (exhibitionId) => {
@@ -94,7 +110,7 @@ const MyWishlistPage = () => {
         description="회원님이 등록하신 위시리스트를 조회할 수 있습니다."
       />
 
-      {/* 💡 상단 일괄 삭제 버튼 영역 */}
+      {/* 상단 일괄 삭제 버튼 영역 */}
       {wishlist.length > 0 && (
         <div className="flex justify-end items-center gap-2 -mb-2">
           <button
@@ -150,6 +166,13 @@ const MyWishlistPage = () => {
           </div>
         </div>
       )}
+
+      {/* 💡 전역 커스텀 모달 컴포넌트 렌더링 연동 */}
+      <ConfirmModal
+        modalState={modalState}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </div>
   );
 };
