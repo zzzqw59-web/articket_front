@@ -281,16 +281,23 @@ export const useMemberEdit = () => {
       return;
     }
 
+    // 💡 비밀번호가 입력된 경우에만 유효성 검사 수행
+    const passwordChanged = Boolean(formData.password && formData.password.trim());
+    if (passwordChanged) {
+      const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+      if (!passwordRegex.test(formData.password)) {
+        showAlert({ 
+          message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 8자 이상으로 입력해 주세요." 
+        });
+        return;
+      }
+    }
+
     const updateData = {
       nickname: formData.nickname,
       currentPassword: verifiedPasswordRef.current,
       phone,
     };
-
-    const passwordChanged = Boolean(formData.password && formData.password.trim());
-    if (passwordChanged) {
-      updateData.password = formData.password;
-    }
 
     try {
       await updateMyProfile(updateData);
