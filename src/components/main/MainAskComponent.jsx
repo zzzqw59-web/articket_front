@@ -19,7 +19,7 @@ const MainAskComponent = () => {
         setError(false);
 
         const response = await getAskList({
-          sort: "askHits",
+          sort: "views",
         });
 
         if (!cancelled) {
