@@ -28,7 +28,7 @@ const ReservationListPage = () => {
       if (activeTab === "booking") {
         // 1. 예약 내역 목록 조회 (Payment/Reservation List API)
         const response = await getMyReservationList(currentPage, 10, searchType, keyword, sort);
-        const mappedData = (response.dtoList || []).map((item) => ({
+        const mappedData = (response.dtoList || []).filter((item) => item.reservationStatus !== "PENDING").map((item) => ({
           id: item.reservationId,
           orderId: item.reservationOrderId,
           bookingId: item.reservationOrderId || `RES${String(item.reservationId).padStart(7, '0')}`,
