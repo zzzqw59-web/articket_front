@@ -106,7 +106,7 @@ const CommentSection = ({
             <tr className="border-b border-gray-200 text-gray-600 font-medium">
               <th className="py-2.5 px-4 w-16 text-center">번호</th>
               <th className="py-2.5 px-4">댓글 내용</th>
-              <th className="py-2.5 px-4 w-32">작성자</th>
+              <th className="py-2.5 px-4 w-48">작성자</th>
               <th className="py-2.5 px-4 w-28 text-center">작성일</th>
               <th className="py-2.5 px-2 w-12 text-center"></th>
             </tr>
