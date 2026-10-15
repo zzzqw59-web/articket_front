@@ -239,6 +239,12 @@ const ProfileFormStep = ({
               />
               {isEditing && renderEyeIcon(showFormPassword, () => setShowFormPassword(!showFormPassword))}
             </div>
+            {/* 💡 유효성 규칙 안내 텍스트 */}
+            {isEditing && (
+              <span className="text-[11px] text-gray-400 mt-0.5">
+                영문, 숫자, 특수문자를 포함하여 8자 이상 입력해 주세요. (변경하지 않으려면 비워두세요)
+              </span>
+            )}
           </div>
 
           <div className="flex flex-col gap-1">
