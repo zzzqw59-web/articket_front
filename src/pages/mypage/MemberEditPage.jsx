@@ -1,6 +1,7 @@
 import { useMemberEdit } from "./hooks/useMemberEdit";
 import PasswordVerifyStep from "./components/PasswordVerifyStep";
 import ProfileFormStep from "./components/ProfileFormStep";
+import ConfirmModal from "../../components/common/ConfirmModal"; // 💡 ConfirmModal 연동
 
 const MemberEditPage = () => {
   const {
@@ -19,7 +20,7 @@ const MemberEditPage = () => {
     setAuthCode,
     isPhoneVerified,
     phoneVerifiedUntil,
-    withdrawInfo,            
+    withdrawInfo,           
     handleCancelWithdrawal,
     handleFormChange,
     handleStartEdit,
@@ -28,6 +29,11 @@ const MemberEditPage = () => {
     resetPhoneVerification,
     handlePhoneVerify,
     handleUpdateSubmit,
+    passwordValidationStatus,
+    modalState,
+    showAlert,
+    handleConfirm,
+    handleCancel,
   } = useMemberEdit();
 
   const renderEyeIcon = (isVisible, toggleFunc) => (
@@ -84,8 +90,17 @@ const MemberEditPage = () => {
           onUpdateSubmit={handleUpdateSubmit}
           onWithdrawal={handleStartWithdrawal}
           renderEyeIcon={renderEyeIcon}
+          showAlert={showAlert} // 💡 폼 내부에 모달 함수 전달
+          passwordValidationStatus = {passwordValidationStatus} // 💡 비밀번호 유효성 상태 전달,
         />
       )}
+
+      {/* 💡 ConfirmModal 렌더링 연결 */}
+      <ConfirmModal
+        modalState={modalState}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </div>
   );
 };

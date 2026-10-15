@@ -2,6 +2,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAskList } from "../../../api/askApi";
+import { useModal } from "../../../hooks/useModal"; // 👈 모달 훅 임포트
+import { getStoredAccessToken } from "../../../api/authStorage"; // 👈 토큰 확인 유틸 임포트
 
 /**
  * 문의글 제목 아이콘 및 포맷팅 헬퍼 함수
@@ -16,6 +18,7 @@ const formatAskTitle = (item) => {
 
 export const useAskList = () => {
   const navigate = useNavigate();
+  const { modalState, showAlert, handleConfirm, handleCancel } = useModal(); // 👈 모달 상태 선언
 
   // 필터 및 페이징 상태
   const [activeTab, setActiveTab] = useState("all");
@@ -36,7 +39,6 @@ export const useAskList = () => {
     setIsLoading(true);
 
     try {
-      // API 요청 파라미터 구성
       const params = {
         page: currentPage,
         size: 10,
@@ -50,7 +52,6 @@ export const useAskList = () => {
 
       const response = await getAskList(params);
 
-      // Page<DTO> (content) 및 PageResponseDTO (dtoList) 호환 처리
       const rawList = response?.content || response?.dtoList || [];
       const calculatedTotalPages = response?.totalPages || response?.totalPage || 1;
 
@@ -74,12 +75,10 @@ export const useAskList = () => {
     }
   }, [currentPage, activeTab, selectedSort, searchParams]);
 
-  // 의존성 변경 시 데이터 자동 조회
   useEffect(() => {
     fetchAskList();
   }, [fetchAskList]);
 
-  // 이벤트 핸들러 모음
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
     setCurrentPage(1);
@@ -99,8 +98,20 @@ export const useAskList = () => {
     navigate(`/articket/ask/${row.id}`);
   };
 
-  // 문의글 작성 페이지 이동 (인증 가드는 ProtectedRoute가 전담)
+  // 💡 [수정] 글쓰기 버튼 클릭 시 로그인 검증 및 ConfirmModal 안내 처리
   const handleWriteClick = () => {
+    const accessToken = getStoredAccessToken();
+    if (!accessToken) {
+      const currentPath = window.location.pathname + window.location.search;
+      showAlert({
+        message: "로그인이 필요한 서비스입니다.",
+        onConfirm: () => {
+          navigate(`/articket/login?redirect=${encodeURIComponent(currentPath)}`);
+        },
+      });
+      return;
+    }
+
     navigate("/articket/ask/write");
   };
 
@@ -117,5 +128,9 @@ export const useAskList = () => {
     handleSearch,
     handleRowClick,
     handleWriteClick,
+    // 💡 UI(AskListPage)에서 모달을 렌더링할 수 있도록 전달
+    modalState,
+    handleConfirm,
+    handleCancel,
   };
 };

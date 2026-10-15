@@ -201,6 +201,7 @@ const AskForm = ({
           onRemoveExisting={handleRemoveExistingImage}
           onRemoveNew={handleRemoveFile}
           onChangeFile={handleFileChange}
+          onShowAlert={showAlert}
         />
 
         {/* 5행: 운영원칙 동의 */}

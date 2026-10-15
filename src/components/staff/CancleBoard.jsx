@@ -164,8 +164,8 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
       >
         <div className="shrink-0">
           <h3 className="mb-4 truncate text-xl font-bold -translate-y-3">
-            {currentExhibition.title ??
-              currentExhibition.exhibitionTitle ??
+            {currentExhibition?.title ??
+              currentExhibition?.exhibitionTitle ??
               "선택한 전시"}
           </h3>
 

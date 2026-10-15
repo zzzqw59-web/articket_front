@@ -12,22 +12,22 @@ import { AUTH_CONSTANTS } from "../../../constants/authConstants";
 import { WITHDRAW_STATUS } from "../../../constants/config";
 import { clearAuth, notifyMemberProfileUpdated } from "../../../api/authStorage";
 import { normalizePhone, isValidPhone } from "../../auth/utils/authFormUtils";
+import { useModal } from "../../../hooks/useModal";
 
 export const useMemberEdit = () => {
   const navigate = useNavigate();
 
-  // 1. 비밀번호 확인 모드 상태
+  const { modalState, showAlert, showConfirm, closeModal, handleConfirm, handleCancel } = useModal();
+
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [checkPassword, setCheckPassword] = useState("");
   const verifiedPasswordRef = useRef("");
   const [showCheckPassword, setShowCheckPassword] = useState(false);
-  const [verifyPurpose, setVerifyPurpose] = useState(null); // null | "EDIT" | "WITHDRAW"
+  const [verifyPurpose, setVerifyPurpose] = useState(null);
 
-  // 2. 정보 수정 모드 상태
   const [isEditing, setIsEditing] = useState(false);
   const [showFormPassword, setShowFormPassword] = useState(false);
 
-  // 3. 회원 정보 Form State 및 저장된 원본
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -40,13 +40,11 @@ export const useMemberEdit = () => {
   const savedProfileRef = useRef(null);
   const currentPhoneRef = useRef("");
 
-  // 4. SMS 인증 상태
   const [authCode, setAuthCode] = useState("");
   const [isPhoneVerified, setIsPhoneVerified] = useState(false);
   const [phoneVerifiedUntil, setPhoneVerifiedUntil] = useState(0);
   const verifiedPhoneRef = useRef("");
 
-  // 5. 회원 탈퇴 상태 정보 (WithdrawResponseDTO)
   const [withdrawInfo, setWithdrawInfo] = useState(null);
 
   const resetPhoneVerification = () => {
@@ -56,7 +54,6 @@ export const useMemberEdit = () => {
     verifiedPhoneRef.current = "";
   };
 
-  // 초기 렌더링 시 회원 정보 & 탈퇴 상태 함께 불러오기
   const fetchMemberData = async () => {
     try {
       const data = await getMyProfile();
@@ -74,11 +71,8 @@ export const useMemberEdit = () => {
       currentPhoneRef.current = profile.phone;
       setFormData(profile);
 
-      // 탈퇴 상태 조회
       try {
         const withdrawData = await getWithdrawStatus();
-
-        // 백엔드 응답의 withdrawStatus가 IN_PROGRESS일 때만 유지
         if (
           withdrawData &&
           (withdrawData.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
@@ -89,7 +83,6 @@ export const useMemberEdit = () => {
           setWithdrawInfo(null);
         }
       } catch (withdrawError) {
-        console.warn("탈퇴 신청 이력이 없거나 조회 실패:", withdrawError);
         setWithdrawInfo(null);
       }
     } catch (error) {
@@ -101,7 +94,6 @@ export const useMemberEdit = () => {
     fetchMemberData();
   }, []);
 
-  // 인증 성공 이후 회원정보 수정 요청도 5분 이내에 완료해야 한다.
   useEffect(() => {
     if (!isPhoneVerified || !phoneVerifiedUntil) {
       return undefined;
@@ -116,7 +108,6 @@ export const useMemberEdit = () => {
     return () => window.clearInterval(timer);
   }, [isPhoneVerified, phoneVerifiedUntil]);
 
-  // '회원 정보 수정' 버튼 클릭
   const handleStartEdit = () => {
     verifiedPasswordRef.current = "";
     setCheckPassword("");
@@ -125,7 +116,6 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(true);
   };
 
-  // '회원 탈퇴' 버튼 클릭
   const handleStartWithdrawal = () => {
     verifiedPasswordRef.current = "";
     setCheckPassword("");
@@ -134,11 +124,17 @@ export const useMemberEdit = () => {
     setIsVerifyingPassword(true);
   };
 
-  // 비밀번호 입력 제출 핸들러
+  const handleWithdrawSuccess = async () => {
+    await fetchMemberData();
+    setIsVerifyingPassword(false);
+    setCheckPassword("");
+    setVerifyPurpose(null);
+  };
+
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
     if (!checkPassword.trim()) {
-      alert(AUTH_CONSTANTS.MSG_ENTER_PASSWORD || "비밀번호를 입력해 주세요.");
+      showAlert({ message: AUTH_CONSTANTS.MSG_ENTER_PASSWORD || "비밀번호를 입력해 주세요." });
       return;
     }
 
@@ -153,60 +149,51 @@ export const useMemberEdit = () => {
           setCheckPassword("");
           setVerifyPurpose(null);
         } else {
-          alert("비밀번호가 일치하지 않습니다.");
+          showAlert({ message: "비밀번호가 일치하지 않습니다." });
         }
       } catch (error) {
-        console.error("비밀번호 검증 오류:", error.response?.status || error.message);
-        const errorMessage = error.response?.data?.message || "";
-        if (error.response?.status === 403 &&
-            (errorMessage.includes("비활성화된 회원") ||
-             errorMessage.includes("탈퇴 진행 중") ||
-             errorMessage.includes("탈퇴 완료된 회원"))) {
-          alert("제재/탈퇴 상태에서는 회원정보 변경이 불가능합니다.");
-        } else {
-          alert("비밀번호 확인 중 오류가 발생했습니다.");
-        }
+        showAlert({ message: "비밀번호 확인 중 오류가 발생했습니다." });
       }
     } else if (verifyPurpose === "WITHDRAW") {
-      const isConfirmed = window.confirm(
-        "정말로 회원 탈퇴를 신청하시겠습니까?\n신청 후 30일간의 유예기간이 부여되며, 유예기간 내에 철회할 수 있습니다."
-      );
-      if (!isConfirmed) return;
-
-      try {
-        const result = await requestWithdraw(checkPassword);
-        alert(result?.message || "회원 탈퇴 신청이 완료되었습니다.");
-
-        await fetchMemberData();
-        setIsVerifyingPassword(false);
-        setCheckPassword("");
-        setVerifyPurpose(null);
-      } catch (error) {
-        console.error("회원 탈퇴 신청 실패:", error);
-        const errorMessage = error.response?.data?.message || "회원 탈퇴 신청 중 오류가 발생했습니다.";
-        alert(errorMessage);
-      }
+      showConfirm({
+        title: "회원 탈퇴 신청",
+        message: "정말로 회원 탈퇴를 신청하시겠습니까?\n신청 후 30일간의 유예기간이 부여됩니다.",
+        confirmLabel: "신청하기",
+        onConfirm: async () => {
+          try {
+            const result = await requestWithdraw(checkPassword);
+            showAlert({
+              message: result?.message || "회원 탈퇴 신청이 완료되었습니다.",
+              onConfirm: handleWithdrawSuccess
+            });
+          } catch (error) {
+            showAlert({ message: error.response?.data?.message || "회원 탈퇴 신청 중 오류가 발생했습니다." });
+          }
+        }
+      });
     }
   };
 
-  // 탈퇴 신청 취소(철회) 처리
-  const handleCancelWithdrawal = async () => {
-    if (!window.confirm("회원 탈퇴 신청을 취소하시겠습니까?\n취소 시 기존 계정을 정상적으로 이용하실 수 있습니다.")) {
-      return;
-    }
-
-    try {
-      await cancelWithdraw();
-      alert("회원 탈퇴 신청이 정상적으로 취소되었습니다.");
-
-      // 상태 즉시 리셋 후 서버 데이터 재조회
-      setWithdrawInfo(null);
-      await fetchMemberData();
-    } catch (error) {
-      console.error("탈퇴 취소 실패:", error);
-      const errorMessage = error.response?.data?.message || "탈퇴 취소 처리 중 오류가 발생했습니다.";
-      alert(errorMessage);
-    }
+  const handleCancelWithdrawal = () => {
+    showConfirm({
+      title: "탈퇴 신청 취소",
+      message: "회원 탈퇴 신청을 취소하시겠습니까?",
+      confirmLabel: "확인",
+      onConfirm: async () => {
+        try {
+          await cancelWithdraw();
+          showAlert({
+            message: "회원 탈퇴 신청이 정상적으로 취소되었습니다.",
+            onConfirm: async () => {
+              setWithdrawInfo(null);
+              await fetchMemberData();
+            }
+          });
+        } catch (error) {
+          showAlert({ message: "탈퇴 취소 처리 중 오류가 발생했습니다." });
+        }
+      }
+    });
   };
 
   const handleFormChange = (e) => {
@@ -236,13 +223,9 @@ export const useMemberEdit = () => {
     }
   };
 
-  // SMS 인증은 화면에 작성된 전화번호와 인증 성공한 전화번호가 같을 때만 유지한다.
   const handlePhoneVerify = (verifiedPhone, requestStartedAt) => {
     const normalizedPhone = normalizePhone(verifiedPhone);
-
-    if (normalizedPhone !== currentPhoneRef.current) {
-      return;
-    }
+    if (normalizedPhone !== currentPhoneRef.current) return;
 
     verifiedPhoneRef.current = normalizedPhone;
     setIsPhoneVerified(true);
@@ -251,31 +234,44 @@ export const useMemberEdit = () => {
     );
   };
 
-  // 프로필 정보 수정 저장 제출 핸들러
+  // 💡 실시간 비밀번호 유효성 검사 함수
+  const isPasswordValid = (password) => {
+    if (!password || !password.trim()) return null;
+    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+    return passwordRegex.test(password);
+  };
+
+  const passwordValidationStatus = isPasswordValid(formData.password);
+
   const handleUpdateSubmit = async (e) => {
     e.preventDefault();
 
     const phone = normalizePhone(formData.phone);
     if (!isValidPhone(phone)) {
-      alert("올바른 휴대폰 번호를 입력해 주세요.");
+      showAlert({ message: "올바른 휴대폰 번호를 입력해 주세요." });
       return;
     }
 
-    // 전화번호 변경 여부에 상관없이 현재 입력된 번호의 SMS 인증이 필요하다.
     if (!isPhoneVerified || verifiedPhoneRef.current !== phone || Date.now() >= phoneVerifiedUntil) {
       resetPhoneVerification();
-      alert(AUTH_CONSTANTS.MSG_NEED_PHONE_VERIFY);
+      showAlert({ message: AUTH_CONSTANTS.MSG_NEED_PHONE_VERIFY });
       return;
     }
 
-    // 백엔드 MemberUpdateRequestDTO 매핑 (nickname, password, currentPassword, phone)
+    const passwordChanged = Boolean(formData.password && formData.password.trim());
+    if (passwordChanged && !passwordValidationStatus) {
+      showAlert({ 
+        message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 8자 이상으로 입력해 주세요." 
+      });
+      return;
+    }
+
     const updateData = {
       nickname: formData.nickname,
       currentPassword: verifiedPasswordRef.current,
       phone,
     };
 
-    const passwordChanged = Boolean(formData.password && formData.password.trim());
     if (passwordChanged) {
       updateData.password = formData.password;
     }
@@ -288,23 +284,22 @@ export const useMemberEdit = () => {
       setIsEditing(false);
       setShowFormPassword(false);
 
-      // 백엔드는 비밀번호 변경 시 DB의 Refresh Token을 삭제한다.
       if (passwordChanged) {
         clearAuth();
-        alert("비밀번호가 변경되었습니다. 다시 로그인해 주세요.");
-        navigate("/articket/login", { replace: true });
+        showAlert({
+          message: "회원 정보가 변경되었습니다. 다시 로그인해 주세요.",
+          onConfirm: () => navigate("/articket/login", { replace: true })
+        });
         return;
       }
 
-      // DB의 최신 회원정보를 조회한 뒤 Header 닉네임도 갱신한다.
       savedProfileRef.current = { ...formData, password: "", phone };
       setFormData({ ...savedProfileRef.current });
       notifyMemberProfileUpdated();
       await fetchMemberData();
-      alert(AUTH_CONSTANTS.MSG_UPDATE_SUCCESS);
+      showAlert({ message: AUTH_CONSTANTS.MSG_UPDATE_SUCCESS });
     } catch (error) {
-      console.error("회원정보 수정 실패:", error.response?.status || error.message);
-      alert(error.response?.data?.message || error.response?.data?.detail || "회원 정보 수정 중 오류가 발생했습니다.");
+      showAlert({ message: error.response?.data?.message || "회원 정보 수정 중 오류가 발생했습니다." });
     }
   };
 
@@ -333,5 +328,10 @@ export const useMemberEdit = () => {
     resetPhoneVerification,
     handlePhoneVerify,
     handleUpdateSubmit,
+    passwordValidationStatus, // 💡 컴포넌트에서 쓸 수 있도록 반환
+    modalState,
+    showAlert,
+    handleConfirm,
+    handleCancel,
   };
 };
