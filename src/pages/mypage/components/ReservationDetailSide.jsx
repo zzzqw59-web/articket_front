@@ -51,7 +51,7 @@ const ReservationDetailSide = ({
     reservationStatus === RESERVATION_STATUS.RESERVED;
 
   return (
-    <div className="w-[360px] flex flex-col gap-4 sticky top-20 h-fit shrink-0">
+    <div className="w-[360px] flex flex-col gap-4 top-20 h-fit shrink-0">
       {/* 영수증 카드 */}
       <div className="relative w-full bg-white border border-gray-100 rounded-lg shadow-sm p-6 overflow-hidden">
         {/* 취소 워터마크 */}
