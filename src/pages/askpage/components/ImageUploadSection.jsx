@@ -8,6 +8,7 @@ const ImageUploadSection = ({
   onRemoveExisting,
   onRemoveNew,
   onChangeFile,
+  onShowAlert, // 👈 부모로부터 showAlert 함수를 받습니다.
 }) => {
   // 클라이언트 측 파일 검증 헬퍼 (5MB, 허용 확장자 체크)
   const handleFileChangeWithValidation = (idx, e) => {
@@ -16,7 +17,7 @@ const ImageUploadSection = ({
 
     // 1. 용량 검증 (5MB = 5 * 1024 * 1024 bytes)
     if (file.size > 5 * 1024 * 1024) {
-      alert("파일 크기는 5MB를 초과할 수 없습니다.");
+      onShowAlert({ message: "파일 크기는 5MB를 초과할 수 없습니다." }); // 👈 모달 호출
       e.target.value = ""; // 입력 초기화
       return;
     }
@@ -24,7 +25,7 @@ const ImageUploadSection = ({
     // 2. 형식 검증 (JPG, JPEG, PNG, GIF, WEBP)
     const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
     if (!allowedTypes.includes(file.type)) {
-      alert("지원하지 않는 파일 형식입니다. (JPG, JPEG, PNG, GIF, WEBP만 가능합니다.)");
+      onShowAlert({ message: "지원하지 않는 파일 형식입니다. (JPG, JPEG, PNG, GIF, WEBP만 가능합니다.)" }); // 👈 모달 호출
       e.target.value = ""; // 입력 초기화
       return;
     }
