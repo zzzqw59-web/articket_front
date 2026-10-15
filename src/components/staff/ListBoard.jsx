@@ -127,7 +127,9 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
   return (
     <div className="mx-auto w-[1400px]">
       <div className=" items-center">
-        <h2 className="head-text text-4xl font-bold mt-10">관련 글 조회</h2>
+        <h2 className="head-text text-4xl font-bold mt-10 mb-5">
+          관련 글 조회
+        </h2>
 
         {currentExhibition && (
           <div className="flex justify-between">
