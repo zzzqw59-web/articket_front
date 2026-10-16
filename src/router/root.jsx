@@ -3,6 +3,10 @@ import RoleGuard from "./RoleGuard";
 import adminRouter from "./adminRouter";
 import staffRouter from "./staffRouter";
 import IntroPage from "../pages/intro/IntroPage";
+import NotFoundPage from "../pages/error/NotFoundPage";
+import RouteErrorPage from "../pages/error/RouteErrorPage";
+import ForbiddenPage from "../pages/error/ForbiddenPage";
+import ServerErrorPage from "../pages/error/ServerErrorPage";
 import MypageLayout from "../pages/mypage/components/MypageLayout";
 import mypageRouter from "./mypageRouter";
 import askpageRouter from "./askpageRouter";
@@ -21,13 +25,25 @@ const roots = createBrowserRouter([
   {
     path: "/",
     element: <Navigate to="/articket" replace />,
+    errorElement: <RouteErrorPage />,
   },
 
   {
     path: "/articket",
     element: <MainLayout />,
+    errorElement: <RouteErrorPage />,
     HydrateFallback: () => <div>Loading...</div>,
     children: [
+      // 접근 권한 및 서버 오류 안내 페이지
+      {
+        path: "error/403",
+        element: <ForbiddenPage />,
+      },
+      {
+        path: "error/500",
+        element: <ServerErrorPage />,
+      },
+
       // 메인페이지
       {
         index: true,
@@ -112,7 +128,20 @@ const roots = createBrowserRouter([
   {
     path: "/articket/intro",
     element: <IntroPage />,
+    errorElement: <RouteErrorPage />,
     HydrateFallback: () => <div>Loading...</div>,
+  },
+
+  // 정의되지 않은 주소는 공통 레이아웃에서 404 페이지 표시
+  {
+    element: <MainLayout />,
+    errorElement: <RouteErrorPage />,
+    children: [
+      {
+        path: "*",
+        element: <NotFoundPage />,
+      },
+    ],
   },
 ]);
 
