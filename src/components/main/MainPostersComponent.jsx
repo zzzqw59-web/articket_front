@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { getExhibitionList } from "../../api/exhibitionApi";
 import { useState, useEffect } from "react";
@@ -27,8 +26,6 @@ const MainPostersComponent = () => {
           setPosters((response?.content ?? []).slice(0, 4));
         }
       } catch (e) {
-        console.error("fail to get exhibition list", e);
-
         if (!cancelled) {
           setError(true);
         }
@@ -64,9 +61,7 @@ const MainPostersComponent = () => {
         <button
           type="button"
           key={poster.id}
-          onClick={() =>
-            navigate(`/articket/exhibition/${poster.id}`)
-          }
+          onClick={() => navigate(`/articket/exhibition/${poster.id}`)}
           className="group min-w-0 text-left"
           aria-label={`${poster.title} 전시 상세 보기`}
         >
@@ -109,9 +104,7 @@ const MainPostersComponent = () => {
                 {poster.title}
               </h3>
 
-              <span className="mt-5 text-xs text-white/85">
-                자세히 보기 ↗
-              </span>
+              <span className="mt-5 text-xs text-white/85">자세히 보기 ↗</span>
             </div>
           </div>
 

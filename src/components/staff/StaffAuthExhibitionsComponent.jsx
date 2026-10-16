@@ -9,7 +9,6 @@ const StaffAuthExhibitionsComponent = ({ exhibitions, onRequestSuccess }) => {
       await axiosInstance.post("/api/staff/requests", { exhibitionId });
       alert("신청되었습니다.");
     } catch (e) {
-      console.error("fail to apply", e);
       alert(e.response?.data?.message || "신청에 실패했습니다.");
     } finally {
       onRequestSuccess?.();

@@ -25,8 +25,6 @@ const MainAskComponent = () => {
           setAsks((response?.dtoList ?? []).slice(0, 5));
         }
       } catch (e) {
-        console.error("fail to load ask", e);
-
         if (!cancelled) {
           setError(true);
         }

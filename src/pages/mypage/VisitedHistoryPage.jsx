@@ -2,10 +2,10 @@ import { useState, useEffect, useCallback } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
-import { 
-  VISITED_SEARCH_OPTIONS, 
-  VISITED_SORT_OPTIONS, 
-  VISITED_COLUMNS 
+import {
+  VISITED_SEARCH_OPTIONS,
+  VISITED_SORT_OPTIONS,
+  VISITED_COLUMNS,
 } from "../../constants/mypageConstants";
 import { getMyVisitedHistoryList } from "../../api/mypageApi"; // 💡 API 임포트
 
@@ -14,9 +14,12 @@ const VisitedHistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [selectedSort, setSelectedSort] = useState("latest-reservation");
-  
+
   // 검색 상태 관리
-  const [searchParams, setSearchParams] = useState({ searchType: "", keyword: "" });
+  const [searchParams, setSearchParams] = useState({
+    searchType: "",
+    keyword: "",
+  });
   const [loading, setLoading] = useState(false);
 
   // 관람 내역 데이터 페치 함수
@@ -28,14 +31,13 @@ const VisitedHistoryPage = () => {
         10, // size
         searchParams.searchType,
         searchParams.keyword,
-        selectedSort
+        selectedSort,
       );
 
       // PageResponseDTO 구조 대응 (dtoList, totalPage 등)
       setDataList(response.dtoList || []);
       setTotalPages(response.totalPage || 1);
     } catch (error) {
-      console.error("관람 내역 조회 실패:", error);
     } finally {
       setLoading(false);
     }
@@ -85,10 +87,7 @@ const VisitedHistoryPage = () => {
 
       {/* 3. 하단 검색 바 (중앙 정렬) */}
       <div className="w-full max-w-xl mx-auto mt-2">
-        <SearchBar 
-          options={VISITED_SEARCH_OPTIONS} 
-          onSearch={handleSearch} 
-        />
+        <SearchBar options={VISITED_SEARCH_OPTIONS} onSearch={handleSearch} />
       </div>
     </div>
   );

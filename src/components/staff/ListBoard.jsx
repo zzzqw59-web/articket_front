@@ -59,7 +59,6 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
       } catch (error) {
         if (cancelled) return;
 
-        console.error("문의글 조회 실패:", error);
         setAskItems([]);
         setAskTotalPages(1);
       }
@@ -96,7 +95,6 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
       } catch (error) {
         if (cancelled) return;
 
-        console.error("리뷰글 조회 실패:", error);
         setReviewItems([]);
         setReviewTotalPages(1);
       }

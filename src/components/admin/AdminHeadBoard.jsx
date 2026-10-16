@@ -112,7 +112,6 @@ const AdminHeadBoard = ({ exhibitions = [], onSelectedIdsChange }) => {
         setSummary({ total, average });
       } catch (error) {
         if (cancelled) return;
-        console.error("통계 조회 실패:", error);
         setError("통계 데이터를 불러오지 못했습니다.");
         setTotalStatistic(null);
       } finally {

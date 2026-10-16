@@ -25,7 +25,7 @@ const AdminManageAskComponent = () => {
         setAskList(data.dtoList ?? []);
         setTotalPage(data.totalPage ?? 0);
       } catch (error) {
-        console.error("문의 목록 조회 실패:", error);
+        ("문의 목록 조회 실패:", error);
         setAskList([]);
         setTotalPage(0);
       } finally {

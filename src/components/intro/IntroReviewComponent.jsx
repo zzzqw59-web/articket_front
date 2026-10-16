@@ -10,9 +10,7 @@ const IntroReviewComponent = () => {
     try {
       const response = await getReviewListByHits();
       setReviews(response.dtoList.slice(0, 3));
-    } catch (e) {
-      console.error("fail to load review", e);
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {

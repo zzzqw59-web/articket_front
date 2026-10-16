@@ -6,18 +6,28 @@ import {
   updateMyProfile,
   requestWithdraw,
   cancelWithdraw,
-  getWithdrawStatus
+  getWithdrawStatus,
 } from "../../../api/mypageApi";
 import { AUTH_CONSTANTS } from "../../../constants/authConstants";
 import { WITHDRAW_STATUS } from "../../../constants/config";
-import { clearAuth, notifyMemberProfileUpdated } from "../../../api/authStorage";
+import {
+  clearAuth,
+  notifyMemberProfileUpdated,
+} from "../../../api/authStorage";
 import { normalizePhone, isValidPhone } from "../../auth/utils/authFormUtils";
 import { useModal } from "../../../hooks/useModal";
 
 export const useMemberEdit = () => {
   const navigate = useNavigate();
 
-  const { modalState, showAlert, showConfirm, closeModal, handleConfirm, handleCancel } = useModal();
+  const {
+    modalState,
+    showAlert,
+    showConfirm,
+    closeModal,
+    handleConfirm,
+    handleCancel,
+  } = useModal();
 
   const [isVerifyingPassword, setIsVerifyingPassword] = useState(false);
   const [checkPassword, setCheckPassword] = useState("");
@@ -76,7 +86,7 @@ export const useMemberEdit = () => {
         if (
           withdrawData &&
           (withdrawData.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
-           withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
+            withdrawData.status === WITHDRAW_STATUS.IN_PROGRESS)
         ) {
           setWithdrawInfo(withdrawData);
         } else {
@@ -85,9 +95,7 @@ export const useMemberEdit = () => {
       } catch (withdrawError) {
         setWithdrawInfo(null);
       }
-    } catch (error) {
-      console.error("회원 정보 조회 실패:", error);
-    }
+    } catch (error) {}
   };
 
   useEffect(() => {
@@ -134,7 +142,10 @@ export const useMemberEdit = () => {
   const handleVerifySubmit = async (e) => {
     e.preventDefault();
     if (!checkPassword.trim()) {
-      showAlert({ message: AUTH_CONSTANTS.MSG_ENTER_PASSWORD || "비밀번호를 입력해 주세요." });
+      showAlert({
+        message:
+          AUTH_CONSTANTS.MSG_ENTER_PASSWORD || "비밀번호를 입력해 주세요.",
+      });
       return;
     }
 
@@ -157,19 +168,24 @@ export const useMemberEdit = () => {
     } else if (verifyPurpose === "WITHDRAW") {
       showConfirm({
         title: "회원 탈퇴 신청",
-        message: "정말로 회원 탈퇴를 신청하시겠습니까?\n신청 후 30일간의 유예기간이 부여됩니다.",
+        message:
+          "정말로 회원 탈퇴를 신청하시겠습니까?\n신청 후 30일간의 유예기간이 부여됩니다.",
         confirmLabel: "신청하기",
         onConfirm: async () => {
           try {
             const result = await requestWithdraw(checkPassword);
             showAlert({
               message: result?.message || "회원 탈퇴 신청이 완료되었습니다.",
-              onConfirm: handleWithdrawSuccess
+              onConfirm: handleWithdrawSuccess,
             });
           } catch (error) {
-            showAlert({ message: error.response?.data?.message || "회원 탈퇴 신청 중 오류가 발생했습니다." });
+            showAlert({
+              message:
+                error.response?.data?.message ||
+                "회원 탈퇴 신청 중 오류가 발생했습니다.",
+            });
           }
-        }
+        },
       });
     }
   };
@@ -187,12 +203,12 @@ export const useMemberEdit = () => {
             onConfirm: async () => {
               setWithdrawInfo(null);
               await fetchMemberData();
-            }
+            },
           });
         } catch (error) {
           showAlert({ message: "탈퇴 취소 처리 중 오류가 발생했습니다." });
         }
-      }
+      },
     });
   };
 
@@ -230,14 +246,15 @@ export const useMemberEdit = () => {
     verifiedPhoneRef.current = normalizedPhone;
     setIsPhoneVerified(true);
     setPhoneVerifiedUntil(
-      requestStartedAt + AUTH_CONSTANTS.VERIFIED_VALID_SECONDS * 1000
+      requestStartedAt + AUTH_CONSTANTS.VERIFIED_VALID_SECONDS * 1000,
     );
   };
 
   // 💡 실시간 비밀번호 유효성 검사 함수
   const isPasswordValid = (password) => {
     if (!password || !password.trim()) return null;
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
+    const passwordRegex =
+      /^(?=.*[A-Za-z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>])[A-Za-z\d!@#$%^&*(),.?":{}|<>]{8,}$/;
     return passwordRegex.test(password);
   };
 
@@ -252,16 +269,23 @@ export const useMemberEdit = () => {
       return;
     }
 
-    if (!isPhoneVerified || verifiedPhoneRef.current !== phone || Date.now() >= phoneVerifiedUntil) {
+    if (
+      !isPhoneVerified ||
+      verifiedPhoneRef.current !== phone ||
+      Date.now() >= phoneVerifiedUntil
+    ) {
       resetPhoneVerification();
       showAlert({ message: AUTH_CONSTANTS.MSG_NEED_PHONE_VERIFY });
       return;
     }
 
-    const passwordChanged = Boolean(formData.password && formData.password.trim());
+    const passwordChanged = Boolean(
+      formData.password && formData.password.trim(),
+    );
     if (passwordChanged && !passwordValidationStatus) {
-      showAlert({ 
-        message: "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 8자 이상으로 입력해 주세요." 
+      showAlert({
+        message:
+          "비밀번호는 영문, 숫자, 특수문자를 모두 포함하여 8자 이상으로 입력해 주세요.",
       });
       return;
     }
@@ -288,7 +312,7 @@ export const useMemberEdit = () => {
         clearAuth();
         showAlert({
           message: "회원 정보가 변경되었습니다. 다시 로그인해 주세요.",
-          onConfirm: () => navigate("/articket/login", { replace: true })
+          onConfirm: () => navigate("/articket/login", { replace: true }),
         });
         return;
       }
@@ -299,7 +323,11 @@ export const useMemberEdit = () => {
       await fetchMemberData();
       showAlert({ message: AUTH_CONSTANTS.MSG_UPDATE_SUCCESS });
     } catch (error) {
-      showAlert({ message: error.response?.data?.message || "회원 정보 수정 중 오류가 발생했습니다." });
+      showAlert({
+        message:
+          error.response?.data?.message ||
+          "회원 정보 수정 중 오류가 발생했습니다.",
+      });
     }
   };
 

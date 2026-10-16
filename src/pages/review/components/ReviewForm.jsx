@@ -40,9 +40,7 @@ const ReviewForm = ({
       try {
         const data = await getAvailableExhibitionsForReview();
         setExhibitions(data);
-      } catch (error) {
-        console.error("리뷰 작성 가능한 전시 조회 실패:", error);
-      }
+      } catch (error) {}
     };
 
     fetchExhibitions();
@@ -56,10 +54,7 @@ const ReviewForm = ({
     handleFileChange,
     handleRemoveFile,
     handleRemoveExistingImage,
-  } = useImageUploader(
-    REVIEW_IMAGE_LIMIT,
-    initialData?.images || []
-  );
+  } = useImageUploader(REVIEW_IMAGE_LIMIT, initialData?.images || []);
 
   // 제목 / 내용 변경
   const handleChange = (e) => {
@@ -76,8 +71,7 @@ const ReviewForm = ({
     const exhibitionId = Number(e.target.value);
 
     const selected = exhibitions.find(
-      (exhibition) =>
-        exhibition.exhibitionId === exhibitionId
+      (exhibition) => exhibition.exhibitionId === exhibitionId,
     );
 
     setFormData((prev) => ({
@@ -123,10 +117,7 @@ const ReviewForm = ({
 
   return (
     <>
-      <form
-        onSubmit={handleSubmit}
-        className="w-full flex flex-col gap-4"
-      >
+      <form onSubmit={handleSubmit} className="w-full flex flex-col gap-4">
         {/* 전시 */}
         {isEditMode ? (
           // 수정 모드에서는 기존 전시 고정
@@ -143,9 +134,7 @@ const ReviewForm = ({
             onChange={handleExhibitionChange}
             className="w-full px-3 py-2 text-sm border border-gray-300 rounded bg-white"
           >
-            <option value="">
-              관람한 전시를 선택해 주세요
-            </option>
+            <option value="">관람한 전시를 선택해 주세요</option>
 
             {exhibitions.map((exhibition) => (
               <option

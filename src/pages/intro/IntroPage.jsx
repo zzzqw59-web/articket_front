@@ -32,9 +32,7 @@ const IntroPage = () => {
         Array.from({ length: 3 }, (_, i) => getExhibitionList({ page: i })),
       );
       setPosters(posters);
-    } catch (e) {
-      console.error("fail to get exhibition list");
-    }
+    } catch (e) {}
   };
 
   const fetchVenues = async () => {
@@ -47,9 +45,7 @@ const IntroPage = () => {
       }
       const shuffled = [...validVenues].sort(() => 0.5 - Math.random());
       setVenues(shuffled);
-    } catch (e) {
-      console.error("fail to load venue", e);
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {

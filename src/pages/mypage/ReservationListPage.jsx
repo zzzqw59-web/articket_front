@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import PageHeader from "../../components/common/PageHeader";
 import DataTableContainer from "../../components/common/DataTableContainer";
@@ -52,16 +51,14 @@ const ReservationListPage = () => {
           PAGE_SIZE,
           searchType,
           keyword,
-          sort
+          sort,
         );
 
-        const allReservations = [
-          ...(firstResponse.dtoList || []),
-        ];
+        const allReservations = [...(firstResponse.dtoList || [])];
 
         const serverTotalPages = Math.max(
           1,
-          Number(firstResponse.totalPage) || 1
+          Number(firstResponse.totalPage) || 1,
         );
 
         // 2. 서버에 남아 있는 페이지까지 모두 조회
@@ -73,7 +70,7 @@ const ReservationListPage = () => {
             PAGE_SIZE,
             searchType,
             keyword,
-            sort
+            sort,
           );
 
           allReservations.push(...(response.dtoList || []));
@@ -83,20 +80,20 @@ const ReservationListPage = () => {
 
         // 3. PENDING 제외
         const filteredReservations = allReservations.filter(
-          (item) => item.reservationStatus !== "PENDING"
+          (item) => item.reservationStatus !== "PENDING",
         );
 
         // 4. 필터링된 데이터 기준 전체 페이지 계산
         const calculatedTotalPages = Math.max(
           1,
-          Math.ceil(filteredReservations.length / PAGE_SIZE)
+          Math.ceil(filteredReservations.length / PAGE_SIZE),
         );
 
         // 5. 현재 페이지에 해당하는 예약 10개 추출
         const startIndex = (currentPage - 1) * PAGE_SIZE;
         const paginatedReservations = filteredReservations.slice(
           startIndex,
-          startIndex + PAGE_SIZE
+          startIndex + PAGE_SIZE,
         );
 
         // 6. 기존 화면 데이터 형태로 변환
@@ -135,7 +132,6 @@ const ReservationListPage = () => {
         if (currentPage > calculatedTotalPages) {
           setCurrentPage(calculatedTotalPages);
         }
-
       } else {
         // 결제 내역은 기존 서버 페이징 유지
         const response = await getMyPaymentList(
@@ -143,7 +139,7 @@ const ReservationListPage = () => {
           PAGE_SIZE,
           searchType,
           keyword,
-          sort
+          sort,
         );
 
         if (requestId !== requestIdRef.current) return;
@@ -165,7 +161,6 @@ const ReservationListPage = () => {
       }
     } catch (error) {
       if (requestId === requestIdRef.current) {
-        console.error(`${activeTab} 내역 조회 실패:`, error);
         setDataList([]);
         setTotalPages(1);
       }
@@ -212,17 +207,12 @@ const ReservationListPage = () => {
             : row.amount,
           status: detailData.reservationStatus || row.status,
           bookingDate: detailData.reservationCreatedAt
-            ? detailData.reservationCreatedAt
-                .replace("T", " ")
-                .split(".")[0]
+            ? detailData.reservationCreatedAt.replace("T", " ").split(".")[0]
             : row.bookingDate,
           cancelDate: detailData.reservationCanceledAt
-            ? detailData.reservationCanceledAt
-                .replace("T", " ")
-                .split(".")[0]
+            ? detailData.reservationCanceledAt.replace("T", " ").split(".")[0]
             : row.cancelDate,
         });
-
       } else if (activeTab === "payment" && row.id) {
         const detailData = await getPaymentDetail(row.id);
 
@@ -242,15 +232,11 @@ const ReservationListPage = () => {
             : "0 원",
           status: detailData.paymentStatus,
           transactionDate:
-            detailData.paymentApprovedAt ||
-            detailData.paymentCreatedAt ||
-            "-",
+            detailData.paymentApprovedAt || detailData.paymentCreatedAt || "-",
           cancelDate: detailData.paymentCanceledAt || null,
         });
       }
-    } catch (error) {
-      console.error("상세 정보 조회 실패:", error);
-    }
+    } catch (error) {}
   };
 
   const handleCloseDetail = () => {
@@ -271,13 +257,9 @@ const ReservationListPage = () => {
 
       // 목록 새로고침
       await fetchData();
-
     } catch (error) {
-      console.error("예약 취소 실패:", error);
-
       alert(
-        error.response?.data?.message ||
-        "예약 취소 중 오류가 발생했습니다."
+        error.response?.data?.message || "예약 취소 중 오류가 발생했습니다.",
       );
     } finally {
       setCancelLoading(false);
@@ -339,6 +321,7 @@ const ReservationListPage = () => {
           />
         )}
       </div>
+    
 
       <ReservationCancelModal
         isOpen={isCancelModalOpen}

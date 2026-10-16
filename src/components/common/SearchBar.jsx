@@ -1,6 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 
-const SearchBar = ({ options = [], onSearch, placeholder = "검색어를 입력하세요" }) => {
+const SearchBar = ({
+  options = [],
+  onSearch,
+  placeholder = "검색어를 입력하세요",
+}) => {
   // options의 첫 번째 항목 값으로 초기화 (options가 뒤늦게 전달되더라도 대응되도록 useEffect 포함)
   const [selectedType, setSelectedType] = useState(options[0]?.value || "");
   const [keyword, setKeyword] = useState("");
@@ -49,7 +53,10 @@ const SearchBar = ({ options = [], onSearch, placeholder = "검색어를 입력�
       />
 
       {/* 검색 아이콘 버튼 */}
-      <button type="submit" className="text-gray-500 hover:text-amber-800 p-1 transition-colors">
+      <button
+        type="submit"
+        className="text-gray-500 hover:text-amber-800 p-1 transition-colors"
+      >
         <svg
           className="w-4 h-4"
           fill="none"

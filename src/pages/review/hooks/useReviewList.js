@@ -42,8 +42,8 @@ export const useReviewList = () => {
         title: item.reviewTitle,
         writer: item.memberNickname,
         createdAt: item.reviewCreatedAt
-            ? item.reviewCreatedAt.replace("T", " ").slice(0, 16)
-            : "",
+          ? item.reviewCreatedAt.replace("T", " ").slice(0, 16)
+          : "",
         views: item.reviewHits ?? 0,
         rawItem: item,
       }));
@@ -51,7 +51,6 @@ export const useReviewList = () => {
       setReviewList(formattedList);
       setTotalPages(response?.totalPage || 1);
     } catch (error) {
-      console.error("리뷰 목록 조회 실패:", error);
       setReviewList([]);
       setTotalPages(1);
     } finally {
@@ -83,7 +82,9 @@ export const useReviewList = () => {
       showAlert({
         message: "로그인이 필요한 서비스입니다.",
         onConfirm: () => {
-          navigate(`/articket/login?redirect=${encodeURIComponent(currentPath)}`);
+          navigate(
+            `/articket/login?redirect=${encodeURIComponent(currentPath)}`,
+          );
         },
       });
       return;

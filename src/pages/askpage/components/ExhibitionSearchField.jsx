@@ -39,9 +39,7 @@ const ExhibitionSearchField = ({
         const items = data.content || data.dtoList || data || [];
         setExhibitionList(items);
         setIsDropdownOpen(true);
-      } catch (error) {
-        console.error("전시 검색 실패:", error);
-      }
+      } catch (error) {}
     };
 
     const timer = setTimeout(() => {

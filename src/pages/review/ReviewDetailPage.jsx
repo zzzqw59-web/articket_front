@@ -33,17 +33,8 @@ const ReviewDetailPage = () => {
   } = useReviewDetail(reviewId);
 
   useEffect(() => {
-    console.log("reviewData:", reviewData);
-    console.log("images:", reviewData?.images);
-    console.log("selectedImage:", selectedImage);
-
-    if (
-      reviewData?.images?.length > 0 &&
-      !selectedImage
-    ) {
-      setSelectedImage(
-        reviewData.images[0].reviewImageUrl
-      );
+    if (reviewData?.images?.length > 0 && !selectedImage) {
+      setSelectedImage(reviewData.images[0].reviewImageUrl);
     }
   }, [reviewData, selectedImage]);
 
@@ -80,83 +71,61 @@ const ReviewDetailPage = () => {
 
                 <span>
                   {reviewData.reviewModifiedAt
-                    ? reviewData.reviewModifiedAt
-                        .replace("T", " ")
-                        .slice(0, 16)
+                    ? reviewData.reviewModifiedAt.replace("T", " ").slice(0, 16)
                     : reviewData.reviewCreatedAt
-                    ? reviewData.reviewCreatedAt
-                        .replace("T", " ")
-                        .slice(0, 16)
-                    : ""}
+                      ? reviewData.reviewCreatedAt
+                          .replace("T", " ")
+                          .slice(0, 16)
+                      : ""}
                 </span>
               </div>
 
               <div className="flex flex-col items-end gap-1 text-xs">
-                <span>
-                  조회수 : {reviewData.reviewHits ?? 0}
-                </span>
+                <span>조회수 : {reviewData.reviewHits ?? 0}</span>
 
                 {reviewData.exhibitionTitle && (
-                  <span>
-                    관련전시 :{" "}
-                    {reviewData.exhibitionTitle}
-                  </span>
+                  <span>관련전시 : {reviewData.exhibitionTitle}</span>
                 )}
               </div>
             </div>
           </div>
 
           {/* 첨부 이미지 */}
-          {reviewData.images &&
-            reviewData.images.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full my-2">
-                <div className="md:col-span-3 bg-gray-100 aspect-[4/3] rounded-sm flex items-center justify-center overflow-hidden border border-gray-300">
-                  {selectedImage ? (
-                    <img
-                      src={`http://localhost:8080${selectedImage}`}
-                      alt="첨부 이미지"
-                      className="w-full h-full object-contain"
-                    />
-                  ) : (
-                    <span className="text-gray-400">
-                      이미지 영역
-                    </span>
-                  )}
-                </div>
-
-                <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible">
-                  {reviewData.images.map(
-                    (img, idx) => (
-                      <div
-                        key={
-                          img.reviewImageId || idx
-                        }
-                        onClick={() =>
-                          setSelectedImage(
-                            img.reviewImageUrl
-                          )
-                        }
-                        className={`w-full bg-gray-100 aspect-[4/3] rounded-sm border cursor-pointer overflow-hidden flex items-center justify-center ${
-                          selectedImage ===
-                          img.reviewImageUrl
-                            ? "border-blue-500 ring-2 ring-blue-200"
-                            : "border-gray-300 hover:border-gray-400"
-                        }`}
-                      >
-                        <img
-                          src={`http://localhost:8080${img.reviewImageUrl}`}
-                          alt={
-                            img.reviewImageOrigin ||
-                            `썸네일 ${idx + 1}`
-                          }
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )
-                  )}
-                </div>
+          {reviewData.images && reviewData.images.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 w-full my-2">
+              <div className="md:col-span-3 bg-gray-100 aspect-[4/3] rounded-sm flex items-center justify-center overflow-hidden border border-gray-300">
+                {selectedImage ? (
+                  <img
+                    src={`http://localhost:8080${selectedImage}`}
+                    alt="첨부 이미지"
+                    className="w-full h-full object-contain"
+                  />
+                ) : (
+                  <span className="text-gray-400">이미지 영역</span>
+                )}
               </div>
-            )}
+
+              <div className="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible">
+                {reviewData.images.map((img, idx) => (
+                  <div
+                    key={img.reviewImageId || idx}
+                    onClick={() => setSelectedImage(img.reviewImageUrl)}
+                    className={`w-full bg-gray-100 aspect-[4/3] rounded-sm border cursor-pointer overflow-hidden flex items-center justify-center ${
+                      selectedImage === img.reviewImageUrl
+                        ? "border-blue-500 ring-2 ring-blue-200"
+                        : "border-gray-300 hover:border-gray-400"
+                    }`}
+                  >
+                    <img
+                      src={`http://localhost:8080${img.reviewImageUrl}`}
+                      alt={img.reviewImageOrigin || `썸네일 ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* 리뷰 본문 */}
           <div className="text-sm text-gray-800 leading-relaxed my-4 min-h-[100px] whitespace-pre-wrap">
@@ -168,20 +137,14 @@ const ReviewDetailPage = () => {
             <ActionButton
               label="목록"
               variant="secondary"
-              onClick={() =>
-                navigate("/articket/review")
-              }
+              onClick={() => navigate("/articket/review")}
             />
 
             <div className="flex gap-2">
               <ActionButton
                 label="수정"
                 variant="secondary"
-                onClick={() =>
-                  navigate(
-                    `/articket/review/${reviewId}/edit`
-                  )
-                }
+                onClick={() => navigate(`/articket/review/${reviewId}/edit`)}
               />
 
               <ActionButton

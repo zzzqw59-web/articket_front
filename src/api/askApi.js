@@ -67,7 +67,6 @@ export const getExhibitionSearchListForAsk = async ({
     const combined = [...freeItems, ...paidItems];
     return combined.slice(0, size);
   } catch (error) {
-    console.error("전시 통합 검색 실패:", error);
     return [];
   }
 };
@@ -119,9 +118,6 @@ export const getStaffPageAsk = async (exhibitionId, params = {}) => {
  * 7. 댓글 안 달린 문의글 목록 조회
  */
 export const getAdminPageAsk = async (params = {}) => {
-  const response = await axiosInstance.get(
-    `${BASE_URL}/adminpage`,
-    { params },
-  );
+  const response = await axiosInstance.get(`${BASE_URL}/adminpage`, { params });
   return response.data;
 };

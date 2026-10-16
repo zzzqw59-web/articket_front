@@ -78,7 +78,6 @@ const CancleBoard = ({ selectedExhibitions = [] }) => {
       } catch (err) {
         if (canceled) return;
 
-        console.error("취소 통계 조회 실패:", err);
         setError("취소 통계를 불러오지 못했습니다.");
       } finally {
         if (!canceled) {
