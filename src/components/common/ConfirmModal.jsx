@@ -1,3 +1,5 @@
+import React from "react";
+import ReactDOM from "react-dom"; // 👉 포탈을 사용하기 위해 임포트
 import ActionButton from "./ActionButton";
 
 const ConfirmModal = ({ modalState, onConfirm, onCancel }) => {
@@ -5,8 +7,8 @@ const ConfirmModal = ({ modalState, onConfirm, onCancel }) => {
 
   const { type, title, message, confirmLabel, cancelLabel } = modalState;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
+  return ReactDOM.createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm animate-fadeIn">
       <div className="w-full max-w-sm bg-white rounded-xl shadow-lg p-6 flex flex-col gap-4 border border-gray-100 mx-4">
         {/* 헤더 */}
         <div className="flex flex-col gap-1">
@@ -34,7 +36,8 @@ const ConfirmModal = ({ modalState, onConfirm, onCancel }) => {
           />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body 
   );
 };
 
