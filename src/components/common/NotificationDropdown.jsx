@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
+import ConfirmModal from "./ConfirmModal";
+import { useModal } from "../../hooks/useModal";
 
 // 1. ISO 날짜 문자열을 상대 시간으로 변환하는 헬퍼 함수
 const formatRelativeTime = (dateString) => {
@@ -32,17 +34,14 @@ const formatRelativeTime = (dateString) => {
 
 // 2. 새로운 알림 타입 체계(0X, 1X, 2X) 및 댓글 수정/삭제(X4, X5)에 따른 매핑 객체
 const NOTIFICATION_CONFIG = {
-  // 0X: 회원 상태 관련
-  0: (targetId) => ({
+  0: () => ({
     text: "계정이 비활성화 되었습니다.",
     targetUrl: `/articket/mypage/edit`,
   }),
-  1: (targetId) => ({
+  1: () => ({
     text: "계정이 활성화 되었습니다.",
     targetUrl: `/articket/mypage/edit`, 
   }),
-
-  // 1X: 문의 관련
   10: (targetId) => ({
     text: "관리자: 새로운 문의가 등록되었습니다.",
     targetUrl: `/articket/ask/${targetId}`,
@@ -55,7 +54,7 @@ const NOTIFICATION_CONFIG = {
     text: "관리자에 의해 문의가 수정되었습니다.",
     targetUrl: `/articket/ask/${targetId}`,
   }),
-  13: (targetId) => ({
+  13: () => ({
     text: "관리자에 의해 문의가 삭제되었습니다.",
     targetUrl: `/articket/ask`,
   }),
@@ -67,8 +66,6 @@ const NOTIFICATION_CONFIG = {
     text: "관리자에 의해 문의 댓글이 삭제되었습니다.",
     targetUrl: `/articket/ask/${targetId}`,
   }),
-
-  // 2X: 리뷰 관련
   20: (targetId) => ({
     text: "새로운 리뷰가 등록되었습니다.",
     targetUrl: `/articket/review/${targetId}`,
@@ -81,7 +78,7 @@ const NOTIFICATION_CONFIG = {
     text: "관리자에 의해 리뷰가 수정되었습니다.",
     targetUrl: `/articket/review/${targetId}`,
   }),
-  23: (targetId) => ({
+  23: () => ({
     text: "관리자에 의해 리뷰가 삭제되었습니다.",
     targetUrl: `/articket/review`,
   }),
@@ -124,12 +121,17 @@ const NotificationDropdown = ({
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
 
+  // 드롭다운 내부 일괄 삭제를 위한 커스텀 모달 훅 (showConfirm 사용)
+  const { modalState, showConfirm, closeModal, handleConfirm } = useModal();
+
   // 필터 탭 상태: 'all' | 'unread'
   const [filter, setFilter] = useState("all");
 
-  // 외부 영역 클릭 시 팝업 닫기
+  // 외부 영역 클릭 시 팝업 닫기 (모달 열려있을 때 예외 처리)
   useEffect(() => {
     const handleClickOutside = (e) => {
+      if (modalState.isOpen) return;
+
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
         onClose();
       }
@@ -140,7 +142,7 @@ const NotificationDropdown = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, modalState.isOpen]);
 
   if (!isOpen) return null;
 
@@ -163,11 +165,10 @@ const NotificationDropdown = ({
     }
   };
 
-  // 일괄 삭제 확인 핸들러
+  // 일괄 삭제 버튼 클릭 시 부모(Bell)에게 모달 띄우기를 요청
   const handleClearAllConfirm = () => {
-    if (window.confirm("모든 알림을 삭제하시겠습니까?")) {
-      onDeleteAll();
-    }
+    if (notifications.length === 0) return;
+    onDeleteAll(); // 혹은 부모로 콜백 전달
   };
 
   return (
@@ -255,14 +256,24 @@ const NotificationDropdown = ({
         <button
           type="button"
           onClick={onReadAll}
-          className="text-gray-500 hover:text-amber-600 font-medium transition-colors text-[11px]"
+          disabled={unreadCount === 0}
+          className={`font-medium transition-colors text-[11px] ${
+            unreadCount === 0
+              ? "text-gray-300 cursor-not-allowed"
+              : "text-gray-500 hover:text-amber-600"
+          }`}
         >
           모두 읽음
         </button>
         <button
           type="button"
-          onClick={handleClearAllConfirm}
-          className="text-gray-400 hover:text-red-500 transition-colors text-[11px]"
+          onClick={onDeleteAll}
+          disabled={notifications.length === 0}
+          className={`transition-colors text-[11px] ${
+            notifications.length === 0
+              ? "text-gray-300 cursor-not-allowed"
+              : "text-gray-400 hover:text-red-500"
+          }`}
         >
           일괄 삭제
         </button>
