@@ -112,7 +112,6 @@ const AdminHeadBoard = ({ exhibitions = [], onSelectedIdsChange }) => {
         setSummary({ total, average });
       } catch (error) {
         if (cancelled) return;
-        console.error("통계 조회 실패:", error);
         setError("통계 데이터를 불러오지 못했습니다.");
         setTotalStatistic(null);
       } finally {
@@ -129,9 +128,7 @@ const AdminHeadBoard = ({ exhibitions = [], onSelectedIdsChange }) => {
 
   return (
     <section className="mx-auto w-full max-w-[1400px]">
-      <h1 className="head-text mb-6 text-4xl font-bold -translate-x-10">
-        전시 통계
-      </h1>
+      <h1 className="head-text mb-6 text-4xl font-bold">전시 통계</h1>
 
       <div className="grid grid-cols-1 items-stretch gap-10 md:grid-cols-2">
         {/* 전시 선택 */}

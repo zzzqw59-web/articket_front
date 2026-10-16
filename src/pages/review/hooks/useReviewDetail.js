@@ -1,9 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  getReviewDetail,
-  deleteReview,
-} from "../../../api/reviewApi";
+import { getReviewDetail, deleteReview } from "../../../api/reviewApi";
 
 import {
   getReviewReplyList,
@@ -17,13 +14,8 @@ import { useModal } from "../../../hooks/useModal";
 export const useReviewDetail = (reviewId) => {
   const navigate = useNavigate();
 
-  const {
-    modalState,
-    showAlert,
-    showConfirm,
-    handleConfirm,
-    handleCancel,
-  } = useModal();
+  const { modalState, showAlert, showConfirm, handleConfirm, handleCancel } =
+    useModal();
 
   const [reviewData, setReviewData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -41,11 +33,8 @@ export const useReviewDetail = (reviewId) => {
 
       try {
         const data = await getReviewDetail(reviewId);
-        console.log("리뷰 상세:", data);
         setReviewData(data);
       } catch (error) {
-        console.error("리뷰 상세 조회 실패:", error);
-
         showAlert({
           message: "리뷰 정보를 불러오지 못했습니다.",
         });
@@ -62,8 +51,7 @@ export const useReviewDetail = (reviewId) => {
   // 리뷰 삭제
   const handleDeleteReview = () => {
     showConfirm({
-      message:
-        "리뷰를 삭제하시겠습니까?\n삭제한 리뷰는 복구할 수 없습니다.",
+      message: "리뷰를 삭제하시겠습니까?\n삭제한 리뷰는 복구할 수 없습니다.",
 
       onConfirm: async () => {
         try {
@@ -74,11 +62,8 @@ export const useReviewDetail = (reviewId) => {
             onConfirm: () => navigate("/articket/review"),
           });
         } catch (error) {
-          console.error("리뷰 삭제 실패:", error);
-
           const message =
-            error.response?.data?.message ||
-            "리뷰 삭제 처리에 실패했습니다.";
+            error.response?.data?.message || "리뷰 삭제 처리에 실패했습니다.";
 
           showAlert({
             message,
@@ -95,11 +80,7 @@ export const useReviewDetail = (reviewId) => {
     setIsReplyLoading(true);
 
     try {
-      const response = await getReviewReplyList(
-        reviewId,
-        replyPage,
-        10
-      );
+      const response = await getReviewReplyList(reviewId, replyPage, 10);
 
       if (response && response.dtoList) {
         const formattedReplies = response.dtoList.map((item) => ({
@@ -109,15 +90,11 @@ export const useReviewDetail = (reviewId) => {
           content: item.reviewReplyBody,
 
           createdAt: item.reviewReplyCreatedAt
-            ? item.reviewReplyCreatedAt
-                .replace("T", " ")
-                .slice(0, 16)
+            ? item.reviewReplyCreatedAt.replace("T", " ").slice(0, 16)
             : "",
 
           modifiedAt: item.reviewReplyModifiedAt
-            ? item.reviewReplyModifiedAt
-                .replace("T", " ")
-                .slice(0, 16)
+            ? item.reviewReplyModifiedAt.replace("T", " ").slice(0, 16)
             : "",
 
           rawItem: item,
@@ -128,8 +105,6 @@ export const useReviewDetail = (reviewId) => {
         setTotalReplyCount(response.totalCount || 0);
       }
     } catch (error) {
-      console.error("리뷰 댓글 목록 로딩 실패:", error);
-
       showAlert({
         message: "댓글 목록을 불러오지 못했습니다.",
       });
@@ -146,8 +121,6 @@ export const useReviewDetail = (reviewId) => {
       await createReviewReply(reviewId, commentText);
       await fetchReplyList();
     } catch (error) {
-      console.error("리뷰 댓글 등록 실패:", error);
-
       showAlert({
         message: "댓글 등록에 실패했습니다.",
       });
@@ -155,23 +128,14 @@ export const useReviewDetail = (reviewId) => {
   };
 
   // 댓글 수정
-  const handleEditComment = async (
-    reviewReplyId,
-    commentText
-  ) => {
+  const handleEditComment = async (reviewReplyId, commentText) => {
     if (!commentText.trim()) return;
 
     try {
-      await updateReviewReply(
-        reviewId,
-        reviewReplyId,
-        commentText
-      );
+      await updateReviewReply(reviewId, reviewReplyId, commentText);
 
       await fetchReplyList();
     } catch (error) {
-      console.error("리뷰 댓글 수정 실패:", error);
-
       showAlert({
         message: "댓글 수정에 실패했습니다.",
       });
@@ -185,15 +149,10 @@ export const useReviewDetail = (reviewId) => {
 
       onConfirm: async () => {
         try {
-          await deleteReviewReply(
-            reviewId,
-            reviewReplyId
-          );
+          await deleteReviewReply(reviewId, reviewReplyId);
 
           await fetchReplyList();
         } catch (error) {
-          console.error("리뷰 댓글 삭제 실패:", error);
-
           showAlert({
             message: "댓글 삭제에 실패했습니다.",
           });

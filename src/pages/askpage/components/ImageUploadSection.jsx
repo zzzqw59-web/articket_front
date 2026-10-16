@@ -1,3 +1,5 @@
+import React from "react";
+
 const ImageUploadSection = ({
   isEditMode,
   existingImages,
@@ -6,7 +8,32 @@ const ImageUploadSection = ({
   onRemoveExisting,
   onRemoveNew,
   onChangeFile,
+  onShowAlert, // 👈 부모로부터 showAlert 함수를 받습니다.
 }) => {
+  // 클라이언트 측 파일 검증 헬퍼 (5MB, 허용 확장자 체크)
+  const handleFileChangeWithValidation = (idx, e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // 1. 용량 검증 (5MB = 5 * 1024 * 1024 bytes)
+    if (file.size > 5 * 1024 * 1024) {
+      onShowAlert({ message: "파일 크기는 5MB를 초과할 수 없습니다." }); // 👈 모달 호출
+      e.target.value = ""; // 입력 초기화
+      return;
+    }
+
+    // 2. 형식 검증 (JPG, JPEG, PNG, GIF, WEBP)
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      onShowAlert({ message: "지원하지 않는 파일 형식입니다. (JPG, JPEG, PNG, GIF, WEBP만 가능합니다.)" }); // 👈 모달 호출
+      e.target.value = ""; // 입력 초기화
+      return;
+    }
+
+    // 검증 통과 시 기존 부모 전달 핸들러 호출
+    onChangeFile(idx, e);
+  };
+
   return (
     <div className="flex flex-col gap-4">
       {/* 수정 모드 전용: 기존 첨부 이미지 유지 목록 */}
@@ -32,9 +59,15 @@ const ImageUploadSection = ({
 
       {/* 신규 사진 첨부 영역 */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs text-gray-500 font-semibold">
-          사진 첨부 (최대 {limit}개)
-        </span>
+        <div className="flex justify-between items-center">
+          <span className="text-xs text-gray-500 font-semibold">
+            사진 첨부 (최대 {limit}개)
+          </span>
+          <span className="text-[10px] text-gray-400">
+            * 최대 5MB, JPG/PNG/GIF/WEBP 지원
+          </span>
+        </div>
+
         {files.map((file, idx) => (
           <div key={idx} className="flex items-center gap-2">
             {file ? (
@@ -55,9 +88,9 @@ const ImageUploadSection = ({
                 </span>
                 <input
                   type="file"
-                  accept="image/*"
+                  accept="image/jpeg, image/png, image/gif, image/webp"
                   className="hidden"
-                  onChange={(e) => onChangeFile(idx, e)}
+                  onChange={(e) => handleFileChangeWithValidation(idx, e)}
                 />
               </label>
             )}

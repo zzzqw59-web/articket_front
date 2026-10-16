@@ -59,7 +59,6 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
       } catch (error) {
         if (cancelled) return;
 
-        console.error("문의글 조회 실패:", error);
         setAskItems([]);
         setAskTotalPages(1);
       }
@@ -96,7 +95,6 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
       } catch (error) {
         if (cancelled) return;
 
-        console.error("리뷰글 조회 실패:", error);
         setReviewItems([]);
         setReviewTotalPages(1);
       }
@@ -127,7 +125,9 @@ const ListBoard = ({ selectedExhibitions = [] }) => {
   return (
     <div className="mx-auto w-[1400px]">
       <div className=" items-center">
-        <h2 className="head-text text-4xl font-bold mt-10">관련 글 조회</h2>
+        <h2 className="head-text text-4xl font-bold mt-10 mb-5">
+          관련 글 조회
+        </h2>
 
         {currentExhibition && (
           <div className="flex justify-between">

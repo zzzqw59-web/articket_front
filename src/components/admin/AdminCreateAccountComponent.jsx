@@ -76,8 +76,6 @@ const AdminCreateAccountComponent = () => {
       alert("관계자 계정이 생성되었습니다.");
       setForm({ ...INITIAL_FORM });
     } catch (error) {
-      console.error("관계자 계정 생성 실패:", error);
-
       alert(
         error.response?.data?.message ||
           "계정 생성에 실패했습니다. 입력 정보와 권한을 확인해 주세요.",

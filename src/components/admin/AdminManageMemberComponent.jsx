@@ -88,11 +88,11 @@ const AdminManageMemberComponent = () => {
 
     try {
       const data = await getMembers(page, PAGE_SIZE);
-
+      console.log("응답 회원 목록:", data.dtoList);
+      console.log("첫 번째 회원:", data.dtoList?.[0]);
       setMembers(data.dtoList ?? []);
       setPageData(data);
     } catch (err) {
-      console.error("회원 목록 조회 실패:", err);
       setError("회원 목록을 불러오지 못했습니다.");
       setMembers([]);
     } finally {
@@ -105,18 +105,13 @@ const AdminManageMemberComponent = () => {
   }, [fetchMembers]);
 
   // 페이지네이션
+  const totalPages = pageData.totalPage ?? 1;
+
   const pageNumberList = pageData.pageNumberList ?? [1];
 
-  const totalPages = Math.max(
-    1,
-    pageNumberList.length > 0 ? Math.max(...pageNumberList) : 1,
-  );
-
   const changePage = (nextPage) => {
-    if (nextPage < 1 || nextPage > totalPages || nextPage === page || loading) {
+    if (nextPage < 1 || nextPage > totalPages || nextPage === page || loading)
       return;
-    }
-
     setPage(nextPage);
   };
 
@@ -164,8 +159,6 @@ const AdminManageMemberComponent = () => {
         ),
       );
     } catch (err) {
-      console.error("회원 활성화 실패:", err);
-
       alert(err.response?.data?.message ?? "회원 활성화에 실패했습니다.");
     } finally {
       finishProcessing(memberId);
@@ -205,8 +198,6 @@ const AdminManageMemberComponent = () => {
       setDeactivateReason("");
       setDeactivateTerm(1);
     } catch (err) {
-      console.error("회원 비활성화 실패:", err);
-
       alert(err.response?.data?.message ?? "회원 비활성화에 실패했습니다.");
     } finally {
       finishProcessing(memberId);

@@ -6,7 +6,7 @@ const AdminFloatingNavigator = ({ isMain = true }) => {
   const [isFooterVisible, setIsFooterVisible] = useState(false);
 
   useEffect(() => {
-    const footer = document.getElementById("site-footer");
+    const footer = document.querySelector("footer");
 
     if (!footer) {
       console.warn("site-footer를 찾을 수 없습니다.");

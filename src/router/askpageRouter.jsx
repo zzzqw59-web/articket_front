@@ -1,3 +1,5 @@
+import PrivateRoute from "./PrivateRoute";
+
 const askpageRouter = () => {
   return [
     {
@@ -7,16 +9,6 @@ const askpageRouter = () => {
       lazy: async () => {
         const { default: Component } = await import(
           "../pages/askpage/AskListPage"
-        );
-        return { Component };
-      },
-    },
-    {
-      path: "write",
-      HydrateFallback: () => <div>Loading...</div>,
-      lazy: async () => {
-        const { default: Component } = await import(
-          "../pages/askpage/AskWritePage"
         );
         return { Component };
       },
@@ -32,14 +24,29 @@ const askpageRouter = () => {
       },
     },
     {
-      path: ":askId/edit",
-      HydrateFallback: () => <div>Loading...</div>,
-      lazy: async () => {
-        const { default: Component } = await import(
-          "../pages/askpage/AskEditPage"
-        );
-        return { Component };
-      },
+      element: <PrivateRoute />, // 👈 문의 작성 및 수정 페이지는 로그인 가드로 보호
+      children: [
+        {
+          path: "write",
+          HydrateFallback: () => <div>Loading...</div>,
+          lazy: async () => {
+            const { default: Component } = await import(
+              "../pages/askpage/AskWritePage"
+            );
+            return { Component };
+          },
+        },
+        {
+          path: ":askId/edit",
+          HydrateFallback: () => <div>Loading...</div>,
+          lazy: async () => {
+            const { default: Component } = await import(
+              "../pages/askpage/AskEditPage"
+            );
+            return { Component };
+          },
+        },
+      ],
     },
   ];
 };

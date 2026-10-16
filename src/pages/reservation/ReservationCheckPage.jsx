@@ -15,8 +15,9 @@ const ReservationCheckPage = () => {
         const data = await getReservationByOrderId(orderId);
         setReservation(data);
       } catch (error) {
-        console.error("예약 조회 실패:", error);
-        setError("예약 정보를 불러올 수 없습니다.");
+        setError(
+          `예약 조회 실패 (HTTP ${error.response?.status ?? "네트워크 오류"})`,
+        );
       } finally {
         setLoading(false);
       }
@@ -70,9 +71,7 @@ const ReservationCheckPage = () => {
     return (
       <div className="min-h-screen flex items-center justify-center px-4 py-8">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 text-center">
-          <h1 className="text-xl font-bold text-gray-900 mb-6">
-            예약 확인
-          </h1>
+          <h1 className="text-xl font-bold text-gray-900 mb-6">예약 확인</h1>
 
           <div className="mb-4">
             <span className="inline-block px-3 py-1 rounded-full bg-gray-100 text-gray-600 text-sm font-medium">
@@ -80,9 +79,7 @@ const ReservationCheckPage = () => {
             </span>
           </div>
 
-          <p className="text-gray-700 font-medium mb-2">
-            {statusMessage}
-          </p>
+          <p className="text-gray-700 font-medium mb-2">{statusMessage}</p>
 
           <p className="text-sm text-gray-400 leading-relaxed">
             예약이 확정된 경우에만 입장할 수 있습니다.
@@ -96,37 +93,27 @@ const ReservationCheckPage = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6">
-        <h1 className="text-xl font-bold text-center mb-6">
-          예약 확인
-        </h1>
+        <h1 className="text-xl font-bold text-center mb-6">예약 확인</h1>
 
         <div className="space-y-4">
           <div>
             <p className="text-sm text-gray-400">전시명</p>
-            <p className="font-medium">
-              {reservation.exhibitionTitle}
-            </p>
+            <p className="font-medium">{reservation.exhibitionTitle}</p>
           </div>
 
           <div>
             <p className="text-sm text-gray-400">전시 장소</p>
-            <p className="font-medium">
-              {reservation.exhibitionArea}
-            </p>
+            <p className="font-medium">{reservation.exhibitionArea}</p>
           </div>
 
           <div>
             <p className="text-sm text-gray-400">관람일</p>
-            <p className="font-medium">
-              {reservation.reservationDay}
-            </p>
+            <p className="font-medium">{reservation.reservationDay}</p>
           </div>
 
           <div>
             <p className="text-sm text-gray-400">예약 인원</p>
-            <p className="font-medium">
-              {reservation.reservationPerson}명
-            </p>
+            <p className="font-medium">{reservation.reservationPerson}명</p>
           </div>
 
           <div>
@@ -145,9 +132,7 @@ const ReservationCheckPage = () => {
 
           <div>
             <p className="text-sm text-gray-400">예약 상태</p>
-            <p className="font-medium text-green-600">
-              예약 확정
-            </p>
+            <p className="font-medium text-green-600">예약 확정</p>
           </div>
         </div>
       </div>

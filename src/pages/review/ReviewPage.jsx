@@ -5,13 +5,10 @@ import SearchBar from "../../components/common/SearchBar";
 import { REVIEW_COLUMNS, REVIEW_SEARCH_OPTIONS } from "../../constants/reviewConstans";
 import { useReviewList } from "./hooks/useReviewList";
 import ActionButton from "../../components/common/ActionButton";
+import ConfirmModal from "../../components/common/ConfirmModal"; // 👈 1. ConfirmModal 임포트
 
 const ReviewPage = () => {
-    const navigate = useNavigate();
-    const handleWriteClick = () => {
-    navigate("/articket/review/write");
-    };
-
+    // 🚀 2. 훅에서 필요한 상태와 핸들러들 구조 분해 할당
     const {
         currentPage,
         reviewList,
@@ -20,7 +17,12 @@ const ReviewPage = () => {
         setCurrentPage,
         handleSearch,
         handleRowClick,
+        handleWriteClick,
+        modalState,
+        handleConfirm,
+        handleCancel,
     } = useReviewList();
+
   return (
     <div>
         <div className="w-full max-w-5xl mx-auto px-4 py-6 flex flex-col gap-6">
@@ -61,8 +63,15 @@ const ReviewPage = () => {
                 </div>
             </div>
         </div>
+
+        {/* 💡 3. 최하단에 ConfirmModal 컴포넌트 배치 */}
+        <ConfirmModal
+            modalState={modalState}
+            onConfirm={handleConfirm}
+            onCancel={handleCancel}
+        />
     </div>
   )
 }
 
-export default ReviewPage
+export default ReviewPage;

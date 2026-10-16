@@ -31,9 +31,7 @@ const AdminComponent = () => {
           : (response.dtoList ?? response.content ?? []);
 
         setExhibitions(list);
-      } catch (error) {
-        console.error("전시 목록 조회 실패:", error);
-      }
+      } catch (error) {}
     };
 
     fetchExhibitions();

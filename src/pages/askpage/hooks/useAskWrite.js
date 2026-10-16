@@ -16,7 +16,6 @@ export const useAskWrite = () => {
         onConfirm: () => navigate(`/articket/ask/${askId}`),
       });
     } catch (error) {
-      console.error("문의 등록 실패:", error);
       showAlert({ message: "문의 등록에 실패했습니다." });
     }
   };

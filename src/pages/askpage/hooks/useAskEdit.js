@@ -18,7 +18,6 @@ export const useAskEdit = (askId) => {
       const data = await getAskDetail(askId);
       setInitialData(data);
     } catch (error) {
-      console.error("원글 데이터 조회 실패:", error);
       showAlert({
         message: "존재하지 않거나 접근 권한이 없는 문의글입니다.",
         onConfirm: () => navigate("/articket/ask"),
@@ -41,7 +40,6 @@ export const useAskEdit = (askId) => {
         onConfirm: () => navigate(`/articket/ask/${askId}`),
       });
     } catch (error) {
-      console.error("문의글 수정 실패:", error);
       showAlert({ message: "문의글 수정 처리에 실패했습니다." });
     }
   };

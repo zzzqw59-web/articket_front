@@ -2,9 +2,15 @@ import { useState, useEffect, useRef } from "react";
 import PageHeader from "../../../components/common/PageHeader";
 import ActionButton from "../../../components/common/ActionButton";
 import Badge from "../../../components/common/Badge";
-import { AUTH_CONSTANTS, VERIFICATION_TYPE } from "../../../constants/authConstants";
+import {
+  AUTH_CONSTANTS,
+  VERIFICATION_TYPE,
+} from "../../../constants/authConstants";
 import { WITHDRAW_STATUS } from "../../../constants/config";
-import { sendPhoneVerification, verifyPhoneVerification } from "../../../api/authApi";
+import {
+  sendPhoneVerification,
+  verifyPhoneVerification,
+} from "../../../api/authApi";
 import { isValidPhone, normalizePhone } from "../../auth/utils/authFormUtils";
 
 const ProfileFormStep = ({
@@ -16,7 +22,7 @@ const ProfileFormStep = ({
   setAuthCode,
   isPhoneVerified,
   phoneVerifiedUntil,
-  withdrawInfo, 
+  withdrawInfo,
   onCancelWithdrawal,
   onFormChange,
   onStartEdit,
@@ -26,6 +32,8 @@ const ProfileFormStep = ({
   onUpdateSubmit,
   onWithdrawal,
   renderEyeIcon,
+  showAlert,
+  passwordValidationStatus,
 }) => {
   const [isCodeSent, setIsCodeSent] = useState(false);
   const [codeExpiresAt, setCodeExpiresAt] = useState(0);
@@ -40,21 +48,21 @@ const ProfileFormStep = ({
   }, [formData.phone]);
 
   const timeLeft = Math.max(0, Math.ceil((codeExpiresAt - now) / 1000));
-  const verifiedTimeLeft = Math.max(0, Math.ceil((phoneVerifiedUntil - now) / 1000));
+  const verifiedTimeLeft = Math.max(
+    0,
+    Math.ceil((phoneVerifiedUntil - now) / 1000),
+  );
 
-  // 탈퇴 대기 상태 여부 판단
   const isPendingWithdrawal =
     withdrawInfo &&
     (withdrawInfo.withdrawStatus === WITHDRAW_STATUS.IN_PROGRESS ||
-     withdrawInfo.status === WITHDRAW_STATUS.IN_PROGRESS);
+      withdrawInfo.status === WITHDRAW_STATUS.IN_PROGRESS);
 
   useEffect(() => {
     if (!isCodeSent) return undefined;
-
     const timer = window.setInterval(() => {
       setNow(Date.now());
     }, 1000);
-
     return () => window.clearInterval(timer);
   }, [isCodeSent]);
 
@@ -72,14 +80,10 @@ const ProfileFormStep = ({
     return `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
   };
 
-  /**
-   * 인증번호 발송 요청
-   * Request DTO: VerificationSendRequestDTO { phone, type }
-   */
   const handleSendCode = async () => {
     const phone = normalizePhone(formData.phone);
     if (!isValidPhone(phone)) {
-      alert("올바른 휴대폰 번호를 입력해 주세요.");
+      showAlert({ message: "올바른 휴대폰 번호를 입력해 주세요." });
       return;
     }
 
@@ -91,41 +95,46 @@ const ProfileFormStep = ({
 
     try {
       setIsSending(true);
-
-      // VerificationSendRequestDTO 필드명(phone, type)에 맞춘 객체전송
       await sendPhoneVerification({
         phone,
         type: VERIFICATION_TYPE.MEMBER_UPDATE,
       });
 
-      if (sequence !== requestSequenceRef.current || phone !== currentPhoneRef.current) return;
+      if (
+        sequence !== requestSequenceRef.current ||
+        phone !== currentPhoneRef.current
+      )
+        return;
       const currentTime = Date.now();
       setNow(currentTime);
       setIsCodeSent(true);
-      setCodeExpiresAt(requestStartedAt + AUTH_CONSTANTS.RESEND_TIMER_SECONDS * 1000);
-      alert("인증번호가 발송되었습니다.");
+      setCodeExpiresAt(
+        requestStartedAt + AUTH_CONSTANTS.RESEND_TIMER_SECONDS * 1000,
+      );
+      showAlert({ message: "인증번호가 발송되었습니다." });
     } catch (error) {
-      console.error("인증번호 발송 실패:", error);
       if (sequence === requestSequenceRef.current) {
-        alert(error.response?.data?.message || "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요.");
+        showAlert({
+          message:
+            error.response?.data?.message ||
+            "인증번호 발송에 실패했습니다. 전화번호를 확인해 주세요.",
+        });
       }
     } finally {
       setIsSending(false);
     }
   };
 
-  /**
-   * 인증번호 검증 요청
-   * Request DTO: VerificationVerifyRequestDTO { phone, code, type }
-   */
   const handleVerifyCode = async () => {
     const codeLength = AUTH_CONSTANTS?.SMS_CODE_LENGTH || 6;
     if (!isCodeSent || Date.now() >= codeExpiresAt) {
-      alert("인증번호가 만료되었습니다. 다시 전송해 주세요.");
+      showAlert({ message: "인증번호가 만료되었습니다. 다시 전송해 주세요." });
       return;
     }
     if (!authCode || authCode.length !== codeLength) {
-      alert(`인증번호 ${codeLength}자리를 정확히 입력해 주세요.`);
+      showAlert({
+        message: `인증번호 ${codeLength}자리를 정확히 입력해 주세요.`,
+      });
       return;
     }
 
@@ -135,22 +144,31 @@ const ProfileFormStep = ({
 
     try {
       setIsVerifying(true);
-
-      // VerificationVerifyRequestDTO 필드명(phone, code, type)에 맞춘 객체전송
       await verifyPhoneVerification({
         phone,
         code: authCode,
         type: VERIFICATION_TYPE.MEMBER_UPDATE,
       });
 
-      if (sequence !== requestSequenceRef.current || phone !== currentPhoneRef.current) return;
+      if (
+        sequence !== requestSequenceRef.current ||
+        phone !== currentPhoneRef.current
+      )
+        return;
       onPhoneVerify(phone, requestStartedAt);
       setNow(Date.now());
-      alert(AUTH_CONSTANTS?.MSG_PHONE_VERIFIED_SUCCESS || "전화번호 인증이 완료되었습니다.");
+      showAlert({
+        message:
+          AUTH_CONSTANTS?.MSG_PHONE_VERIFIED_SUCCESS ||
+          "전화번호 인증이 완료되었습니다.",
+      });
     } catch (error) {
-      console.error("인증번호 검증 실패:", error);
       if (sequence === requestSequenceRef.current) {
-        alert(error.response?.data?.message || "인증번호가 일치하지 않거나 만료되었습니다.");
+        showAlert({
+          message:
+            error.response?.data?.message ||
+            "인증번호가 일치하지 않거나 만료되었습니다.",
+        });
       }
     } finally {
       setIsVerifying(false);
@@ -179,21 +197,43 @@ const ProfileFormStep = ({
       />
 
       <div className="w-full max-w-lg bg-white border border-gray-100 rounded-xl shadow-sm p-6 flex flex-col gap-6">
-
         {/* 탈퇴 진행 중 안내 배너 */}
         {isPendingWithdrawal && (
           <div className="w-full p-4 bg-amber-50 border border-amber-200 rounded-lg flex flex-col gap-3">
             <div className="flex items-start gap-3">
               <div className="p-1 bg-amber-500 text-white rounded-full mt-0.5">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                  />
                 </svg>
               </div>
               <div className="flex flex-col text-xs text-amber-900 gap-1">
-                <span className="font-bold text-sm">현재 회원 탈퇴가 진행 중입니다.</span>
-                <span>신청일: {withdrawInfo?.withdrawCreatedAt?.replace("T", " ") || "조회 중"}</span>
-                <span>삭제 예정일: {withdrawInfo?.withdrawDue?.replace("T", " ") || withdrawInfo?.dueData?.replace("T", " ") || "유예 기간 내"}</span>
-                <span className="text-amber-700 mt-1">유예 기간 동안은 언제든지 탈퇴를 철회하실 수 있습니다.</span>
+                <span className="font-bold text-sm">
+                  현재 회원 탈퇴가 진행 중입니다.
+                </span>
+                <span>
+                  신청일:{" "}
+                  {withdrawInfo?.withdrawCreatedAt?.replace("T", " ") ||
+                    "조회 중"}
+                </span>
+                <span>
+                  삭제 예정일:{" "}
+                  {withdrawInfo?.withdrawDue?.replace("T", " ") ||
+                    withdrawInfo?.dueData?.replace("T", " ") ||
+                    "유예 기간 내"}
+                </span>
+                <span className="text-amber-700 mt-1">
+                  유예 기간 동안은 언제든지 탈퇴를 철회하실 수 있습니다.
+                </span>
               </div>
             </div>
             <button
@@ -227,7 +267,9 @@ const ProfileFormStep = ({
         {/* 회원 정보 폼 */}
         <form onSubmit={onUpdateSubmit} className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-700">이메일</label>
+            <label className="text-xs font-semibold text-gray-700">
+              이메일
+            </label>
             <input
               type="email"
               value={formData.email || ""}
@@ -237,12 +279,22 @@ const ProfileFormStep = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-700">비밀번호</label>
+            <label className="text-xs font-semibold text-gray-700">
+              비밀번호
+            </label>
             <div className="relative w-full">
               <input
-                type={isEditing ? (showFormPassword ? "text" : "password") : "password"}
+                type={
+                  isEditing
+                    ? showFormPassword
+                      ? "text"
+                      : "password"
+                    : "password"
+                }
                 name="password"
-                placeholder={isEditing ? "변경할 비밀번호를 입력해 주세요" : "••••••••••••"}
+                placeholder={
+                  isEditing ? "변경할 비밀번호를 입력해 주세요" : "••••••••••••"
+                }
                 value={isEditing ? formData.password : "••••••••••••"}
                 onChange={onFormChange}
                 disabled={!isEditing}
@@ -252,12 +304,34 @@ const ProfileFormStep = ({
                     : "border-gray-200 bg-gray-50 text-gray-500 cursor-default"
                 }`}
               />
-              {isEditing && renderEyeIcon(showFormPassword, () => setShowFormPassword(!showFormPassword))}
+              {isEditing &&
+                renderEyeIcon(showFormPassword, () =>
+                  setShowFormPassword(!showFormPassword),
+                )}
             </div>
+
+            {/* 💡 실시간 비밀번호 유효성 피드백 텍스트 */}
+            {isEditing &&
+              formData.password &&
+              formData.password.trim() !== "" && (
+                <span
+                  className={`text-[11px] mt-0.5 font-medium ${
+                    passwordValidationStatus
+                      ? "text-emerald-600"
+                      : "text-red-500"
+                  }`}
+                >
+                  {passwordValidationStatus
+                    ? "사용할 수 있는 비밀번호입니다."
+                    : "유효하지 않은 비밀번호입니다. 영문, 숫자, 특수문자 포함 8자 이상 비밀번호를 입력해주세요."}
+                </span>
+              )}
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-700">닉네임</label>
+            <label className="text-xs font-semibold text-gray-700">
+              닉네임
+            </label>
             <input
               type="text"
               name="nickname"
@@ -283,7 +357,9 @@ const ProfileFormStep = ({
           </div>
 
           <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-gray-700">전화번호</label>
+            <label className="text-xs font-semibold text-gray-700">
+              전화번호
+            </label>
             <div className="flex gap-2 items-center">
               <input
                 type="tel"
@@ -306,7 +382,11 @@ const ProfileFormStep = ({
                   disabled={isSending || isVerifying}
                   className="px-4 py-2 text-xs bg-gray-800 text-white rounded font-medium hover:bg-gray-700 disabled:bg-gray-400 whitespace-nowrap transition-colors"
                 >
-                  {isSending ? "발송 중..." : isCodeSent ? "재전송" : "인증번호 전송"}
+                  {isSending
+                    ? "발송 중..."
+                    : isCodeSent
+                      ? "재전송"
+                      : "인증번호 전송"}
                 </button>
               )}
             </div>
@@ -315,9 +395,12 @@ const ProfileFormStep = ({
           {isEditing && isCodeSent && (
             <div className="flex flex-col gap-1 mt-1">
               <div className="flex justify-between items-center">
-                <label className="text-xs font-semibold text-gray-700">인증번호 입력</label>
+                <label className="text-xs font-semibold text-gray-700">
+                  인증번호 입력
+                </label>
                 <span className="text-[11px] font-bold text-red-500">
-                  {isPhoneVerified ? "수정 가능시간" : "유효시간"} {formatTime(isPhoneVerified ? verifiedTimeLeft : timeLeft)}
+                  {isPhoneVerified ? "수정 가능시간" : "유효시간"}{" "}
+                  {formatTime(isPhoneVerified ? verifiedTimeLeft : timeLeft)}
                 </span>
               </div>
               <div className="flex gap-2 items-center">
@@ -344,7 +427,11 @@ const ProfileFormStep = ({
                       : "bg-amber-600 text-white hover:bg-amber-700 disabled:bg-amber-400"
                   }`}
                 >
-                  {isVerifying ? "확인 중..." : isPhoneVerified ? "인증완료" : "인증하기"}
+                  {isVerifying
+                    ? "확인 중..."
+                    : isPhoneVerified
+                      ? "인증완료"
+                      : "인증하기"}
                 </button>
               </div>
             </div>
@@ -360,14 +447,11 @@ const ProfileFormStep = ({
                   type="button"
                   onClick={handleCancelEdit}
                 />
-                <ActionButton
-                  label="저장"
-                  variant="primary"
-                  type="submit"
-                />
+                <ActionButton label="저장" variant="primary" type="submit" />
               </div>
             ) : (
-              !isPendingWithdrawal && formData.memberType !== "ADMIN" && (
+              !isPendingWithdrawal &&
+              formData.memberType !== "ADMIN" && (
                 <>
                   <button
                     type="button"

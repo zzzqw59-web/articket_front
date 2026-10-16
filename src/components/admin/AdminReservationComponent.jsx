@@ -26,7 +26,6 @@ const AdminReservationComponent = () => {
       setReservations(data.dtoList ?? []);
       setPageData(data);
     } catch (err) {
-      console.error("예약 목록 조회 실패:", err);
       setReservations([]);
       setPageData({});
     } finally {
@@ -64,7 +63,6 @@ const AdminReservationComponent = () => {
 
       await fetchReservations();
     } catch (err) {
-      console.error("예약 취소 실패:", err);
     } finally {
       setCancelingId(null);
     }
@@ -74,7 +72,7 @@ const AdminReservationComponent = () => {
     <div className="w-full min-w-0 py-8">
       <div className="mx-auto w-[1400px] max-w-full px-4">
         <div className="mb-6">
-          <h2 className="head-text -translate-x-5 text-4xl font-bold text-gray-900">
+          <h2 className="head-text text-4xl font-bold text-gray-900">
             예약 관리
           </h2>
         </div>

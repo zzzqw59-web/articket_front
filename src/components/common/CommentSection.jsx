@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import ActionButton from "./ActionButton";
 import Badge from "./Badge";
 
@@ -18,11 +18,13 @@ const CommentSection = ({
 }) => {
   const [commentText, setCommentText] = useState("");
   const [activeMenuId, setActiveMenuId] = useState(null);
-  
+
   const [editingId, setEditingId] = useState(null);
   const [editingText, setEditingText] = useState("");
 
   const menuRef = useRef(null);
+
+  useEffect(() => {}, [comments]);
 
   // 외부 클릭 시 드롭다운 닫기
   useEffect(() => {
@@ -102,7 +104,7 @@ const CommentSection = ({
             <tr className="border-b border-gray-200 text-gray-600 font-medium">
               <th className="py-2.5 px-4 w-16 text-center">번호</th>
               <th className="py-2.5 px-4">댓글 내용</th>
-              <th className="py-2.5 px-4 w-32">작성자</th>
+              <th className="py-2.5 px-4 w-48">작성자</th>
               <th className="py-2.5 px-4 w-28 text-center">작성일</th>
               <th className="py-2.5 px-2 w-12 text-center"></th>
             </tr>
@@ -115,7 +117,8 @@ const CommentSection = ({
                 const isEditing = editingId === commentId;
 
                 // 등록순 번호 계산
-                const displayNo = totalComments - ((currentPage - 1) * pageSize + index);
+                const displayNo =
+                  totalComments - ((currentPage - 1) * pageSize + index);
 
                 // 작성자 권한/역할 값 추출
                 const roleValue = item.memberType || item.role;
@@ -168,12 +171,16 @@ const CommentSection = ({
                     {/* 작성자 & 뱃지 */}
                     <td className="py-3 px-4 text-gray-600">
                       <div className="flex items-center gap-1.5">
-                        <span className="font-medium text-gray-700">{item.writer}</span>
-                        
+                        <span className="font-medium text-gray-700">
+                          {item.writer}
+                        </span>
+
                         {/* 💡 하드코딩 조건식 제거 및 roleValue를 variant에 바로 바인딩 */}
-                        {roleValue && roleValue !== "USER" && roleValue !== "ROLE_MEMBER" && (
-                          <Badge variant={roleValue} />
-                        )}
+                        {roleValue &&
+                          roleValue !== "USER" &&
+                          roleValue !== "ROLE_MEMBER" && (
+                            <Badge variant={roleValue} />
+                          )}
                       </div>
                     </td>
 
@@ -189,11 +196,17 @@ const CommentSection = ({
                           type="button"
                           onClick={() => toggleMenu(commentId)}
                           className={`p-1 rounded-full hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-opacity duration-150 ${
-                            isMenuOpen ? "opacity-100" : "opacity-0 group-hover:opacity-100"
+                            isMenuOpen
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100"
                           }`}
                           title="더보기"
                         >
-                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <svg
+                            className="w-4 h-4"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
                             <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
                           </svg>
                         </button>

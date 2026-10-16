@@ -5,7 +5,6 @@ import ExhibitionSort from "../../components/exhibition/ExhibitionSort";
 import ExhibitionList from "../../components/exhibition/ExhibitionList";
 import ExhibitionPagination from "../../components/exhibition/ExhibitionPagination";
 import "../../styles/ExhibitionAndVenue.css";
-import MainLayout from "../../layouts/MainLayout";
 
 const SIZE = 9;
 
@@ -31,8 +30,20 @@ const ExhibitionListPage = () => {
         setError("");
 
         const [freeData, paidData] = await Promise.all([
-          getExhibitionList({ keyword, sort, free: true, page: freePage, size: SIZE }),
-          getExhibitionList({ keyword, sort, free: false, page: paidPage, size: SIZE }),
+          getExhibitionList({
+            keyword,
+            sort,
+            free: true,
+            page: freePage,
+            size: SIZE,
+          }),
+          getExhibitionList({
+            keyword,
+            sort,
+            free: false,
+            page: paidPage,
+            size: SIZE,
+          }),
         ]);
 
         setFreeExhibitions(freeData.content || []);
@@ -41,7 +52,6 @@ const ExhibitionListPage = () => {
         setPaidExhibitions(paidData.content || []);
         setPaidTotalPages(paidData.totalPages || 0);
       } catch (error) {
-        console.error("전시 목록 조회 실패:", error);
         setError("전시 정보를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
@@ -76,11 +86,19 @@ const ExhibitionListPage = () => {
         <>
           <h2>&lt;무료 전시&gt;</h2>
           <ExhibitionList exhibitions={freeExhibitions} />
-          <ExhibitionPagination page={freePage} totalPages={freeTotalPages} onChange={setFreePage} />
+          <ExhibitionPagination
+            page={freePage}
+            totalPages={freeTotalPages}
+            onChange={setFreePage}
+          />
 
           <h2>&lt;유료 전시&gt;</h2>
           <ExhibitionList exhibitions={paidExhibitions} />
-          <ExhibitionPagination page={paidPage} totalPages={paidTotalPages} onChange={setPaidPage} />
+          <ExhibitionPagination
+            page={paidPage}
+            totalPages={paidTotalPages}
+            onChange={setPaidPage}
+          />
         </>
       )}
     </div>
