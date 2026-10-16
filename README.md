@@ -1,16 +1,388 @@
-# React + Vite
+# 🎨 Articket (아티켓) — Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **전시 정보 탐색부터 예약·결제, 관람 후 리뷰와 문의까지 이어지는 통합 전시 플랫폼**
 
-Currently, two official plugins are available:
+Articket은 전국의 다양한 전시 정보를 찾아보고, 전시 상세 정보를 확인한 뒤 유료 전시를 예약·결제할 수 있는 웹 서비스입니다. 회원별 이용 내역, 리뷰·문의, 전시 관계자 및 관리자 기능을 하나의 서비스로 연결한 **5인 팀 프로젝트**입니다.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+이 저장소는 Articket의 **React 기반 프론트엔드**를 관리합니다. 사용자 화면, 페이지 이동, 백엔드 API 연동, 결제 요청 화면과 QR 티켓 등의 클라이언트 기능을 담당합니다.
 
-## React Compiler
+- **Frontend:** [articket_front](https://github.com/zzzqw59-web/articket_front)
+- **Backend:** [articket_back](https://github.com/zzzqw59-web/articket_back)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 📌 목차
 
-## Expanding the ESLint configuration
+- [프로젝트 소개](#project-intro)
+- [주요 화면 및 기능](#features)
+- [기술 스택](#tech-stack)
+- [시스템 아키텍처 및 AWS 배포](#architecture)
+- [주요 사용자 흐름](#service-flows)
+- [프론트엔드 구현 포인트](#frontend-design)
+- [팀 구성 및 역할](#team)
+- [프로젝트 구조](#project-structure)
+- [로컬 실행 방법](#local-setup)
+- [확인 및 테스트 항목](#verification)
+- [프로젝트 저장소](#repositories)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+<a id="project-intro"></a>
+
+## 📖 프로젝트 소개
+
+| 항목 | 내용 |
+|---|---|
+| 프로젝트명 | Articket (아티켓) |
+| 프로젝트 유형 | 5인 팀 프로젝트 |
+| 개발 기간 | 2026.09.10 ~ 2026.10.19 |
+| 서비스 분야 | 전국 전시 정보 탐색 및 티켓 예약·결제 |
+| Frontend | JavaScript, React, Vite |
+| Backend | Java 17, Spring Boot, Spring Security + JWT |
+| 데이터베이스 | Oracle Database 21c XE (로컬), Amazon RDS for Oracle (AWS 구성) |
+| 결제 연동 | Toss Payments |
+| 클라우드 배포 | AWS 인프라 구축 및 배포 진행 중 |
+
+### 기획 배경 및 목표
+
+전시 정보가 여러 채널에 분산되어 있어 원하는 전시를 찾아 비교하기 번거롭고, 전시 탐색부터 예약·결제, 관람 후 후기 작성까지 사용자 경험이 나뉘는 문제가 있습니다.
+
+Articket은 **전시 탐색 → 예약·결제 → 관람 → 리뷰 작성**을 하나의 서비스 흐름으로 제공하는 것을 목표로 합니다. 프론트엔드는 화면과 사용자 상호작용을 담당하고, 백엔드는 인증·권한, 데이터 검증 및 예약·결제 상태 관리를 처리합니다.
+
+<a id="features"></a>
+
+## ✨ 주요 화면 및 기능
+
+### 1. 회원가입·로그인 및 회원 정보
+
+- 이메일 중복 확인, SMS 인증을 포함한 회원가입 화면
+- JWT 기반 로그인·로그아웃 및 인증 상태에 따른 화면 전환
+- Access Token / Refresh Token을 사용하는 백엔드 인증 기능과 연동
+- 회원정보 조회·수정, 비밀번호 재설정, 탈퇴 신청·철회 화면
+- 일반 회원(`MEMBER`), 전시 관계자(`STAFF`), 관리자(`ADMIN`)별 이용 화면 및 접근 분기
+- 회원 제재·탈퇴 등 계정 상태에 따른 안내 및 예외 화면
+
+> 비밀번호 해싱(BCrypt), 개인정보 암호화(Google Tink), 토큰 검증 및 최종 접근 권한 판단은 백엔드에서 처리합니다.
+
+### 2. 전시 검색 및 상세 페이지
+
+- 전시 목록, 검색·필터링 및 상세 정보 조회
+- 전시 이미지, 전시장 위치·연락처, 관람 기간 및 관람료 표시
+- 전시 포스터와 상세 정보를 중심으로 한 탐색 화면
+- 무료 전시는 정보 조회, 예약 가능한 유료 전시는 예약 페이지로 연결
+- 공공데이터 및 지도 관련 기능을 백엔드 API와 연계
+
+### 3. 예약 화면
+
+- 관람 날짜 선택 및 예약 인원 증감
+- 선택한 인원과 티켓 가격에 따른 예상 결제 금액 표시
+- 예약 생성 API 호출 후 서버에서 발급한 예약번호·주문번호·금액 사용
+- 예약 내역 및 상세 정보 조회, 예약 취소 기능 연계
+- 예약 상태(`PENDING`, `RESERVED`, `CANCELED`)에 따른 화면 표시
+
+### 4. 결제 및 QR 티켓
+
+- **Toss Payments SDK**로 결제 요청
+- 결제 성공·실패 리다이렉트 화면 구성
+- 결제 성공 시 `paymentKey`, `orderId`, `amount`를 백엔드 승인 API로 전달
+- 승인 결과와 예약 상세 정보를 조회하여 결제 완료 화면 표시
+- 예약 정보를 활용한 QR 티켓 생성 및 예약 확인 페이지 연결
+- 결제·환불 내역과 취소 결과를 사용자 화면에 표시
+
+> 결제 승인, 주문번호·금액 검증, 환불 금액 산정 및 예약 상태 변경은 **Spring Boot 백엔드**에서 처리합니다. 프론트엔드에 표시된 금액만으로 결제를 확정하지 않습니다.
+
+### 5. 리뷰 및 댓글
+
+- 리뷰 목록·상세·작성·수정·삭제 화면
+- 키워드 검색, 정렬 및 페이징 기능
+- 리뷰 이미지 선택·미리보기 및 다중 파일 업로드 연동
+- 최대 3장, 파일당 5MB 이하의 이미지 첨부 조건 안내
+- 리뷰 댓글 및 작성자·관리자별 UI 분기
+- 관람 조건을 충족한 회원의 리뷰 작성 기능 연계
+
+### 6. 문의·알림·마이페이지
+
+- 문의 목록·상세·작성·수정·삭제 및 댓글 화면
+- 공개·비밀 문의에 따른 열람 및 답변 UI
+- 알림 목록 확인과 관련 페이지 이동
+- 마이페이지에서 회원정보, 위시리스트, 예약·결제·환불, 리뷰·문의 내역 조회
+- 회원정보 수정 및 탈퇴 관련 안내·확인 화면
+
+### 7. 전시 관계자 및 관리자 화면
+
+- 전시 관계자 권한 신청 및 신청 현황 조회
+- 전시 관계자의 담당 전시·리뷰·문의 관리 화면
+- 관리자의 회원 관리, 게시물 관리 및 관계자 권한 승인·반려 화면
+- 예약·취소·수익 현황 등의 통계 화면
+- 사용자 권한에 따른 메뉴·버튼 노출 및 관련 페이지 이동
+
+<a id="tech-stack"></a>
+
+## 🛠️ 기술 스택
+
+### Frontend
+
+| 기술 | 활용 |
+|---|---|
+| JavaScript | 사용자 화면 및 이벤트 처리 |
+| React | 컴포넌트 기반 UI 구성 |
+| Vite | 개발 서버 실행 및 정적 파일 빌드 |
+| React Router | 페이지 이동 및 라우팅 |
+| Axios | 백엔드 REST API 통신 |
+| Tailwind CSS | 스타일링 및 레이아웃 |
+| Ant Design | UI 컴포넌트 |
+| GSAP | 화면 애니메이션 |
+| Toss Payments SDK | 결제창 호출 및 결제 요청 |
+| qrcode.react | QR 티켓 생성 |
+
+### 연동되는 백엔드 및 외부 서비스
+
+| 기술·서비스 | 연동 목적 |
+|---|---|
+| Spring Boot REST API | 회원·전시·예약·결제·리뷰·문의 데이터 처리 |
+| Spring Security + JWT | 사용자 인증 및 권한 확인 |
+| Oracle Database / Amazon RDS for Oracle | 서버 측 서비스 데이터 저장 |
+| Toss Payments | 결제 요청 및 서버 승인·취소 연동 |
+| 문화 관련 공공데이터 API | 전시 정보 제공 |
+| Kakao API | 지도 관련 서비스 |
+| SOLAPI | SMS 인증 기능 |
+
+> Oracle, BCrypt, Google Tink, QueryDSL 등은 백엔드에서 사용하는 기술이며, 프론트엔드가 데이터베이스 또는 비밀키에 직접 접근하지 않습니다.
+
+<a id="architecture"></a>
+
+## 🏗️ 시스템 아키텍처 및 AWS 배포
+
+### 로컬 개발 환경
+
+```text
+[사용자 브라우저]
+       |
+       v
+[React + Vite 프론트엔드]
+       |
+       | REST API (Axios)
+       v
+[Spring Boot + Spring Security/JWT]
+       |
+       +----> [Oracle Database 21c XE]
+       |
+       +----> [Toss Payments / 공공데이터 / SOLAPI 등]
+```
+
+### AWS 배포 환경
+
+```text
+[사용자 브라우저]
+       |
+       | DNS 조회
+       v
+[Amazon Route 53]
+       |
+       | 프론트엔드 도메인
+       v
+[Amazon CloudFront] ----> [Amazon S3]
+                               React 빌드 파일
+
+[브라우저에서 실행 중인 React 앱]
+       |
+       | REST API (별도 API 주소)
+       v
+[Amazon EC2 / Nginx]
+       |
+       v
+[Spring Boot + JWT]
+       |
+       v
+[Amazon RDS for Oracle]
+
+* Spring Boot 서버는 Toss Payments 및 외부 API와 연동
+```
+
+| AWS 서비스 | 역할 |
+|---|---|
+| Amazon S3 | `npm run build`로 생성된 정적 파일 저장 |
+| Amazon CloudFront | 정적 콘텐츠 배포 및 HTTPS 제공 |
+| Amazon Route 53 | 도메인 및 DNS 관리 |
+| Amazon EC2 | 백엔드 애플리케이션 실행 |
+| Nginx | 백엔드 API 요청을 Spring Boot로 전달 |
+| Amazon RDS for Oracle | 서비스 데이터 저장 |
+
+**배포 현황:** AWS 인프라 구축 및 배포 진행 중. 서비스 주소와 최종 도메인·API 연결 설정은 배포 완료 후 추가합니다.
+
+<a id="service-flows"></a>
+
+## 🔄 주요 사용자 흐름
+
+### 전시 예약·결제
+
+```text
+전시 검색 및 상세 조회
+         ↓
+관람 날짜·인원 선택
+         ↓
+예약 생성 API 호출
+         ↓
+서버가 발급한 orderId·결제 금액 확인
+         ↓
+Toss Payments SDK로 결제 요청
+         ↓
+결제 성공 URL로 이동
+         ↓
+백엔드 결제 승인 API 호출
+         ↓
+예약 상세 재조회
+         ↓
+결제 완료 정보 및 QR 티켓 표시
+```
+
+### 리뷰 작성
+
+```text
+로그인 및 내 관람 내역 확인
+         ↓
+작성 가능한 전시 선택
+         ↓
+리뷰 제목·내용·이미지 입력
+         ↓
+리뷰 등록 API 호출
+         ↓
+백엔드 작성 조건 검증
+         ↓
+등록 결과 안내 및 리뷰 상세 화면 이동
+```
+
+### 회원 이용 화면
+
+```text
+회원가입 / 로그인
+         ↓
+인증 결과에 따른 화면 갱신
+         ↓
+회원 권한에 맞는 서비스 이용
+         ↓
+마이페이지·관심 전시·예약·문의 조회
+```
+
+<a id="frontend-design"></a>
+
+## 💡 프론트엔드 구현 포인트
+
+### 사용자 흐름 중심의 화면 구성
+
+- 전시 상세에서 예약 페이지로 자연스럽게 이동할 수 있도록 화면 흐름을 연결했습니다.
+- 예약 화면에서 날짜·인원 변경 시 예상 결제 금액을 바로 확인할 수 있도록 구성했습니다.
+- 결제 성공·실패 결과에 따라 안내 화면을 구분하고, 성공 시 서버의 예약 정보를 다시 조회하도록 연동했습니다.
+
+### 컴포넌트 및 API 호출 분리
+
+- React 컴포넌트를 활용해 공통 UI를 재사용하고 화면별 역할을 구분했습니다.
+- Axios API 호출 모듈을 통해 백엔드와 데이터를 주고받습니다.
+- React Router를 이용해 전시, 예약, 결제, 리뷰, 마이페이지 등 기능별 화면 이동을 처리합니다.
+
+### 입력값 안내와 예외 상황 처리
+
+- 필수 입력값, 이미지 첨부 제한 및 요청 결과를 사용자가 이해할 수 있도록 표시합니다.
+- 로그인 여부와 회원 권한에 따라 이용 가능한 화면과 동작을 구분합니다.
+- **화면에서의 검증은 사용자 편의를 위한 것이며**, 최종 데이터 검증과 권한 확인은 백엔드에서 수행합니다.
+
+### 외부 결제 서비스 연동
+
+- 결제 요청은 브라우저의 Toss Payments SDK에서 시작합니다.
+- 결제 승인과 데이터 저장은 백엔드 API를 통해 처리합니다.
+- 결제 후 예약번호, 전시 정보, 관람일, 인원, 결제 금액 및 QR 티켓을 보여주는 화면을 제공합니다.
+
+<a id="team"></a>
+
+## 👥 팀 구성 및 역할
+
+| 팀원 | 담당 기능 |
+|---|---|
+| 김성민 (팀장) | 예약·결제·환불·리뷰·리뷰 댓글 |
+| 김태현 | 회원가입·JWT 인증·회원 및 권한 관리 |
+| 육현승 | 전시·전시장 정보 및 외부 데이터 연동 |
+| 최서현 | 아티켓 소개·전시 관계자·관리자 페이지 |
+| 한진형 | 문의·문의 댓글·알림·마이페이지 |
+
+> 위 표는 팀 프로젝트의 **기능별 담당 영역**이며, 프론트엔드와 백엔드 저장소에서 각각 화면·API 관련 작업을 진행했습니다.
+
+<a id="project-structure"></a>
+
+## 📂 프로젝트 구조
+
+```text
+articket_front/
+├── public/                # 정적 리소스
+├── src/
+│   ├── api/               # 백엔드 API 호출 모듈
+│   ├── components/        # 공통·재사용 UI 컴포넌트
+│   ├── pages/             # 기능별 페이지
+│   └── ...                # 라우팅·스타일·기타 기능 모듈
+├── package.json
+└── vite.config.js
+```
+
+*위 구조는 주요 폴더만 표시한 요약이며, 실제 디렉터리와 세부 파일은 저장소를 참고해 주세요.*
+
+<a id="local-setup"></a>
+
+## 🚀 로컬 실행 방법
+
+### 사전 준비
+
+- Node.js 및 npm (프로젝트에서 사용하는 Vite 버전과 호환되는 환경)
+- 실행 가능한 Articket 백엔드 API
+- 프로젝트에서 사용하는 외부 서비스의 프론트엔드 설정값
+
+### 1. 저장소 복제 및 의존성 설치
+
+```bash
+git clone https://github.com/zzzqw59-web/articket_front.git
+cd articket_front
+npm install
+```
+
+### 2. 환경 설정
+
+백엔드 API 주소와 Toss Payments **클라이언트 키** 등을 프로젝트의 실제 환경변수·API 설정 방식에 맞게 준비합니다. 로컬에서는 백엔드 주소 및 CORS 허용 출처가 일치해야 합니다.
+
+> Vite에서 `VITE_` 접두사가 붙은 환경변수는 브라우저 번들에 포함될 수 있습니다. **Toss Payments 서버 비밀키, JWT 서명 키, SOLAPI 비밀키, DB 비밀번호, Tink 키셋은 프론트엔드 환경변수나 저장소에 넣지 마세요.**
+
+### 3. 개발 서버 실행
+
+```bash
+npm run dev
+```
+
+Vite 터미널에 출력되는 로컬 주소로 접속합니다.
+
+### 4. 빌드 및 코드 검사
+
+```bash
+npm run build
+npm run lint
+```
+
+정적 빌드 결과물은 기본 Vite 설정에서는 `dist/`에 생성되며, AWS S3/CloudFront 배포 시 해당 결과물을 사용합니다. 실제 출력 디렉터리는 프로젝트 설정을 따릅니다.
+
+<a id="verification"></a>
+
+## 🧪 확인 및 테스트 항목
+
+프론트엔드 화면과 백엔드 API를 연동하여 다음 사용자 흐름을 확인합니다.
+
+- 회원가입·로그인 및 인증 상태에 따른 화면 전환
+- 전시 검색·상세 조회와 예약 화면 이동
+- 예약 생성 후 Toss Payments 결제 요청 및 성공·실패 화면
+- 예약·결제 내역 조회, QR 티켓 표시 및 취소 결과 확인
+- 리뷰·문의 작성 및 이미지 업로드
+- 마이페이지와 전시 관계자·관리자 화면의 권한별 표시
+
+관리자 통계와 예약·결제·리뷰 시연에는 백엔드에서 준비한 **가상 테스트 데이터**를 사용할 수 있습니다. 해당 데이터는 실제 고객이나 운영 매출이 아닙니다.
+
+<a id="repositories"></a>
+
+## 🔗 프로젝트 저장소
+
+- **Frontend:** [zzzqw59-web/articket_front](https://github.com/zzzqw59-web/articket_front)
+- **Backend:** [zzzqw59-web/articket_back](https://github.com/zzzqw59-web/articket_back)
+
+---
+
+**Articket — 전시를 찾는 순간부터 관람의 기록까지.**

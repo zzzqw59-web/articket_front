@@ -32,7 +32,7 @@ const maskName = (name) => {
 const maskPhone = (phone) => {
   if (!phone) return "-";
 
-  return phone.replace(/-(\d{3,4})-/, "-****-");
+  return phone.slice(0, 3) + "-****-" + phone.slice(7);
 };
 
 // 가입일 포맷
