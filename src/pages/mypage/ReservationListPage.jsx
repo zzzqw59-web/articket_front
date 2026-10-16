@@ -321,6 +321,7 @@ const ReservationListPage = () => {
           />
         )}
       </div>
+    
 
       <ReservationCancelModal
         isOpen={isCancelModalOpen}
