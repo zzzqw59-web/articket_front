@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import DataTableContainer from "../../components/common/DataTableContainer";
 import SearchBar from "../../components/common/SearchBar";
 import PageHeader from "../../components/common/PageHeader";
-import { getMyAskList, getMyReviewList, getMyReplyList } from "../../api/mypageApi";
+import {
+  getMyAskList,
+  getMyReviewList,
+  getMyReplyList,
+} from "../../api/mypageApi";
 import {
   MYPOST_TABS,
   MYPOST_SORT_OPTIONS,
@@ -48,30 +52,56 @@ const MyPostPage = () => {
       const apiSortParam = sortOrder === "oldest" ? "asc" : "desc";
 
       if (activeTab === "review") {
-        response = await getMyReviewList(currentPage, 10, searchType, keyword, apiSortParam);
+        response = await getMyReviewList(
+          currentPage,
+          10,
+          searchType,
+          keyword,
+          apiSortParam,
+        );
         formattedList = (response.dtoList || []).map((item) => ({
           id: item.reviewId,
           title: item.reviewTitle,
-          createdAt: item.reviewCreatedAt ? item.reviewCreatedAt.substring(0, 10) : "",
+          createdAt: item.reviewCreatedAt
+            ? item.reviewCreatedAt.substring(0, 10)
+            : "",
           targetUrl: `/articket/review/${item.reviewId}`,
         }));
       } else if (activeTab === "ask") {
-        response = await getMyAskList(currentPage, 10, searchType, keyword, apiSortParam);
+        response = await getMyAskList(
+          currentPage,
+          10,
+          searchType,
+          keyword,
+          apiSortParam,
+        );
         formattedList = (response.dtoList || []).map((item) => ({
           id: item.askId,
           title: item.askTitle,
-          createdAt: item.askCreatedAt ? item.askCreatedAt.substring(0, 10) : "",
+          createdAt: item.askCreatedAt
+            ? item.askCreatedAt.substring(0, 10)
+            : "",
           targetUrl: `/articket/ask/${item.askId}`,
         }));
       } else if (activeTab === "reply") {
-        response = await getMyReplyList(currentPage, 10, searchType, keyword, apiSortParam);
+        response = await getMyReplyList(
+          currentPage,
+          10,
+          searchType,
+          keyword,
+          apiSortParam,
+        );
         formattedList = (response.dtoList || []).map((item) => {
-          const displayDate = item.displayDate || item.replyModifiedAt || item.replyCreatedAt;
+          const displayDate =
+            item.displayDate || item.replyModifiedAt || item.replyCreatedAt;
           return {
             id: item.replyId,
             replyContent: item.replyContent,
             createdAt: displayDate ? displayDate.substring(0, 10) : "",
-            targetUrl: item.replyType === "REVIEW" ? `/articket/review/${item.targetId}` : `/articket/ask/${item.targetId}`,
+            targetUrl:
+              item.replyType === "REVIEW"
+                ? `/articket/review/${item.targetId}`
+                : `/articket/ask/${item.targetId}`,
           };
         });
       }
@@ -86,7 +116,6 @@ const MyPostPage = () => {
         }));
       }
     } catch (error) {
-      console.error(`${activeTab} 목록을 불러오는 중 오류 발생:`, error);
     } finally {
       setIsLoading(false);
     }
@@ -128,7 +157,9 @@ const MyPostPage = () => {
           key={activeTab}
           options={getMyPostSearchOptions(activeTab)}
           onSearch={({ type, keyword }) => {
-            setSearchType(type || (activeTab === "reply" ? "content" : "title"));
+            setSearchType(
+              type || (activeTab === "reply" ? "content" : "title"),
+            );
             setKeyword(keyword || "");
             setCurrentPage(1);
           }}

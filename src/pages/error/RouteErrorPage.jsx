@@ -10,7 +10,6 @@ const RouteErrorPage = () => {
 
   useEffect(() => {
     if (import.meta.env.DEV) {
-      console.error("라우터 렌더링 또는 로딩 오류:", error);
     }
   }, [error]);
 

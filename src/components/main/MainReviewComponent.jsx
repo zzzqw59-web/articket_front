@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getReviewListByHits } from "../../api/reviewApi";
@@ -24,8 +23,6 @@ const MainReviewComponent = () => {
           setReviews((response?.dtoList ?? []).slice(0, 5));
         }
       } catch (e) {
-        console.error("fail to load reviews", e);
-
         if (!cancelled) {
           setError(true);
         }
@@ -59,9 +56,7 @@ const MainReviewComponent = () => {
           pb-4
         "
       >
-        <span className="text-[12px] font-medium text-[#514B44]">
-          제목
-        </span>
+        <span className="text-[12px] font-medium text-[#514B44]">제목</span>
 
         <span className="w-[64px] text-center text-[12px] font-medium text-[#514B44]">
           조회수
@@ -81,9 +76,7 @@ const MainReviewComponent = () => {
             <button
               type="button"
               key={review.reviewId}
-              onClick={() =>
-                navigate(`/articket/review/${review.reviewId}`)
-              }
+              onClick={() => navigate(`/articket/review/${review.reviewId}`)}
               className="
                 group flex w-full
                 items-center justify-between

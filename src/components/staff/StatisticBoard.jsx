@@ -94,7 +94,6 @@ const StatisticBoard = ({ selectedExhibitions = [] }) => {
           setStatIndex(0);
         }
       } catch (err) {
-        console.error("통계 조회 실패:", err);
 
         if (!cancelled) {
           setData([]);

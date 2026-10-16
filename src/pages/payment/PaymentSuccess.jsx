@@ -29,12 +29,6 @@ const PaymentSuccess = () => {
         const orderId = searchParams.get("orderId");
         const amount = searchParams.get("amount");
 
-        console.log("결제 승인 요청:", {
-          paymentKey,
-          orderId,
-          amount,
-        });
-
         if (!paymentKey || !orderId || !amount) {
           throw new Error("결제 정보가 올바르지 않습니다.");
         }
@@ -45,28 +39,17 @@ const PaymentSuccess = () => {
           amount: Number(amount),
         });
 
-        console.log("결제 승인 완료:", response);
-
         const reservationResponse = await getReservationDetail(
-          response.reservationId
+          response.reservationId,
         );
-
-        console.log("예약 상세 정보:", reservationResponse);
-        console.log("예약 응답 필드:", Object.keys(reservationResponse));
-console.log("예약 상태값:", reservationResponse.reservationStatus);
-console.log("status 값:", reservationResponse.status);
 
         setPayment(response);
         setReservation(reservationResponse);
       } catch (error) {
-        console.error("결제 승인 실패 전체:", error);
-        console.error("error.response:", error.response);
-        console.error("error.message:", error.message);
-
         setError(
           error.response?.data?.message ||
             error.message ||
-            "결제 승인에 실패했습니다."
+            "결제 승인에 실패했습니다.",
         );
       } finally {
         setIsLoading(false);
@@ -80,9 +63,7 @@ console.log("status 값:", reservationResponse.status);
   if (isLoading) {
     return (
       <main className="min-h-[600px] flex items-center justify-center bg-white">
-        <p className="text-sm text-gray-400">
-          결제를 확인하는 중입니다...
-        </p>
+        <p className="text-sm text-gray-400">결제를 확인하는 중입니다...</p>
       </main>
     );
   }
@@ -100,9 +81,7 @@ console.log("status 값:", reservationResponse.status);
             결제 승인에 실패했습니다.
           </h2>
 
-          <p className="text-sm text-gray-500 break-keep mb-8">
-            {error}
-          </p>
+          <p className="text-sm text-gray-500 break-keep mb-8">{error}</p>
 
           <button
             type="button"

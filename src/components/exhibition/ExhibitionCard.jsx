@@ -3,7 +3,7 @@ import "../../styles/ExhibitionAndVenue.css";
 import { useState, useEffect } from "react";
 import { countWish, toggleWish } from "../../api/wishApi";
 
-const ExhibitionCard = ({exhibition}) => {
+const ExhibitionCard = ({ exhibition }) => {
   const navigate = useNavigate();
 
   const [isWished, setIsWished] = useState(false);
@@ -12,14 +12,12 @@ const ExhibitionCard = ({exhibition}) => {
   //해당 전시의 찜 개수 조회 + 현재 회원의 찜 여부 조회
   useEffect(() => {
     const fetchWishInfo = async () => {
-        try {
-            const data = await countWish( exhibition.id);
+      try {
+        const data = await countWish(exhibition.id);
 
-            setWishCount(data.totalWishCount);
-            setIsWished(data.wished);
-        } catch(error) {
-            console.error("찜 개수 조회 실패",error);
-        }
+        setWishCount(data.totalWishCount);
+        setIsWished(data.wished);
+      } catch (error) {}
     };
     fetchWishInfo();
   }, [exhibition.id]);
@@ -30,67 +28,54 @@ const ExhibitionCard = ({exhibition}) => {
     e.stopPropagation();
 
     try {
-        const data = await toggleWish(exhibition.id);
+      const data = await toggleWish(exhibition.id);
 
-        setIsWished(data.wished);
-        setWishCount(data.totalWishCount);
-    }catch (error) {
-        console.error("찜 토글 실패:", error);
-        alert("찜 처리에 실패했습니다.");
+      setIsWished(data.wished);
+      setWishCount(data.totalWishCount);
+    } catch (error) {
+      alert("찜 처리에 실패했습니다.");
     }
   };
 
   const handleCardClick = () => {
-    navigate(
-      `/articket/exhibition/${exhibition.id}`
-    );
+    navigate(`/articket/exhibition/${exhibition.id}`);
   };
 
   return (
-    <div
-      className="exhibition-card"
-      onClick={handleCardClick}
-    >
+    <div className="exhibition-card" onClick={handleCardClick}>
       <div className="exhibition-image">
         <img
-          src={ exhibition.imgUrl
-            ? exhibition.imgUrl.startsWith("http") 
-            ? exhibition.imgUrl : `http://localhost:8080/api/images/${exhibition.imgUrl}` 
-            : "/images/default-exhibition.jpg"}
+          src={
+            exhibition.imgUrl
+              ? exhibition.imgUrl.startsWith("http")
+                ? exhibition.imgUrl
+                : `http://localhost:8080/api/images/${exhibition.imgUrl}`
+              : "/images/default-exhibition.jpg"
+          }
           alt={exhibition.title}
         />
       </div>
 
       <div className="exhibition-info">
-       <div className="exhibition-card-top">     
-        <span
-          className={`exhibition-badge ${
-            exhibition.free
-              ? "free"
-              : "paid"
-          }`}
-        >
-          {exhibition.free
-            ? "무료"
-            : "유료"}
-        </span>
+        <div className="exhibition-card-top">
+          <span
+            className={`exhibition-badge ${exhibition.free ? "free" : "paid"}`}
+          >
+            {exhibition.free ? "무료" : "유료"}
+          </span>
 
-        {/* 찜 */}
-        <button
+          {/* 찜 */}
+          <button
             type="button"
-            className={`wish-button ${
-                isWished ? "wished" : ""
-            }`}
+            className={`wish-button ${isWished ? "wished" : ""}`}
             onClick={handleWishToggle}
-        >
+          >
             {isWished ? "♥" : "♡"}
             <span>{wishCount}</span>
-        </button>
-       </div> 
+          </button>
+        </div>
 
-        <h3>
-          {exhibition.title}
-        </h3>
+        <h3>{exhibition.title}</h3>
 
         <p>
           {exhibition.startDate}
@@ -102,4 +87,4 @@ const ExhibitionCard = ({exhibition}) => {
   );
 };
 
-export default ExhibitionCard; 
+export default ExhibitionCard;

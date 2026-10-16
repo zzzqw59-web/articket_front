@@ -108,8 +108,6 @@ const AdminManageStaffRequestComponent = () => {
 
       setCurrentPage((page) => Math.min(page, lastPage));
     } catch (error) {
-      console.error("전시 권한 신청 목록 조회 실패:", error);
-
       alert(
         error.response?.data?.message || "신청 목록을 불러오지 못했습니다.",
       );
@@ -154,8 +152,6 @@ const AdminManageStaffRequestComponent = () => {
 
       await fetchRequests();
     } catch (error) {
-      console.error("신청 처리 실패:", error);
-
       alert(
         error.response?.data?.message || "신청 처리 중 오류가 발생했습니다.",
       );

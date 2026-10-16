@@ -6,12 +6,7 @@ import { useModal } from "../../../hooks/useModal";
 export const useReviewEdit = (reviewId) => {
   const navigate = useNavigate();
 
-  const {
-    modalState,
-    showAlert,
-    handleConfirm,
-    handleCancel,
-  } = useModal();
+  const { modalState, showAlert, handleConfirm, handleCancel } = useModal();
 
   const [initialData, setInitialData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,11 +19,8 @@ export const useReviewEdit = (reviewId) => {
 
     try {
       const data = await getReviewDetail(reviewId);
-      console.log("수정할 리뷰 데이터:", data);
       setInitialData(data);
     } catch (error) {
-      console.error("원글 데이터 조회 실패:", error);
-
       showAlert({
         message: "존재하지 않거나 접근 권한이 없는 리뷰입니다.",
         onConfirm: () => navigate("/articket/review"),
@@ -43,7 +35,11 @@ export const useReviewEdit = (reviewId) => {
   }, [fetchOriginalReview]);
 
   // 리뷰 수정 제출
-  const handleSubmit = async ({ requestDto, files = [], deletedImageIds = [] }) => {
+  const handleSubmit = async ({
+    requestDto,
+    files = [],
+    deletedImageIds = [],
+  }) => {
     try {
       const formData = new FormData();
 
@@ -65,11 +61,8 @@ export const useReviewEdit = (reviewId) => {
         onConfirm: () => navigate(`/articket/review/${reviewId}`),
       });
     } catch (error) {
-      console.error("리뷰 수정 실패:", error);
-
       const message =
-        error.response?.data?.message ||
-        "리뷰 수정 처리에 실패했습니다.";
+        error.response?.data?.message || "리뷰 수정 처리에 실패했습니다.";
 
       showAlert({
         message,

@@ -53,7 +53,8 @@ export const useAskList = () => {
       const response = await getAskList(params);
 
       const rawList = response?.content || response?.dtoList || [];
-      const calculatedTotalPages = response?.totalPages || response?.totalPage || 1;
+      const calculatedTotalPages =
+        response?.totalPages || response?.totalPage || 1;
 
       const formattedList = rawList.map((item) => ({
         id: item.askId,
@@ -67,7 +68,6 @@ export const useAskList = () => {
       setAskList(formattedList);
       setTotalPages(calculatedTotalPages);
     } catch (error) {
-      console.error("문의 목록 조회 실패:", error);
       setAskList([]);
       setTotalPages(1);
     } finally {
@@ -106,7 +106,9 @@ export const useAskList = () => {
       showAlert({
         message: "로그인이 필요한 서비스입니다.",
         onConfirm: () => {
-          navigate(`/articket/login?redirect=${encodeURIComponent(currentPath)}`);
+          navigate(
+            `/articket/login?redirect=${encodeURIComponent(currentPath)}`,
+          );
         },
       });
       return;

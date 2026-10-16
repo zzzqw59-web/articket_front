@@ -1,4 +1,4 @@
-import { NavLink, Link, useNavigate } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import NotificationBell from "./NotificationBell";
 import { logout } from "../../api/authApi";
@@ -39,12 +39,6 @@ const IntroHeader = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
-  const handleScrollClick = (e) => {
-    if (e.target.closest("a")) {
-      window.scrollTo(0, 0);
-    }
-  };
-
   useEffect(() => {
     const syncAuthUser = () => {
       setAuthUser(getStoredAuthUser());
@@ -79,8 +73,6 @@ const IntroHeader = () => {
         if (!cancelled) {
           setNickname("회원");
         }
-
-        console.error("회원 정보를 불러오는 데 실패했습니다.", error);
       }
     };
 
@@ -146,8 +138,6 @@ const IntroHeader = () => {
         if (!cancelled) {
           setNickname("회원");
         }
-
-        console.error("회원 정보를 불러오는 데 실패했습니다.", error);
       }
     };
 

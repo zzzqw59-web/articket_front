@@ -40,7 +40,6 @@ const Staffpage = () => {
       pageCache.current = nextPageCache;
       setTotalPages(Math.ceil(posters.length / 5));
     } catch (e) {
-      console.error("fail to load exhibition posters", e);
       alert("오류가 발생했습니다. 잠시 후 다시 시도해 주세요.");
       window.location.href = "/articket";
     }

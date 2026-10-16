@@ -26,7 +26,6 @@ const AdminReservationComponent = () => {
       setReservations(data.dtoList ?? []);
       setPageData(data);
     } catch (err) {
-      console.error("예약 목록 조회 실패:", err);
       setReservations([]);
       setPageData({});
     } finally {
@@ -64,7 +63,6 @@ const AdminReservationComponent = () => {
 
       await fetchReservations();
     } catch (err) {
-      console.error("예약 취소 실패:", err);
     } finally {
       setCancelingId(null);
     }

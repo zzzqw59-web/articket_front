@@ -10,7 +10,6 @@ import {
   deleteReply,
 } from "../../../api/askReplyApi";
 
-
 export const useAskDetail = (askId) => {
   const navigate = useNavigate();
 
@@ -43,7 +42,6 @@ export const useAskDetail = (askId) => {
     // 실행 직후 현재 askId를 ref에 저장하여 중복 조회 방지
     fetchedAskIdRef.current = askId;
 
-
     setIsLoading(true);
     try {
       const response = await getAskDetail(askId);
@@ -59,7 +57,6 @@ export const useAskDetail = (askId) => {
         setSelectedImage(response.images[0].imageUrl);
       }
     } catch (error) {
-      console.error("문의 상세 조회 실패:", error);
       const status = error.response?.status;
 
       if (status === 404) {
@@ -96,7 +93,6 @@ export const useAskDetail = (askId) => {
         setTotalReplyCount(response.totalCount || 0);
       }
     } catch (error) {
-      console.error("댓글 목록 로딩 실패:", error);
     } finally {
       setIsReplyLoading(false);
     }
@@ -121,7 +117,6 @@ export const useAskDetail = (askId) => {
       setReplyPage(1);
       fetchReplyList();
     } catch (error) {
-      console.error("댓글 등록 실패:", error);
       showAlert({ message: "댓글을 등록할 수 없습니다." });
     }
   };
@@ -133,7 +128,6 @@ export const useAskDetail = (askId) => {
       showAlert({ message: "댓글이 수정되었습니다." });
       fetchReplyList();
     } catch (error) {
-      console.error("댓글 수정 실패:", error);
       showAlert({ message: "댓글 수정할 수 없습니다." });
     }
   };
@@ -149,7 +143,6 @@ export const useAskDetail = (askId) => {
           showAlert({ message: "댓글이 삭제되었습니다." });
           fetchReplyList();
         } catch (error) {
-          console.error("댓글 삭제 실패:", error);
           showAlert({ message: "댓글 삭제할 수 없습니다." });
         }
       },
@@ -160,7 +153,8 @@ export const useAskDetail = (askId) => {
   const handleDeleteAsk = () => {
     showConfirm({
       title: "문의글 삭제",
-      message: "정말 이 문의글을 삭제하시겠습니까?\n삭제된 문의글은 복구되지 않습니다.",
+      message:
+        "정말 이 문의글을 삭제하시겠습니까?\n삭제된 문의글은 복구되지 않습니다.",
       confirmLabel: "삭제",
       onConfirm: async () => {
         try {
@@ -170,7 +164,6 @@ export const useAskDetail = (askId) => {
             onConfirm: () => navigate("/articket/ask"),
           });
         } catch (error) {
-          console.error("문의글 삭제 실패:", error);
           showAlert({ message: "삭제 처리 중 오류가 발생했습니다." });
         }
       },
@@ -192,8 +185,8 @@ export const useAskDetail = (askId) => {
     handleEditComment,
     handleDeleteComment,
     handleDeleteAsk,
-      modalState,
-      handleConfirm,
-      handleCancel,
+    modalState,
+    handleConfirm,
+    handleCancel,
   };
 };

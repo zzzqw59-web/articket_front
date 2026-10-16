@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { getExhibitionList } from "../../api/exhibitionApi";
 import StaffAuthExhibitionsComponent from "../../components/staff/StaffAuthExhibitionsComponent";
-import PageHeader from "../../components/common/PageHeader";
 import ExhibitionPagination from "../../components/exhibition/ExhibitionPagination";
 import ExhibitionSearch from "../../components/exhibition/ExhibitionSearch";
 import StaffRequestComponent from "../../components/staff/StaffRequestComponent";
@@ -28,7 +27,6 @@ const StaffAuthPage = () => {
       setExhibitions(data.content || data || []);
       setTotalPages(data.totalPages || 0);
     } catch (e) {
-      console.error("fail to load exhibition list", e);
     } finally {
       setLoading(false);
     }
@@ -38,10 +36,7 @@ const StaffAuthPage = () => {
     try {
       const data = await getStaffRequest();
       setRequests(data);
-      console.log("신청 현황 응답:", data);
-    } catch (e) {
-      console.log("fail to load request", e);
-    }
+    } catch (e) {}
   };
 
   useEffect(() => {

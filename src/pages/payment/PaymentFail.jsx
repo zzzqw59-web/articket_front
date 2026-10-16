@@ -22,11 +22,8 @@ const PaymentFail = () => {
 
         const data = await getReservationByOrderId(orderId);
 
-        console.log("실패 예약 상세 정보:", data);
-
         setReservation(data);
       } catch (error) {
-        console.error("예약 정보 조회 실패:", error);
       } finally {
         setIsLoading(false);
       }
@@ -42,7 +39,6 @@ const PaymentFail = () => {
   return (
     <div className="flex justify-center items-center min-h-screen">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-lg border border-gray-200 p-6 relative">
-
         {/* 상단 타이틀 */}
         <div className="text-center mb-6">
           <div className="flex justify-center items-center gap-2 mb-1">
@@ -51,8 +47,7 @@ const PaymentFail = () => {
               fill="currentColor"
               viewBox="0 0 24 24"
             >
-              <path d="M22 10V6a2 2 0 0 0-2-2H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99 2 2 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.81-2.77-2-3.46V6h16v2.54z"
-              />
+              <path d="M22 10V6a2 2 0 0 0-2-2H4c-1.1 0-1.99.9-1.99 2v4c1.1 0 1.99 2 2 2s-.89 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c-1.1 0-2-.9-2-2s.81-2.77-2-3.46V6h16v2.54z" />
             </svg>
 
             <h1 className="text-2xl font-extrabold tracking-wider text-amber-600">
@@ -74,12 +69,9 @@ const PaymentFail = () => {
 
         {/* 예약 정보 */}
         <div className="space-y-4 text-sm text-gray-700 py-2">
-
           {/* 전시명 */}
           <div className="flex justify-between items-center gap-4">
-            <span className="text-gray-400 shrink-0">
-              전시명
-            </span>
+            <span className="text-gray-400 shrink-0">전시명</span>
 
             <span className="font-semibold text-gray-900 text-right">
               {reservation?.exhibitionTitle || "-"}
@@ -88,9 +80,7 @@ const PaymentFail = () => {
 
           {/* 장소 */}
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">
-              장소
-            </span>
+            <span className="text-gray-400">장소</span>
 
             <span className="font-semibold text-gray-900">
               {reservation?.exhibitionArea || "-"}
@@ -99,9 +89,7 @@ const PaymentFail = () => {
 
           {/* 관람일시 */}
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">
-              관람일시
-            </span>
+            <span className="text-gray-400">관람일시</span>
 
             <span className="font-semibold text-gray-900">
               {reservation?.reservationDay || "-"}
@@ -110,9 +98,7 @@ const PaymentFail = () => {
 
           {/* 예약인원 */}
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">
-              예약인원
-            </span>
+            <span className="text-gray-400">예약인원</span>
 
             <span className="font-semibold text-gray-900">
               {reservation?.reservationPerson
@@ -123,9 +109,7 @@ const PaymentFail = () => {
 
           {/* 예매일자 */}
           <div className="flex justify-between items-center">
-            <span className="text-gray-400">
-              예매일자
-            </span>
+            <span className="text-gray-400">예매일자</span>
 
             <span className="font-semibold text-gray-900">
               {reservation?.reservationCreatedAt
@@ -152,9 +136,7 @@ const PaymentFail = () => {
         <div className="border-t border-gray-200 my-4"></div>
 
         <div className="flex justify-between items-center py-2">
-          <span className="text-gray-400 text-sm">
-            예약상태
-          </span>
+          <span className="text-gray-400 text-sm">예약상태</span>
 
           <span className="px-3.5 py-1 rounded-full text-xs font-bold text-white shadow-sm bg-red-500">
             예약실패
@@ -166,12 +148,13 @@ const PaymentFail = () => {
 
         {/* 버튼 */}
         <button
-          onClick={() => navigate(`/articket/exhibition/${reservation.exhibitionId}`)}
+          onClick={() =>
+            navigate(`/articket/exhibition/${reservation.exhibitionId}`)
+          }
           className="w-full mt-2 py-3 bg-amber-600 hover:bg-amber-700 text-white font-medium rounded-xl shadow-md transition-colors text-sm"
         >
           상세페이지로 이동
         </button>
-
       </div>
     </div>
   );

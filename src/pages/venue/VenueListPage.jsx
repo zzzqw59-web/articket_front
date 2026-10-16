@@ -39,11 +39,7 @@ const VenueListPage = () => {
         setVenues(data.content || []);
         setTotalPages(data.totalPages || 0);
       } catch (error) {
-        console.error("전시장 목록 조회 실패:", error);
-
-        setError(
-          "전시장 정보를 불러오지 못했습니다."
-        );
+        setError("전시장 정보를 불러오지 못했습니다.");
       } finally {
         setLoading(false);
       }
@@ -66,42 +62,23 @@ const VenueListPage = () => {
     <div className="venue-list-page">
       <h1>전국 전시장 정보</h1>
 
-      <VenueSearch
-        onSearch={handleSearch}
-      />
+      <VenueSearch onSearch={handleSearch} />
 
       <div className="venue-sort">
-        <select
-          value={sort}
-          onChange={(e) =>
-            handleSort(e.target.value)
-          }
-        >
-          <option value="latest">
-            최신순
-          </option>
+        <select value={sort} onChange={(e) => handleSort(e.target.value)}>
+          <option value="latest">최신순</option>
 
-          <option value="oldest">
-            오래된순
-          </option>
+          <option value="oldest">오래된순</option>
         </select>
       </div>
 
-      {loading && (
-        <div>Loading...</div>
-      )}
+      {loading && <div>Loading...</div>}
 
-      {error && (
-        <div className="error-message">
-          {error}
-        </div>
-      )}
+      {error && <div className="error-message">{error}</div>}
 
       {!loading && !error && (
         <>
-          <VenueList
-            venues={venues}
-          />
+          <VenueList venues={venues} />
 
           <VenuePagination
             page={page}

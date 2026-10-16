@@ -1,4 +1,3 @@
-
 import { NavLink, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
 import NotificationBell from "./NotificationBell";
@@ -86,28 +85,17 @@ const Header = () => {
         if (!cancelled) {
           setNickname("회원");
         }
-
-        console.error(
-          "회원 정보를 불러오는 데 실패했습니다.",
-          error
-        );
       }
     };
 
     loadMember();
 
-    window.addEventListener(
-      MEMBER_PROFILE_UPDATED_EVENT,
-      loadMember
-    );
+    window.addEventListener(MEMBER_PROFILE_UPDATED_EVENT, loadMember);
 
     return () => {
       cancelled = true;
 
-      window.removeEventListener(
-        MEMBER_PROFILE_UPDATED_EVENT,
-        loadMember
-      );
+      window.removeEventListener(MEMBER_PROFILE_UPDATED_EVENT, loadMember);
     };
   }, [authUser?.memberId]);
 
@@ -128,7 +116,6 @@ const Header = () => {
 
       window.scrollTo(0, 0);
     } catch (error) {
-      console.error("로그아웃에 실패했습니다.", error);
     } finally {
       setIsLoggingOut(false);
     }
@@ -171,11 +158,7 @@ const Header = () => {
       text-[14px] font-medium
       tracking-[-0.02em]
       transition-colors duration-200
-      ${
-        isActive
-          ? "text-[#24221F]"
-          : "text-[#706B63] hover:text-[#24221F]"
-      }
+      ${isActive ? "text-[#24221F]" : "text-[#706B63] hover:text-[#24221F]"}
     `;
 
   // 링크 클릭 처리
@@ -192,11 +175,7 @@ const Header = () => {
         bg-[#F3EEE4]/95
         backdrop-blur-md
         transition-transform duration-300
-        ${
-          isVisible
-            ? "translate-y-0"
-            : "-translate-y-full"
-        }
+        ${isVisible ? "translate-y-0" : "-translate-y-full"}
       `}
     >
       {/* 전체 헤더 */}
@@ -332,9 +311,7 @@ const Header = () => {
                     disabled:opacity-50
                   "
                 >
-                  {isLoggingOut
-                    ? "처리 중..."
-                    : "로그아웃"}
+                  {isLoggingOut ? "처리 중..." : "로그아웃"}
                 </button>
 
                 {/* 알림 */}
@@ -352,9 +329,7 @@ const Header = () => {
 
           <button
             type="button"
-            aria-label={
-              isMenuOpen ? "메뉴 닫기" : "메뉴 열기"
-            }
+            aria-label={isMenuOpen ? "메뉴 닫기" : "메뉴 열기"}
             aria-expanded={isMenuOpen}
             aria-controls="articket-mobile-menu"
             onClick={() => {
@@ -372,11 +347,7 @@ const Header = () => {
                 h-[1.5px] w-6
                 bg-[#24221F]
                 transition-transform duration-200
-                ${
-                  isMenuOpen
-                    ? "translate-y-[7.5px] rotate-45"
-                    : ""
-                }
+                ${isMenuOpen ? "translate-y-[7.5px] rotate-45" : ""}
               `}
             />
 
@@ -394,11 +365,7 @@ const Header = () => {
                 h-[1.5px] w-6
                 bg-[#24221F]
                 transition-transform duration-200
-                ${
-                  isMenuOpen
-                    ? "-translate-y-[7.5px] -rotate-45"
-                    : ""
-                }
+                ${isMenuOpen ? "-translate-y-[7.5px] -rotate-45" : ""}
               `}
             />
           </button>
@@ -453,9 +420,7 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center justify-between gap-4">
-                <span className="text-sm text-[#4E4942]">
-                  {nickname}님
-                </span>
+                <span className="text-sm text-[#4E4942]">{nickname}님</span>
 
                 <button
                   type="button"
@@ -466,9 +431,7 @@ const Header = () => {
                     disabled:opacity-50
                   "
                 >
-                  {isLoggingOut
-                    ? "처리 중..."
-                    : "로그아웃"}
+                  {isLoggingOut ? "처리 중..." : "로그아웃"}
                 </button>
               </div>
             )}
