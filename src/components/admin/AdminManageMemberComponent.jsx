@@ -32,7 +32,14 @@ const maskName = (name) => {
 const maskPhone = (phone) => {
   if (!phone) return "-";
 
-  return phone.slice(0, 3) + "-****-" + phone.slice(7);
+  const numbers = String(phone).replace(/\D/g, "");
+
+  const prefixLength = numbers.startsWith("02") ? 2 : 3;
+  const middleLength = numbers.length - prefixLength - 4;
+
+  if (![3, 4].includes(middleLength)) return phone;
+
+  return `${numbers.slice(0, prefixLength)}-${"*".repeat(middleLength)}-${numbers.slice(-4)}`;
 };
 
 // 가입일 포맷

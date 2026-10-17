@@ -234,10 +234,22 @@ const AdminReservationComponent = () => {
                         </td>
 
                         <td className="whitespace-nowrap px-2 text-gray-500">
-                          {reservation.memberPhone?.replace(
-                            /-(\d{3,4})-/,
-                            "-****-",
-                          ) ?? "-"}
+                          {(() => {
+                            const phone = reservation.memberPhone;
+
+                            if (!phone) return "-";
+
+                            const numbers = String(phone);
+                            const prefixLength = numbers.startsWith("02")
+                              ? 2
+                              : 3;
+                            const middleLength =
+                              numbers.length - prefixLength - 4;
+
+                            if (![3, 4].includes(middleLength)) return numbers;
+
+                            return `${numbers.slice(0, prefixLength)}-${"*".repeat(middleLength)}-${numbers.slice(-4)}`;
+                          })()}
                         </td>
 
                         <td className="whitespace-nowrap px-2 text-gray-600">
