@@ -145,7 +145,7 @@ const MyWishlistPage = () => {
                 imageUrl: item.posterUrl
                   ? item.posterUrl.startsWith("http")
                     ? item.posterUrl
-                    : `http://localhost:8080/api/images/${item.posterUrl}`
+                    : `/api/images/${item.posterUrl}`
                   : "/images/default-exhibition.jpg",
               }}
               onRemove={handleRemoveWish}

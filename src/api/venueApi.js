@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_SERVER_HOST = "http://localhost:8080";
+const API_SERVER_HOST = "";
 const PREFIX = `${API_SERVER_HOST}/api/venues`;
 
 //전시장 목록 조회
