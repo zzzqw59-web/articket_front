@@ -27,7 +27,7 @@ const Staffpage = () => {
             imgUrl: detail.imgUrl
               ? detail.imgUrl.startsWith("http")
                 ? detail.imgUrl
-                : `http://localhost:8080/api/images/${detail.imgUrl}`
+                : `/api/images/${detail.imgUrl}`
               : "/images/default-exhibition.jpg",
           };
         }),

@@ -62,7 +62,7 @@ const ExhibitionEditPage = () => {
           data.imgUrl
             ? data.imgUrl.startsWith("http")
               ? data.imgUrl
-              : `http://localhost:8080/api/images/${data.imgUrl}`
+              : `/api/images/${data.imgUrl}`
             : "",
         );
       } catch (error) {

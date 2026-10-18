@@ -1,7 +1,7 @@
 import axios from "axios";
 import axiosInstance from "./axiosInstance";
 
-const prefix = "http://localhost:8080/api";
+const prefix = "/api";
 
 export const requestStaffAuthority = async (requestDTO) => {
   const response = await axios.post(`${prefix}/staff/requests`, requestDTO);

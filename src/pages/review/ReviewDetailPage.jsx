@@ -96,7 +96,7 @@ const ReviewDetailPage = () => {
               <div className="md:col-span-3 bg-gray-100 aspect-[4/3] rounded-sm flex items-center justify-center overflow-hidden border border-gray-300">
                 {selectedImage ? (
                   <img
-                    src={`http://localhost:8080${selectedImage}`}
+                    src={`${selectedImage}`}
                     alt="첨부 이미지"
                     className="w-full h-full object-contain"
                   />
@@ -117,7 +117,7 @@ const ReviewDetailPage = () => {
                     }`}
                   >
                     <img
-                      src={`http://localhost:8080${img.reviewImageUrl}`}
+                      src={`${img.reviewImageUrl}`}
                       alt={img.reviewImageOrigin || `썸네일 ${idx + 1}`}
                       className="w-full h-full object-cover"
                     />

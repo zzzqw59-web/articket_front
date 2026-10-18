@@ -49,7 +49,7 @@ const ExhibitionCard = ({ exhibition }) => {
             exhibition.imgUrl
               ? exhibition.imgUrl.startsWith("http")
                 ? exhibition.imgUrl
-                : `http://localhost:8080/api/images/${exhibition.imgUrl}`
+                : `/api/images/${exhibition.imgUrl}`
               : "/images/default-exhibition.jpg"
           }
           alt={exhibition.title}
